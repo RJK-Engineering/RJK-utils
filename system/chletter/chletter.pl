@@ -2,9 +2,8 @@ use strict;
 use warnings;
 
 use Options::Pod;
-use Pod::Usage qw(pod2usage);
 
-use Filecheck::Utils qw(DisconnectDrive);
+use RJK::Win32::DriveUtils qw(DisconnectDrive);
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -83,37 +82,19 @@ Display extended help.
 my %opts = (
     tempFile => 'chdl.txt',
 );
-Options::Pod::Configure("comments_included");
 Options::Pod::GetOptions(
     't|temp-file=s' => \$opts{tempFile}, "{Path} to temp file.",
     'd|disconnect-network-drive' => \$opts{disconnectNetworkDrive},
         "Disconnect network drive if one is connected with drive letter [new].",
 
-    #~ ['Messages'],
-    #~ 'v|verbose' => \$opts{verbose}, "Be verbose.",
-    #~ 'q|quiet' => \$opts{quiet}, "Be quiet.",
-    #~ 'debug' => \$opts{debug}, "Display debug information.",
-
     ['Pod'],
     Options::Pod::Options,
 
     ['Help'],
-    'h|help|?' => sub {
-        pod2usage(
-            -exitstatus => 0,
-            -verbose => 99,
-            -sections => "DESCRIPTION|SYNOPSIS|OPTIONS",
-        );
-    }, "Display extended help.",
-)
-&& Options::Pod::HandleOptions()
-|| pod2usage(
-    -verbose => 99,
-    -sections => "DISPLAY EXTENDED HELP",
+    Options::Pod::HelpOptions,
 );
 
-@ARGV == 2 || pod2usage(
-    -verbose => 99,
+@ARGV == 2 || Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 
