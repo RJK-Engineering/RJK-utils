@@ -2,7 +2,6 @@ use strict;
 use warnings;
 
 use Options::Pod;
-use Pod::Usage qw(pod2usage);
 
 use File::Copy qw(move);
 use File::Path qw(make_path);
@@ -131,8 +130,8 @@ my %opts = (
     partDataTable => 'Partition',
     save => 0,
 );
-Options::Pod::Configure("bundling", "comments_included");
 Options::Pod::GetOptions(
+    ['Options'],
     'foswiki-data-dir=s' => \$opts{foswikiDataDir},
         "{Path} to Fowsiki data directory.",
     'web=s' => \$opts{web},
@@ -155,22 +154,10 @@ Options::Pod::GetOptions(
     Options::Pod::Options,
 
     ['Help'],
-    'h|?|help' => sub {
-        pod2usage(
-            -exitstatus => 0,
-            -verbose => 99,
-            -sections => "DESCRIPTION|SYNOPSIS|OPTIONS",
-        );
-    }, "Display extended help.",
-)
-&& Options::Pod::HandleOptions()
-|| pod2usage(
-    -verbose => 99,
-    -sections => "DISPLAY EXTENDED HELP",
+    Options::Pod::HelpOptions,
 );
 
-@ARGV || pod2usage(
-    -verbose => 99,
+@ARGV || Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 
