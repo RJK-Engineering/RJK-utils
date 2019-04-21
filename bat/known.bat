@@ -1,5 +1,5 @@
-@perl known.pl -l ^
+@perl %RJK_UTILS_DIR%\emule\known\known.pl -l ^
 --db-host "rob-laptop2" ^
---db-user "%FILECHECK_DB_USER%" ^
---db-pass "%FILECHECK_DB_PASS%" ^
+--db-user "filecheck" ^
+--db-pass "filecheck" ^
 --db-name "filecheck" %*
