@@ -1,6 +1,9 @@
 use strict;
 use warnings;
 
+use File::Copy qw(move);
+use File::Spec::Functions qw(splitpath);
+
 use Options::Pod;
 
 use Filecheck::Utils qw(GetTerms);
@@ -222,9 +225,6 @@ my @fields = split /,/, $opts{fields} if $opts{fields};
 my @results;
 my $i;
 
-use File::Copy;
-use File::Spec::Functions qw(splitpath);
-
 my $logSize = (-s $opts{logfile}) || 0;
 if ($opts{archiveSize} && $logSize > $opts{archiveSize} * 1024**2) {
     if (! -e $opts{archiveDir}) {
@@ -307,9 +307,6 @@ if (defined $opts{fields}) {
     }
 } else {
     foreach (@results) {
-    #~ use Data::Dumper;
-    #~ print Dumper([keys %$_]);
-    #~ exit;
         print "$_->{operation} $_->{source}\n";
         if ($_->{destination}) {
             print "  -> $_->{destination}\n";
