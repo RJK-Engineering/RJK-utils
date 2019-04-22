@@ -212,7 +212,7 @@ my $i;
 
 my @logfiles = $opts{logfile};
 if ($opts{searchArchives}) {
-    opendir my $dh, $opts{archiveDir} || die "$!";
+    opendir my $dh, $opts{archiveDir} or die "$!";
     foreach (grep { /\.log$/ } readdir $dh) {
         push @logfiles, "$opts{archiveDir}\\$_";
     }

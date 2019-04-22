@@ -182,7 +182,7 @@ if (! -e $opts{targetDir}) {
 
 sub Ignore { 0 }
 
-opendir my $dh, $opts{targetDir} || die "$!";
+opendir my $dh, $opts{targetDir} or die "$!";
 #~ chdir $opts{targetDir};
 my @dirs = grep { -d "$opts{targetDir}\\$_" && ! /^\./ && ! Ignore($_) } readdir $dh;
 closedir $dh;
@@ -319,11 +319,11 @@ sub VisitFile {
     print ">$targetDir\n";
 
     if (! -e $targetDir) {
-        make_path($targetDir) || die "Error creating directory";
+        make_path($targetDir) or die "Error creating directory";
     }
-    -e $targetDir || die "Target directory does not exist";
+    -e $targetDir or die "Target directory does not exist";
 
-    move($target->path, $targetDir) || die "Error moving file";
+    move($target->path, $targetDir) or die "Error moving file";
     sleep 1 if $opts{verbose};
 
     # remove from index
