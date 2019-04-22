@@ -55,6 +55,10 @@ TODO
 
 TODO
 
+=item B<-b -begin [date]>
+
+Search start date. YMD formated number, does numeric comparison, zero padded on right-hand-side, e.g. for "201": 20100000 < 20100101
+
 =item B<-e -regex>
 
 Use regular expression.
@@ -163,6 +167,9 @@ Options::Pod::GetOptions(
         "TODO",
     'D|search-directories' => \$opts{searchDirectories},
         "TODO",
+    'b|begin=s' => \$opts{begin},
+        "Search start {date}. YMD formated number, does numeric comparison,".
+        " zero padded on right-hand-side, e.g. for \"201\": 20100000 < 20100101",
 
     'e|regex' => \$opts{regex},
         "Use regular expression.",
@@ -256,7 +263,20 @@ if ($opts{searchArchives}) {
     closedir $dh;
 }
 
+if ($opts{begin}) {
+    my $l = length $opts{begin};
+    $opts{begin} .= "0" x (8 - $l);
+}
+
 foreach my $logfile (@logfiles) {
+    my (undef, undef, $file) = splitpath($logfile);
+    if ($opts{begin}) {
+        my ($date) = $file =~ /(\d{8})/;
+        if ($date && $date < $opts{begin}) {
+            next;
+        }
+    }
+
     if ($opts{list}) {
         print "$logfile\n";
         next;
