@@ -6,4 +6,4 @@ perl %rjk-utils-home%\system\chletter\chletter.pl ^
 --temp-file "%chletter-temp-file%" ^
 --disconnect-network-drive %*
 
-@if %errorlevel% gtr 0 pause
+if %errorlevel% gtr 0 pause
