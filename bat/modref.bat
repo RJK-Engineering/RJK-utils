@@ -1,1 +1,1 @@
-perl %~dp0..\perl\modref.pl %*
+perl "%~dp0..\perl\modref.pl" %*

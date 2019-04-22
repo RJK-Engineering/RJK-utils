@@ -1,8 +1,8 @@
 @echo off
 
-call %LOCALAPPDATA%\RJK-utils.bat
+call "%~dp0..\config.bat"
 
-perl %rjk-utils-home%\system\chletter\chletter.pl ^
+perl "%rjk-utils-home%\system\chletter\chletter.pl" ^
 --temp-file "%chletter-temp-file%" ^
 --disconnect-network-drive %*
 
