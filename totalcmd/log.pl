@@ -57,7 +57,7 @@ TODO
 
 =item B<-b -begin [date]>
 
-Search start date. YMD formated number, does numeric comparison, zero padded on right-hand-side, e.g. for "201": 20100000 < 20100101
+Search start date. YYYYMMDD formatted number, does numeric comparison, zero padded on right-hand-side, e.g. for "201": 20100000 < 20100101
 
 =item B<-e -regex>
 
@@ -168,7 +168,7 @@ Options::Pod::GetOptions(
     'D|search-directories' => \$opts{searchDirectories},
         "TODO",
     'b|begin=s' => \$opts{begin},
-        "Search start {date}. YMD formated number, does numeric comparison,".
+        "Search start {date}. YYYYMMDD formatted number, does numeric comparison,".
         " zero padded on right-hand-side, e.g. for \"201\": 20100000 < 20100101",
 
     'e|regex' => \$opts{regex},
