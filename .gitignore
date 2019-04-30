@@ -1,2 +1,7 @@
-*.orig
+*.bak
+*.lnk
+*.tmp
 *.sublime-*
+*~
+*~.*
+*.orig
