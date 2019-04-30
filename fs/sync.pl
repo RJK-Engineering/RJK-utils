@@ -9,7 +9,6 @@ use Number::Bytes::Human qw(format_bytes);
 
 use RJK::Win32::Console;
 use File::Traverse::Stats;
-#~ use Wiki::Foswiki;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -29,10 +28,6 @@ sync.pl -h
 =for options start
 
 =over 4
-
-=item B<--foswiki-data-dir [path]>
-
-Path to Fowsiki data directory.
 
 =item B<--web [name]>
 
@@ -132,8 +127,6 @@ my %opts = (
 );
 Options::Pod::GetOptions(
     ['Options'],
-    'foswiki-data-dir=s' => \$opts{foswikiDataDir},
-        "{Path} to Fowsiki data directory.",
     'web=s' => \$opts{web},
         "Web {name}. Default: $opts{web}",
     'dir-table=s' => \$opts{dirDataTable},
@@ -176,94 +169,76 @@ if (! -e $opts{targetDir}) {
 
 ###############################################################################
 
-#~ UpdateWiki('E1', 'install', 'date');
-#~ UpdateWiki('C', 'games', 'date');
-#~ exit;
-
-sub Ignore { 0 }
-
 opendir my $dh, $opts{targetDir} or die "$!";
-#~ chdir $opts{targetDir};
 my @dirs = grep { -d "$opts{targetDir}\\$_" && ! /^\./ && ! Ignore($_) } readdir $dh;
 closedir $dh;
 
 my $filesInTarget; # filename => [ File ]
 my $console = new RJK::Win32::Console();
 
-my $stats;
-sub DisplayTraverseStats {
+IndexTarget();
+Synchronize();
+
+sub IndexTarget {
+    my $stats;
+    my $lastDisplay = 0;
+    my $traverse = new File::Traverse::Stats(
+        visitFile => sub {
+            my $file = shift;
+            if ($lastDisplay < $stats->time - $opts{refreshInterval}) {
+                DisplayStats($stats);
+                $lastDisplay = $stats->time;
+            }
+            push @{$filesInTarget->{$file->name}}, $file;
+        },
+    );
+    $stats = $traverse->stats;
+
+    foreach (@dirs) {
+        my $path = "$opts{targetDir}\\$_";
+        $console->updateLine("Indexing $path ...\n");
+        DisplayStats($stats);
+        $traverse->traverse($path);
+    }
+    DisplayStats($stats);
+    $console->newline;
+}
+
+sub Synchronize {
+    my $traverse = new File::Traverse::Stats(
+        visitFile => sub { VisitFile(@_) },
+    );
+    my $stats = $traverse->stats;
+
+    foreach my $dir (@dirs) {
+        print "Synchronizing $dir ...\n";
+
+        if (! -e $dir) {
+            print "Directory does not exist in source\n";
+            next;
+        } elsif (! -d $dir) {
+            warn "Source is not a directory";
+            exit;
+        } elsif (! -r $dir) {
+            warn "Source directory is not readable";
+            exit;
+        }
+
+        $traverse->traverse($dir);
+        DisplayStats($stats);
+        $console->newline();
+    }
+}
+
+sub Ignore { 0 }
+
+sub DisplayStats {
+    my $stats = shift;
     $console->updateLine(
         sprintf "%s in %s files",
             format_bytes($stats->size),
             $stats->files
     );
-}
-
-my $lastDisplay = 0;
-my $traverse = new File::Traverse::Stats(
-    visitFile => sub {
-        my $file = shift;
-        if ($lastDisplay < $stats->time - $opts{refreshInterval}) {
-            DisplayTraverseStats();
-            $lastDisplay = $stats->time;
-        }
-        push @{$filesInTarget->{$file->name}}, $file;
-    },
-);
-$stats = $traverse->stats;
-
-# index target
-foreach (@dirs) {
-    my $path = "$opts{targetDir}\\$_";
-    $console->updateLine("Indexing $path ...\n");
-    DisplayTraverseStats();
-    $traverse->traverse($path);
-}
-DisplayTraverseStats();
-$console->newline;
-
-$traverse = new File::Traverse::Stats(
-    visitFile => sub { VisitFile(@_) },
-);
-$stats = $traverse->stats;
-
-# synchronize
-foreach my $dir (@dirs) {
-    print "Synchronizing $dir ...\n";
-
-    if (! -e $dir) {
-        print "Directory does not exist in source\n";
-        next;
-    } elsif (! -d $dir) {
-        warn "Source is not a directory";
-        exit;
-    } elsif (! -r $dir) {
-        warn "Source directory is not readable";
-        exit;
-    }
-
-    $traverse->traverse($dir);
-    DisplayTraverseStats();
-    $console->newline();
-}
-
-#~ UpdateWiki('C', 'games', 'date');
-
-sub UpdateWiki {
-    my ($vol, $dir, $date) = @_;
-    my $fw = new Wiki::Foswiki($opts{foswikiDataDir}, $opts{web});
-    my $dt = $fw->getDataTable($opts{dirDataTable});
-    my $row = $dt->getRow({
-        Volume => $vol,
-        Name => $dir,
-    });
-#~ use Data::Dumper;
-#~ print Dumper($row);
-    $row->set('Last Backup' => $date);
-    #~ print $dt->{data}->csv;
-#~ exit;
-    $dt->save() if $opts{save};
-    #~ $fw->saveDataTable($dt) if $opts{save};
 }
 
 # find source file in target and move to correct dir
