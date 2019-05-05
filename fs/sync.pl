@@ -206,7 +206,7 @@ sub IndexTarget {
 
 sub Synchronize {
     my $traverse = new File::Traverse::Stats(
-        visitFile => sub { VisitFile(@_) },
+        visitFile => sub { VisitFile(shift) },
     );
     my $stats = $traverse->stats;
 
