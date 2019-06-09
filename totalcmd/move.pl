@@ -37,9 +37,9 @@ chdir.pl -h
 
 Don't actually move files.
 
-=item B<-e -exit-code [integer]>
+=item B<-e -exit-status [integer]>
 
-Error code to exit with on successful execution.
+Exit status on successful execution.
 
 =item B<-q -quiet>
 
@@ -92,11 +92,11 @@ A backup is created.
 =cut
 ###############################################################################
 
-my %opts = (exitCode => 0);
+my %opts = (exitStatus => 0);
 Options::Pod::GetOptions(
     ['OPTIONS'],
     'd|dry-run' => \$opts{dryRun}, "Don't actually move files.",
-    'e|exit-code=i' => \$opts{exitCode}, "Error code to exit with on successful execution.",
+    'e|exit-status=i' => \$opts{exitStatus}, "Exit status on successful execution.",
     'q|quiet' => \$opts{quiet}, "Be quiet.",
     ['HELP'],
     Options::Pod::HelpOptions("DESCRIPTION|SYNOPSIS|OPTIONS|HELP|POD"),
@@ -146,4 +146,4 @@ while (<$fh>) {
     move $_, $dirName or die "$!: $_";
 }
 
-exit $opts{exitCode};
+exit $opts{exitStatus};
