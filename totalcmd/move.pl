@@ -5,6 +5,7 @@ use File::Copy qw(move);
 use File::stat;
 use Time::localtime;
 use Options::Pod;
+use Media::Info::FFmpeg;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -122,28 +123,45 @@ open my $fh, '<', $filelist or die "$!: $filelist";
 while (<$fh>) {
     chomp;
     next if !-f;
-    my $st = stat $_ or die "$!: $_";
+    my $file = $_;
+    my $st = stat $file or die "$!: $file";
 
     my $dirName = $dirFormat;
     $dirName =~ s/\{(\w+)\.?(\w+)?\}/
-        my $statField = $1;
-        my $dateField = $2;
-        if ($dateField) {
-            my $t = localtime $st->$statField;
-            my $v = $t->$dateField;
-            $v += 1900 if $dateField eq 'year';
-            $v = sprintf("%2.2u", $v+1) if $dateField eq 'mon';
-            $v = sprintf("%2.2u", $v) if $dateField eq 'mday';
+        my $major = $1;
+        my $minor = $2;
+        if ($major eq 'video') {
+            return if ! $minor;
+            my $mi = Media::Info::FFmpeg->info($file);
+            $mi &&
+            $mi->{video} &&
+            $mi->{video}[0] &&
+            defined $mi->{video}[0]{$minor} ? $mi->{video}[0]{$minor} : "";
+        } elsif ($major eq 'audio') {
+            return if ! $minor;
+            my $mi = Media::Info::FFmpeg->info($file);
+            $mi &&
+            $mi->{audio} &&
+            $mi->{audio}[0] &&
+            defined $mi->{audio}[0]{$minor} ? $mi->{audio}[0]{$minor} : "";
+        } elsif ($minor) {
+            my $t = localtime $st->$major;
+            my $v = $t->$minor;
+            $v += 1900 if $minor eq 'year';
+            $v = sprintf("%2.2u", $v+1) if $minor eq 'mon';
+            $v = sprintf("%2.2u", $v) if $minor eq 'mday';
             $v;
         } else {
-            $st->$statField;
+            $st->$major;
         }
     /ge; #/
 
-    print "$dirName $_\n" unless $opts{quiet};
+    next if ! $dirName && $dirName ne '0';
+
+    print "$dirName $file\n" unless $opts{quiet};
     next if $opts{dryRun};
     mkdir $dirName;
-    move $_, $dirName or die "$!: $_";
+    move $file, $dirName or die "$!: $file";
 }
 
 exit $opts{exitStatus};
