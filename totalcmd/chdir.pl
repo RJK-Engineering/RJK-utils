@@ -13,25 +13,39 @@ use TotalCmd::Utils qw(tc_SetSourceTargetPaths);
 ###############################################################################
 =head1 DESCRIPTION
 
-Set Total Commander source panel path read from clipboard.
+Set Total Commander file window paths.
 
 =head1 SYNOPSIS
 
-chdir.pl [options]
+chdir.pl [options] [paths]
 
 =head1 DISPLAY EXTENDED HELP
 
 chdir.pl -h
 
-=head1 OPTIONS
-
 =for options start
+
+=head1 OPTIONS
 
 =over 4
 
+=item B<-c -read-clipboard>
+
+Read paths from clipboard
+
 =back
 
-=head2 Pod
+=head1 HELP
+
+=over 4
+
+=item B<-h -help -?>
+
+Display extended help.
+
+=back
+
+=head1 POD
 
 =over 4
 
@@ -49,9 +63,9 @@ E.g. C<--html .> writes to F<./{scriptname}.html>.
 
 Generate POD for options.
 
-=item B<-savepod>
+=item B<-writepod>
 
-Save generated POD to script file.
+Write generated POD to script file.
 The POD text will be inserted between C<=for options start> and
 C<=for options end> tags.
 If no C<=for options end> tag is present, the POD text will be
@@ -61,34 +75,65 @@ A backup is created.
 
 =back
 
-=head2 Help
-
-=over 4
-
-=item B<-h -help -?>
-
-Display extended help.
-
-=back
-
 =for options end
 
 =cut
 ###############################################################################
 
-my %opts = ();
+my %opts = ( maxTabs => 30 );
 Options::Pod::GetOptions(
-    ['Pod'],
-    Options::Pod::Options,
-
-    ['Help'],
-    Options::Pod::HelpOptions,
+    ['OPTIONS'],
+    'c|read-clipboard' => \$opts{clipboard}, "Read paths from clipboard, one per line.",
+    'n|new-tab' => \$opts{newTab}, "Open in new tab. (/T)",
+    'f|first' => \$opts{first}, "No questions, open first path.",
+    'b|both' => \$opts{both}, "No questions, open first path in source, second in target window.",
+    'a|all' => \$opts{all}, "No questions, open all in tabs (limited to 30 by default).",
+    'm|max-tabs=i' => \$opts{maxTabs}, "Maximum number of tabs to open/paths to choose from. Default: 30",
+    't|target' => \$opts{target}, "Open in target window. (/R)",
+    'l|left-right' => \$opts{leftRight}, "Interprets paths as left/right instead of source/target. (opposite of /S)",
+    ['HELP'],
+    Options::Pod::HelpOptions("DESCRIPTION|SYNOPSIS|OPTIONS|HELP|POD"),
+    ['POD'],
+    Options::Pod::Options
 );
 
-#~ $opts{required} //
-#~ @ARGV || Options::Pod::pod2usage(
-#~     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
-#~ );
+$opts{clipboard} // @ARGV || Options::Pod::pod2usage(
+    -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP"
+);
+
+###############################################################################
+
+use Media::YoutubeDl;
+###############################################################################
+my $ytdl = new Media::YoutubeDl;
+
+# stop download on interrupt
+my $interrupted = 1;
+$SIG{INT} = sub {
+    my ($signal) = @_;
+    if ($interrupted) {
+        exit 1;
+    } else {
+        $ytdl->stop;
+        $interrupted = 1;
+    }
+};
+###############################################################################
+
+my $conf = {
+    capture => [{
+        matcher => "url",       # matchers: regex (default) url path
+        #~ regex => "ph.*",     # /^ph.*$/i
+        #~ regex => "/^ph.*$/", # full expression if starting with '/'
+        #~ regex => [ "ph.*" ],
+        cmd => "ydl",
+    }],
+    commands => [{
+        name => "ydl",
+        action => "download",
+        site => "youtube",
+    }],
+};
 
 ###############################################################################
 
@@ -96,7 +141,7 @@ Options::Pod::GetOptions(
 my $clip = Win32::Clipboard();
 my $path = $clip->Get();
 # split on vertical whitespace characters, remove empty lines
-my @lines = grep { $_ } split /\v+/s, $path
+my @lines = grep { $_ } split /\v+\s*/s, $path
     or Exit("No text on clipboard");
 
 my @paths;
@@ -128,7 +173,6 @@ if (@urls) {
 #~         files = readdir
 #~         path = match(files, file)
 
-
 my %map = split /[=\s]+/, $ENV{CHDIR_DRIVE_MAP} || "";
 my $skip;
 while (my ($a, $b) = each %map) {
@@ -147,6 +191,7 @@ if (! -e "$drive:\\") {
 }
 
 tc_SetSourceTargetPaths($path);
+#~ tc_SetSourceTargetPaths($source, $target, $newTab);
 
 sub Exit {
     print shift, "\n";
