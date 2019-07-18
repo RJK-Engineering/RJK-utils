@@ -8,7 +8,7 @@ use RJK::Win32::DriveUtils qw(ConnectDrive GetDriveLetter);
 use File::PathUtils qw(ExtractPath);
 use RJK::Interactive qw(ItemFromList Pause);
 RJK::Interactive::SetClass('Term::ReadKey'); # Allows reading of single characters
-use TotalCmd::Utils qw(tc_SetSourceTargetPaths);
+use TotalCmd::Utils;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -190,8 +190,8 @@ if (! -e "$drive:\\") {
     ConnectDrive($drive) or Exit("Drive unavailable: $drive");
 }
 
-tc_SetSourceTargetPaths($path);
-#~ tc_SetSourceTargetPaths($source, $target, $newTab);
+TotalCmd::Utils::setSourceTargetPaths($path);
+#~ TotalCmd::Utils::setSourceTargetPaths($source, $target, $newTab);
 
 sub Exit {
     print shift, "\n";
