@@ -6,8 +6,8 @@ use Win32::Clipboard;
 use Options::Pod;
 use RJK::Win32::DriveUtils qw(ConnectDrive GetDriveLetter);
 use File::PathUtils qw(ExtractPath);
-use Interactive qw(ItemFromList Pause);
-Interactive::SetClass('Term::ReadKey'); # Allows reading of single characters
+use RJK::Interactive qw(ItemFromList Pause);
+RJK::Interactive::SetClass('Term::ReadKey'); # Allows reading of single characters
 use TotalCmd::Utils qw(tc_SetSourceTargetPaths);
 
 ###############################################################################
@@ -103,9 +103,9 @@ $opts{clipboard} // @ARGV || Options::Pod::pod2usage(
 
 ###############################################################################
 
-use Media::YoutubeDl;
+use RJK::Util::YoutubeDl;
 ###############################################################################
-my $ytdl = new Media::YoutubeDl;
+my $ytdl = new RJK::Util::YoutubeDl;
 
 # stop download on interrupt
 my $interrupted = 1;
