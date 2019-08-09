@@ -20,3 +20,17 @@ Lief, hij zit nog in het links/rechts dogma.
 
 https://www.youtube.com/watch?v=qzX0TCmV4Rk&lc=Ugw1XAL3hbAiTTeqZnh4AaABAg.8yOBmPR10d58yQ3uLkuWXo
 ​@chevious Mis "if we get organized" That's it, the people are there, the will is there, but for whatever reason they can't get organized, and that's exactly what Bernie says he's gonna do. Now that would be a change!
+
+
+
+
+
+https://www.youtube.com/watch?v=31mvbVBV3X0
+
+
+brood/koek
+3x koffie
+
+sla/salade+shoarma+burger
+pizza(br.?)
+b.fr.
