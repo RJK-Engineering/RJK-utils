@@ -22,6 +22,10 @@ https://www.youtube.com/watch?v=qzX0TCmV4Rk&lc=Ugw1XAL3hbAiTTeqZnh4AaABAg.8yOBmP
 ​@chevious Mis "if we get organized" That's it, the people are there, the will is there, but for whatever reason they can't get organized, and that's exactly what Bernie says he's gonna do. Now that would be a change!
 
 
+----------- reply when Bernie becomes potus
+https://www.youtube.com/watch?v=2O-iLk1G_ng&lc=UgxUo5FMOhzJh25oQUp4AaABAg
+If Bernie is elected, I will immediately quit my job.  Who will work with a socialist in the White House???
+
 
 
 
