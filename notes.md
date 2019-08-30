@@ -26,6 +26,15 @@ https://www.youtube.com/watch?v=TgNMxd-p07w&lc=UgyKLdjgpxR5FC64l4t4AaABAg
 "... for its very survival requires it. Homosexual unions are by nature contradictory to this."
 What a simple mind. Homosexuality probably has been vital in our evolution, the genes that result in homosexuality also result in all kinds of other beneficial traits. In fact there are arguments that the trait of homosexuality alone results in better survival of the species, contradictory as it sounds. If it was detrimental, we would've lost it a long time ago or it would never have existed.
 
+https://www.youtube.com/watch?v=BnV0p8RSY3k&lc=UgwNh-6BkeRvUwXml7p4AaABAg.8q3QdqbM5oW8zDBCme9jl4
+I was triggered by the op with his denigrating "go ahead and shop and play football", as if we should stop enjoying life and only worry about what's wrong in this world. I think that generalization is just about as negative and cynical as you can get. I've spend years following US politics, politics in my own country, geopolitics, informing myself about the systems we set up, the way we organize societies, globalisation, the environmental impact it all has, you name it. I've gone deep my friend, real deep, to the point I didn't do much else and it made me depressed. So I know there's a need for shopping and playing football, it's part of being a healthy human being. But go ahead, call me ignorant.
+---
+That's not what I said. Let's just say, I've been there, consider it a warning. Read my previous reply.
+
+https://www.youtube.com/watch?v=1OnBVqeW5JA&lc=Ugwt_ih6KrzCWfgw7aJ4AaABAg
+"it's a fetish to suffer ... but you can also say things are getting better". And why are things getting better? Maybe the ones with this "fetish" have something to do with it?
+
+
 ----------- reply when Bernie becomes potus
 https://www.youtube.com/watch?v=2O-iLk1G_ng&lc=UgxUo5FMOhzJh25oQUp4AaABAg
 If Bernie is elected, I will immediately quit my job.  Who will work with a socialist in the White House???
