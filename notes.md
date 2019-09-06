@@ -34,6 +34,23 @@ That's not what I said. Let's just say, I've been there, consider it a warning. 
 https://www.youtube.com/watch?v=1OnBVqeW5JA&lc=Ugwt_ih6KrzCWfgw7aJ4AaABAg
 "it's a fetish to suffer ... but you can also say things are getting better". And why are things getting better? Maybe the ones with this "fetish" have something to do with it?
 
+https://www.youtube.com/watch?v=LhX6jzxRotk&lc=UgwMki51cFkOQznqZFF4AaABAg
+Kaplaarzen! Rubberen laarzen! Fijne mooie rubberen waterdichte kaplaarzen. En m'n rooie zuidwestertje, want dat mot ook op natuurlijk.
+
+@Sam Chilcutt Who told you it's gonna be like that? That was a completely different time, with completely different starting points and power structures, people were dirt poor, there was no democracy. What the left wants has nothing to do with that, in fact the policies they propose are mainstream here in my country, and we're doing great. I'm truely curious how you come to these strange assertions, please, please enlighten me, I want to understand!
+
+@Sam Chilcutt To answer your question, the system is corrupt as ..., it doesn't work the way it should. The politicians setup structures where they and their friends profit from it, that's where the monies are going. It's complicated, that's why they can get away with it. But I agree, if they don't fundamentaly change government, or just start over (aka a revolution), it won't get any better, this is how much they forced the system to their hands.
+
+https://www.youtube.com/watch?v=U49khFl4RHo&lc=UgyAJPNaOTyrgqWWosh4AaABAg.8zXpJYHlTkZ8zY3htXP9ky
+@Marco Inderdaad vind het ook zeer vermakelijk, ik volg ook de politiek in Amerika, daar stikt het van dit soort figuren, schrikbarend wat je daar tegenkomt, maar het is een geweldige show! :)
+
+-------
+https://www.youtube.com/watch?v=U49khFl4RHo&lc=UgwMfiCg3b-qyXK_8hN4AaABAg.8zXQnQdmONW8zY0oCWtlas
+"God bestaat" Zijn slechts twee woorden die worden geïnterpreteerd door iemand die ze leest/hoort. Ik ben atheïst en zeg: het idee bestaat, in die zin bestaat God. Het fenomeen (hetgeen gezien kan worden) bestaat niet. In die zin bestaat God niet. Voor mij is het vooral egotripperij, het idee bestaat in de hersenen van individuen, het gaat vooral om ikke ikke ikke, het neemt onzekerheden weg, het wordt aangewend om onverklaarbare zaken te verklaren, zodat de ik zich veilig kan voelen. Soort veiligheidsmechanisme van ons brein.
+
+https://www.youtube.com/watch?v=U49khFl4RHo&lc=Ugx8lpMPV0GYxpy2_H94AaABAg.8zXSGcbmvpw8zXt--Ylawr
+@Sjaak Swart Weer zo'n asociale inhoudsloze termensmijter, met 1 woord iemand proberen weg te zetten. Dapper hoor, voelt goed zeker? Dat is waarschijnlijk de enige reden of vertel ons, wat denk je dat je hiermee te bereiken?
+@Sjaak Swart Welk standpunt? Volgens mij antwoord je op de verkeerde reactie? Anyway, wat een onsamenhangend, haatvol en soms domweg onjuist braaksel heb je daar geproduceerd.
 
 ----------- reply when Bernie becomes potus
 https://www.youtube.com/watch?v=2O-iLk1G_ng&lc=UgxUo5FMOhzJh25oQUp4AaABAg
@@ -51,3 +68,5 @@ typediploma?
 'Radio Bergeijk'
 
 dag niet eten
+
+
