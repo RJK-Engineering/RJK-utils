@@ -79,3 +79,5 @@ kvw
 tk&k
 
 drive/Kiwi/Luchtfoto's (gescand).zip
+
+https://i.imgur.com/szyOf.gif
