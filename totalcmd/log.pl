@@ -199,8 +199,6 @@ Options::Pod::GetOptions(
 
     ['Help'],
     Options::Pod::HelpOptions
-) || Options::Pod::pod2usage(
-    -sections => "DISPLAY EXTENDED HELP",
 );
 
 # default values
