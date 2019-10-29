@@ -5,6 +5,9 @@ use Options::Pod;
 
 use RJK::Exception;
 use TotalCmd::Settings;
+use TotalCmd::Utils;
+use TotalCmd::Command;
+
 use Try::Tiny;
 
 ###############################################################################
@@ -434,7 +437,7 @@ BEGIN {
 
 ###############################################################################
 
-my $tcmd = new TotalCmd();
+my $tcmd = new TotalCmd::Settings();
 my $results;
 
 try {
