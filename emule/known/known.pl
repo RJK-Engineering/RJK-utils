@@ -180,8 +180,6 @@ Options::Pod::GetOptions(
 
     ['POD OPTIONS'],
     Options::Pod::Options
-) || Options::Pod::pod2usage(
-    -sections => "DISPLAY EXTENDED HELP",
 );
 
 $opts{inputFile} //
