@@ -14,7 +14,7 @@ Search for stored comments.
 
 =head1 SYNOPSIS
 
-cmt.pl [options] [arguments]
+cmt.pl [options] [search terms]
 
 =head1 DISPLAY EXTENDED HELP
 
@@ -52,11 +52,11 @@ Like count filter.
 
 Tag filter.
 
-=item B<-d -comments-dir [string]>
+=item B<-d -comments-dir [path]>
 
 Path to comments dir.
 
-=item B<-f -comments-file [string]>
+=item B<-f -comments-file [name]>
 
 Name of comments file.
 
@@ -112,7 +112,8 @@ Display extended help.
 ###############################################################################
 
 my %opts = (
-    searchIn => "text"
+    searchIn => "text",
+    commentsDir => ".",
 );
 Options::Pod::GetOptions(
     'a|display-all' => \$opts{displayAll}, "Display all comments.",
@@ -123,8 +124,8 @@ Options::Pod::GetOptions(
 
     'l|min-like-count=i' => \$opts{minLikeCount}, "Like count filter.",
     't|tag-filter=s' => \$opts{tagFilter}, "Tag filter.",
-    'd|comments-dir=s' => \$opts{commentsDirPath}, "Path to comments dir.",
-    'f|comments-file=s' => \$opts{commentsFile}, "Name of comments file.",
+    'd|comments-dir=s' => \$opts{commentsDir}, "{Path} to comments dir.",
+    'f|comments-file=s' => \$opts{commentsFile}, "{Name} of comments file.",
 
     'L|list' => \$opts{list}, "List comment files.",
 
@@ -155,12 +156,12 @@ $opts{searchIn} = "url" if $opts{urlSearch};
 my @paths;
 
 if ($opts{commentsFile}) {
-    $opts{commentsFile} = "$opts{commentsDirPath}/$opts{commentsFile}"
-        if $opts{commentsDirPath};
+    $opts{commentsFile} = "$opts{commentsDir}/$opts{commentsFile}"
+        if $opts{commentsDir};
     @paths = $opts{commentsFile};
 } else {
     @paths = Files(
-       in => $opts{commentsDirPath},
+       in => $opts{commentsDir},
        filter => sub { /^comments_?\d*\.txt$/ },
        orderBy => 'date',
     );
