@@ -18,9 +18,9 @@ chletter.pl [options] [current] [new]
 
 chletter.pl -h
 
-=head1 OPTIONS
-
 =for options start
+
+=head1 OPTIONS
 
 =over 4
 
@@ -34,7 +34,7 @@ Disconnect network drive if one is connected with drive letter [new].
 
 =back
 
-=head2 Pod
+=head1 POD
 
 =over 4
 
@@ -52,9 +52,9 @@ E.g. C<--html .> writes to F<./{scriptname}.html>.
 
 Generate POD for options.
 
-=item B<-savepod>
+=item B<-writepod>
 
-Save generated POD to script file.
+Write generated POD to script file.
 The POD text will be inserted between C<=for options start> and
 C<=for options end> tags.
 If no C<=for options end> tag is present, the POD text will be
@@ -64,7 +64,7 @@ A backup is created.
 
 =back
 
-=head2 Help
+=head1 HELP
 
 =over 4
 
@@ -83,14 +83,14 @@ my %opts = (
     tempFile => 'chdl.txt',
 );
 Options::Pod::GetOptions(
+    ['OPTIONS'],
     't|temp-file=s' => \$opts{tempFile}, "{Path} to temp file.",
     'd|disconnect-network-drive' => \$opts{disconnectNetworkDrive},
         "Disconnect network drive if one is connected with drive letter [new].",
 
-    ['Pod'],
+    ['POD'],
     Options::Pod::Options,
-
-    ['Help'],
+    ['HELP'],
     Options::Pod::HelpOptions
 );
 

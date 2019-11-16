@@ -20,9 +20,11 @@ cmt.pl [options] [search terms]
 
 cmt.pl -h
 
+=for options start
+
 =head1 OPTIONS
 
-=for options start
+=over 4
 
 =item B<-a -display-all>
 
@@ -116,6 +118,7 @@ my %opts = (
     commentsDir => ".",
 );
 Options::Pod::GetOptions(
+    ['OPTIONS'],
     'a|display-all' => \$opts{displayAll}, "Display all comments.",
     'c|copy-urls' => \$opts{copyUrlsToClip}, "Copy urls to clipboard.",
     'C|copy-comments' => \$opts{copyCommentsToClip}, "Copy full comment info to clipboard.",
@@ -129,10 +132,10 @@ Options::Pod::GetOptions(
 
     'L|list' => \$opts{list}, "List comment files.",
 
-    ['Pod'],
+    ['POD'],
     Options::Pod::Options,
 
-    ['Help'],
+    ['HELP'],
     Options::Pod::HelpOptions
 );
 

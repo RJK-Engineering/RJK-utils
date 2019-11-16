@@ -153,6 +153,7 @@ my %opts = (
     string => "default",
 );
 Options::Pod::GetOptions(
+    ['OPTIONS'],
     'a|archives' => \$opts{searchArchives},
         "Search archives.",
     's|search-source' => \$opts{searchSource},
@@ -194,10 +195,9 @@ Options::Pod::GetOptions(
     't|tail:i' => \$opts{tail},
         "Show last [{n}] results.",
 
-    ['Pod'],
+    ['POD'],
     Options::Pod::Options,
-
-    ['Help'],
+    ['HELP'],
     Options::Pod::HelpOptions
 );
 

@@ -290,6 +290,7 @@ my %opts = (
     sendCommand => 'SendTCCommand',
 );
 Options::Pod::GetOptions(
+    ['OPTIONS'],
     'tcmdinc=s' => \$opts{tcmdinc},
       "{Path} to Total Commander F<totalcmd.inc> file.",
     'tcmdini=s' => \$opts{tcmdini},
@@ -396,10 +397,9 @@ or the directory specified with C<-S> or C<-T> is assumed.
     'debug' => \$opts{debug},
       "Show debug information.",
 
-    ['Pod'],
+    ['POD'],
     Options::Pod::Options,
-
-    ['Help'],
+    ['HELP'],
     Options::Pod::HelpOptions
 );
 

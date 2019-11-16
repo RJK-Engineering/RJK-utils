@@ -25,9 +25,11 @@ Wildcards are allowed.
 
 hmt.pl -h
 
+=for options start
+
 =head1 OPTIONS
 
-=for options start
+=over 4
 
 =item B<-p -properties [names]>
 
@@ -43,7 +45,7 @@ Write to file instead of standard out.
 
 =back
 
-=head1 Pod
+=head1 POD
 
 =over 4
 
@@ -73,7 +75,7 @@ A backup is created.
 
 =back
 
-=head1 Help
+=head1 HELP
 
 =over 4
 
@@ -92,6 +94,7 @@ my %opts = (
     columns => 65
 );
 Options::Pod::GetOptions(
+    ['OPTIONS'],
     'p|properties:s' => \$opts{props},
         "Comma separated list of properties to display. Display available properties if [{names}] is undefined.",
     'c|columns=i' => \$opts{columns},
@@ -99,10 +102,9 @@ Options::Pod::GetOptions(
     'o|output-file=s' => \$opts{out},
         "Write to file instead of standard out.",
 
-    ['Pod'],
+    ['POD'],
     Options::Pod::Options,
-
-    ['Help'],
+    ['HELP'],
     Options::Pod::HelpOptions
 );
 
