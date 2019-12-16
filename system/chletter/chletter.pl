@@ -3,6 +3,7 @@ use warnings;
 
 use Options::Pod;
 
+use RJK::LocalConf;
 use RJK::Win32::DriveUtils qw(DisconnectDrive);
 
 ###############################################################################
@@ -70,7 +71,19 @@ A backup is created.
 
 =item B<-h -help -?>
 
-Display extended help.
+Display program options.
+
+=item B<-hh "-help -help" -??>
+
+Display help options.
+
+=item B<-hhh "-help -help -help" -???>
+
+Display POD options.
+
+=item B<-hhhh "-help -help -help -help" -????>
+
+Display complete help.
 
 =back
 
@@ -79,8 +92,10 @@ Display extended help.
 =cut
 ###############################################################################
 
-my %opts = (
-    tempFile => 'chdl.txt',
+my %opts = RJK::LocalConf::GetOptions(
+    "chletter.conf", (
+        tempFile => 'chdl.txt',
+    )
 );
 Options::Pod::GetOptions(
     ['OPTIONS'],
