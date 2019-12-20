@@ -1,5 +1,2 @@
-@echo off
-
-call "%~dp0..\config.bat"
-
-perl "%rjk-utils-home%\totalcmd\chdir.pl" %*
+@set RJK_UTIL=totalcmd\chdir.pl
+@call rjk-util  %*
