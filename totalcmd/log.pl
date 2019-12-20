@@ -6,8 +6,8 @@ use File::Spec::Functions qw(splitpath);
 
 use Options::Pod;
 
-use Filecheck::Utils qw(GetTerms);
-use HashToStringFormatter;
+use RJK::HashToStringFormatter;
+use RJK::LocalConf;
 use TotalCmd::Log;
 
 ###############################################################################
@@ -148,10 +148,13 @@ Display extended help.
 =cut
 ###############################################################################
 
-my %opts = (
-    showPluginOp => 1,
-    string => "default",
+my %opts = RJK::LocalConf::GetOptions(
+    "totalcmd-log.conf", (
+        showPluginOp => 1,
+        #~ string => "default",
+    )
 );
+
 Options::Pod::GetOptions(
     ['OPTIONS'],
     'a|archives' => \$opts{searchArchives},
@@ -179,7 +182,7 @@ Options::Pod::GetOptions(
     'p|plugin-op' => \$opts{showPluginOp},
         "TODO",
 
-    'logfile=s' => \$opts{logfile},
+    'log-file=s' => \$opts{logFile},
         "Path to Total Commander log file.",
     'archive-dir=s' => \$opts{archiveDir},
         "TODO",
@@ -230,7 +233,7 @@ my @fields = split /,/, $opts{fields} if $opts{fields};
 my @results;
 my $i;
 
-my $logSize = (-s $opts{logfile}) || 0;
+my $logSize = (-s $opts{logFile}) || 0;
 if ($opts{archiveSize} && $logSize > $opts{archiveSize} * 1024**2) {
     if (! -e $opts{archiveDir}) {
         mkdir $opts{archiveDir} or die "$!: $opts{archiveDir}";
@@ -239,7 +242,7 @@ if ($opts{archiveSize} && $logSize > $opts{archiveSize} * 1024**2) {
         die "$!: $opts{archiveDir}";
     }
 
-    my (undef, undef, $file) = splitpath($opts{logfile});
+    my (undef, undef, $file) = splitpath($opts{logFile});
     my @d = localtime;
     my $d = sprintf "%04d%02d%02d", $d[5]+1900, $d[4]+1, $d[3];
     $file =~ s/\.log$/-$d.log/;
@@ -248,11 +251,11 @@ if ($opts{archiveSize} && $logSize > $opts{archiveSize} * 1024**2) {
     if (-e $file) {
         warn "File exists: $file";
     } else {
-        move $opts{logfile}, $file or die "$!: $file";
+        move $opts{logFile}, $file or die "$!: $file";
     }
 }
 
-my @logfiles = $opts{logfile};
+my @logfiles = $opts{logFile};
 if ($opts{searchArchives}) {
     opendir my $dh, $opts{archiveDir} or die "$!: $opts{archiveDir}";
     foreach (grep { /\.log$/ } readdir $dh) {
@@ -313,7 +316,7 @@ if ($opts{tail}) {
     }
 }
 
-my $formatter = new HashToStringFormatter($opts{format});
+my $formatter = new RJK::HashToStringFormatter($opts{format});
 
 if (defined $opts{fields}) {
     if (@fields) {
@@ -364,4 +367,15 @@ sub match {
         }
     }
     return 1;
+}
+
+sub GetTerms {
+    my @searchTerms;
+    # filter out crap
+    foreach (@_) {
+        s/\W/ /g;
+        s/ +/ /g;
+        push @searchTerms, $_ if $_;
+    }
+    return wantarray ? @searchTerms : \@searchTerms;
 }
