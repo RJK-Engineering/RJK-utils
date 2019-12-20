@@ -92,7 +92,7 @@ Options::Pod::GetOptions(
     't|target' => \$opts{target}, "Open in target window. (/R)",
     'l|left-right' => \$opts{leftRight}, "Interprets paths as left/right instead of source/target. (opposite of /S)",
     ['HELP'],
-    Options::Pod::HelpOptions("DESCRIPTION|SYNOPSIS|OPTIONS|HELP|POD"),
+    Options::Pod::HelpOptions
     ['POD'],
     Options::Pod::Options
 );
