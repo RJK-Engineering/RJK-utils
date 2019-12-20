@@ -7,6 +7,7 @@ use DBI;
 use DBD::mysql;
 
 use RJK::DbTable;
+use RJK::LocalConf;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -73,9 +74,9 @@ Commit after [n] database inserts/updates. Default: 100
 
 Show process information after each [n] lines processed. Default: 100
 
-=item B<-l -log-file [path]>
+=item B<-l -log [path]>
 
-Write log. Optional [path] to file without extension, if no path is specified: "known". Ignored when using <-n>.
+Append to log. Optional [path] to file, default: write log file to cwd using filename format: "known-[timestamp].log". Ignored when using <-n>.
 
 =item B<-db-host [string]>
 
@@ -148,7 +149,8 @@ A backup is created.
 =cut
 ###############################################################################
 
-my %opts = ();
+my %opts = RJK::LocalConf::GetOptions("emule-known.conf");
+
 Options::Pod::GetOptions(
     ['HELP OPTIONS'],
     Options::Pod::HelpOptions([
@@ -166,9 +168,9 @@ Options::Pod::GetOptions(
     'c|commit-size=i' => \$opts{commitSize}, "Commit after [{n}] database inserts/updates. Default: 100",
     's|show-info-after=i' => \$opts{showInfoAfterLinesProcessed},
         "Show process information after each [{n}] lines processed. Default: 100",
-    'l|log-file:s' => \$opts{logFile},
-        "Write log. Optional [{path}] to file without extension, if no path is specified".
-        " it is set to \"known\". Ignored when using <-n>.",
+    'l|log:s' => \$opts{log},
+        "Append to log. Optional [{path}] to file, default: write log file to cwd using".
+        " filename format: \"known-[timestamp].log\". Ignored when using <-n>.",
 
     'db-host=s' => \$opts{host}, "Database host.",
     'db-user=s' => \$opts{user}, "Database user.",
@@ -239,9 +241,12 @@ my $table = new RJK::DbTable(
 );
 
 my $logFh;
-if (!$opts{noCommit} && defined $opts{logFile}) {
-    $opts{logFile} = "known" if $opts{logFile} eq '';
-    open $logFh, '>', $opts{logFile} ."-". time() . ".log" or die "$!";
+if (! $opts{noCommit} && defined $opts{log}) {
+    if ($opts{log} eq '') {
+        open $logFh, '>', "known-". time() . ".log" or die "$!";
+    } else {
+        open $logFh, '>>', $opts{log} or die "$!";
+    }
 }
 
 $SIG{INT} = sub {
