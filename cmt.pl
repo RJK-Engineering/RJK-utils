@@ -123,7 +123,7 @@ Options::Pod::GetOptions(
     'c|copy-urls' => \$opts{copyUrlsToClip}, "Copy urls to clipboard.",
     'C|copy-comments' => \$opts{copyCommentsToClip}, "Copy full comment info to clipboard.",
     'u|url-search' => \$opts{urlSearch}, "Search in urls.",
-    'o|open' => \$opts{open}, "Open url in browser.",
+    'o|open' => \$opts{open}, "Open url in browser. Does not work with multiple results.",
 
     'l|min-like-count=i' => \$opts{minLikeCount}, "Like count filter.",
     't|tag-filter=s' => \$opts{tagFilter}, "Tag filter.",
@@ -179,7 +179,7 @@ my $comment;
 my $urls;
 my $text;
 my @searchFor;
-my $matches = 0;
+my $nrOfResults = 0;
 
 if (! $opts{list}) {
     @searchFor = @{$opts{searchFor}};
@@ -190,12 +190,12 @@ foreach (@paths) {
     if ($opts{list}) {
         print "$_\n";
     } else {
-        $matches += search($_);
+        $nrOfResults += search($_);
     }
 }
 
-if ($matches) {
-    print "$matches results total" if @paths > 1;
+if ($nrOfResults) {
+    print "$nrOfResults results total" if @paths > 1;
 
     if ($opts{copyUrlsToClip}) {
         my $clip = Win32::Clipboard();
@@ -203,6 +203,14 @@ if ($matches) {
     } elsif ($opts{copyCommentsToClip}) {
         my $clip = Win32::Clipboard();
         $clip->Set($text);
+    }
+
+    if ($nrOfResults == 1 && $opts{open}) {
+        chomp $urls;
+        if (my $code = system "browse $urls 2>NUL") {
+            print "\nError opening url\n";
+            exit($code);
+        }
     }
 }
 
