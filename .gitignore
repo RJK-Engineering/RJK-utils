@@ -2,6 +2,8 @@
 *.lnk
 *.tmp
 *.sublime-*
+*.*-project
+*.*-workspace
 *~
 *~.*
 *.orig
