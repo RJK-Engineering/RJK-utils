@@ -2,6 +2,6 @@
 
 if not defined RJK_UTILS_HOME FOR /F "delims=" %%P IN ("%~dp0..") DO set RJK_UTILS_HOME=%%~dpfP
 
-perl "%RJK_UTILS_HOME%\%RJK_UTIL%" %*
+perl "%RJK_UTILS_HOME%\utils\%RJK_UTIL%" %*
 
 if %errorlevel% gtr 0. (pause) else if defined COMMANDER_INI pause

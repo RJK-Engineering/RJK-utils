@@ -1,2 +1,2 @@
-@set RJK_UTIL=utils\cmt.pl
+@set RJK_UTIL=cmt.pl
 @call rjk-util %*
