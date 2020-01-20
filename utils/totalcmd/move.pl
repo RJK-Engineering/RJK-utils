@@ -148,8 +148,8 @@ while (<$fh>) {
             my $t = localtime $st->$major;
             my $v = $t->$minor;
             $v += 1900 if $minor eq 'year';
-            $v = sprintf("%2.2u", $v+1) if $minor eq 'mon';
-            $v = sprintf("%2.2u", $v) if $minor eq 'mday';
+            $v = sprintf("%02u", $v+1) if $minor eq 'mon';
+            $v = sprintf("%02u", $v) if $minor eq 'mday';
             $v;
         } else {
             $st->$major;
