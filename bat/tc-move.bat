@@ -1,2 +1,2 @@
 @set RJK_UTIL=totalcmd\move.pl
-@call rjk-util  %*
+@call rjk-util %*
