@@ -7,7 +7,7 @@ use Win32::Clipboard;
 
 my $filename = shift @ARGV;
 $filename //= "C:\\CMDDE62.tmp";
-@ARGV = qw(pre post joined size);
+@ARGV or @ARGV = qw(pre post joined size sizeGroup);
 
 my %opts;
 %opts = (
@@ -22,7 +22,6 @@ my %opts;
     sizeGroupSize => 1000,
 
     setClipboard => 1,
-    pauseBeforeExit => 1,
     show => 1,
 );
 
@@ -38,11 +37,6 @@ my $result = filter($groups, $files->{selection});
 show($result) if $opts{show};
 
 setClipboard($result) if $opts{setClipboard};
-
-if ($opts{pauseBeforeExit}) {
-    print "Press return to exit.\n";
-    <STDIN>;
-}
 
 sub load {
     my $selection = shift;
@@ -67,10 +61,8 @@ sub group {
         $meta->{sizeGroup} = sub {
             my ($file, $data) = @_;
             my $size = -s $file->path;
-            $data->{sizeGroup} = [
-                $opts{sizeGroupSize} * int ($size / $opts{sizeGroupSize}),
-                $opts{sizeGroupSize} * int ($size / $opts{sizeGroupSize}) - int($opts{sizeGroupSize} / 2)
-            ];
+            my $minSize = $opts{sizeGroupSize} * int ($size / $opts{sizeGroupSize});
+            $data->{sizeGroup} = [ $minSize, $minSize + $opts{sizeGroupSize} ];
         };
     }
     if ($opts{groupByIndex}{size}) {
@@ -109,8 +101,8 @@ sub group {
     my $getFile = sub {
         my $file = shift;
         my $f = { file => $file };
-        foreach my $key (keys %$meta) {
-            $meta->{$key}($file, $f);
+        foreach (keys %$meta) {
+            $meta->{$_}($file, $f);
         }
         return $f;
     };
@@ -246,22 +238,20 @@ sub setClipboard {
 
 __END__
 
-finding sequenced files
-file1.ext
-file2.ext
+Sequenced files
 
-[pre][number][post].[extension]
-1. find file with numbers
-2. group by [pre], throw away groups having one file
-3. group by [post], throw away groups having one file
-4. add missing filenames to complete the sequence (between min [number] and max [number])
+* filename format: [pre][number][post].[extension]
+* group by:
+    * [pre]
+    * [post]
+    * joined [pre][post]
+* TODO option to add missing filenames to complete the sequence (between min [number] and max [number])
 
-Max [number] detected = 9999
+Group by file size
 
-input
-- dir (consider all files in dir)
-- file selection
-
-1. joined, groupedBy != ''
-1. pre, groupedBy = ''
-2.
+* size - Files having same size
+* sizeGroup - Files having similar sizes
+    * groups of sizeGroupSize bytes, e.g: sizeGroupSize = 1000
+        * files between 0 (inclusive) and 1000 (exclusive) bytes are grouped
+        * files between 1000 and 2000 bytes are grouped
+        * etc.
