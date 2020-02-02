@@ -1,12 +1,11 @@
 use strict;
 use warnings;
 
-use Options::Pod;
-
 use RJK::Exception;
-use TotalCmd::Settings;
-use TotalCmd::Utils;
-use TotalCmd::Command;
+use RJK::Options::Pod;
+use RJK::TotalCmd::Command;
+use RJK::TotalCmd::Settings;
+use RJK::TotalCmd::Utils;
 
 use Try::Tiny;
 
@@ -289,7 +288,7 @@ my %opts = (
     defaultIcon => 'wcmicons.dll,64',
     sendCommand => 'SendTCCommand',
 );
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'tcmdinc=s' => \$opts{tcmdinc},
       "{Path} to Total Commander F<totalcmd.inc> file.",
@@ -398,9 +397,9 @@ or the directory specified with C<-S> or C<-T> is assumed.
       "Show debug information.",
 
     ['POD'],
-    Options::Pod::Options,
+    RJK::Options::Pod::Options,
     ['HELP'],
-    Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions
 );
 
 $opts{tail} = undef if $opts{head} && $opts{tail};
@@ -437,7 +436,7 @@ BEGIN {
 
 ###############################################################################
 
-my $tcmd = new TotalCmd::Settings();
+my $tcmd = new RJK::TotalCmd::Settings();
 my $results;
 
 try {
@@ -466,7 +465,7 @@ try {
         warn "No results";
     }
 } catch {
-    if ( $_->isa('TotalCmd::NotFoundException') ) {
+    if ( $_->isa('RJK::TotalCmd::NotFoundException') ) {
         warn $_->error();
     } else {
         RJK::Exception::GeneralCatch();
@@ -554,7 +553,7 @@ sub GetResults {
     } elsif (defined $opts{find}) {
         @cmds = $tcmd->getCustomCommands();
     } else {
-        Options::Pod::pod2usage(
+        RJK::Options::Pod::pod2usage(
             -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
         );
     }
@@ -660,7 +659,7 @@ sub _GetIcon {
 sub HasIcon {
     my $file = shift;
 
-    my ($fh, $path) = TotalCmd::Utils::TempFile("ico");
+    my ($fh, $path) = RJK::TotalCmd::Utils::TempFile("ico");
     close $fh;
     debug $path;
 
@@ -766,7 +765,7 @@ sub Execute {
     delete $cmd->{shortcuts}; #XXX
 
     # bless if not already blessed
-    $cmd = new TotalCmd::Command(%$cmd) if ref $cmd eq 'HASH';
+    $cmd = new RJK::TotalCmd::Command(%$cmd) if ref $cmd eq 'HASH';
 
     try {
         $cmd->execute(
@@ -786,15 +785,15 @@ sub Execute {
             }
         );
     } catch {
-        if ( $_->isa('TotalCmd::Command::UnsupportedParameterException') ) {
+        if ( $_->isa('RJK::TotalCmd::Command::UnsupportedParameterException') ) {
             error "Unsupported parameter: %s", $_->parameter();
-        } elsif ( $_->isa('TotalCmd::Command::ListFileException') ) {
+        } elsif ( $_->isa('RJK::TotalCmd::Command::ListFileException') ) {
             warn "%s: %s", $_->error, $_->path();
-        } elsif ( $_->isa('TotalCmd::Command::NoFileException') ) {
+        } elsif ( $_->isa('RJK::TotalCmd::Command::NoFileException') ) {
             warn "%s: %s", $_->error, $_->path();
-        } elsif ( $_->isa('TotalCmd::Command::NoShortNameException') ) {
+        } elsif ( $_->isa('RJK::TotalCmd::Command::NoShortNameException') ) {
             warn "%s: %s", $_->error, $_->path();
-        } elsif ( $_->isa('TotalCmd::Command::Exception') ) {
+        } elsif ( $_->isa('RJK::TotalCmd::Command::Exception') ) {
             error $_->error(). ".";
         } elsif ( $_->isa('Exception') ) {
             $_->rethrow;

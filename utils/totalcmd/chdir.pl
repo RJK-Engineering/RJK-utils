@@ -3,12 +3,12 @@ use warnings;
 
 use Win32::Clipboard;
 
-use Options::Pod;
-use RJK::Win32::DriveUtils qw(ConnectDrive GetDriveLetter);
-use File::PathUtils qw(ExtractPath);
+use RJK::File::PathUtils qw(ExtractPath);
 use RJK::Interactive qw(ItemFromList Pause);
 RJK::Interactive::SetClass('Term::ReadKey'); # Allows reading of single characters
-use TotalCmd::Utils;
+use RJK::Options::Pod;
+use RJK::TotalCmd::Utils;
+use RJK::Win32::DriveUtils qw(ConnectDrive GetDriveLetter);
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -81,7 +81,7 @@ A backup is created.
 ###############################################################################
 
 my %opts = ( maxTabs => 30 );
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'c|read-clipboard' => \$opts{clipboard}, "Read paths from clipboard, one per line.",
     'n|new-tab' => \$opts{newTab}, "Open in new tab. (/T)",
@@ -92,12 +92,12 @@ Options::Pod::GetOptions(
     't|target' => \$opts{target}, "Open in target window. (/R)",
     'l|left-right' => \$opts{leftRight}, "Interprets paths as left/right instead of source/target. (opposite of /S)",
     ['HELP'],
-    Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions
     ['POD'],
-    Options::Pod::Options
+    RJK::Options::Pod::Options
 );
 
-$opts{clipboard} // @ARGV || Options::Pod::pod2usage(
+$opts{clipboard} // @ARGV || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP"
 );
 
@@ -190,8 +190,8 @@ if (! -e "$drive:\\") {
     ConnectDrive($drive) or Exit("Drive unavailable: $drive");
 }
 
-TotalCmd::Utils::setSourceTargetPaths($path);
-#~ TotalCmd::Utils::setSourceTargetPaths($source, $target, $newTab);
+RJK::TotalCmd::Utils::setSourceTargetPaths($path);
+#~ RJK::TotalCmd::Utils::setSourceTargetPaths($source, $target, $newTab);
 
 sub Exit {
     print shift, "\n";

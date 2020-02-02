@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 
-use File::File;
-use TotalCmd::ListFile;
+use RJK::IO::File;
+use RJK::TotalCmd::ListFile;
 use Win32::Clipboard;
 
 my $filename = shift @ARGV;
@@ -27,7 +27,7 @@ my %opts;
 
 $opts{groupByIndex} = { map { $_ => 1 } @{$opts{groupBy}} };
 
-my $selection = new TotalCmd::ListFile($opts{listFile});
+my $selection = new RJK::TotalCmd::ListFile($opts{listFile});
 my $files = load($selection);
 my $groups = group($files->{dirs});
 #~ show($groups) if $opts{show};
@@ -43,7 +43,7 @@ sub load {
     my (%dirs, %selection);
     foreach my $path ($selection->files) {
         # TODO skip files
-        my $f = new File::File($path);
+        my $f = new RJK::IO::File($path);
         if (! $dirs{$f->dir}) {
             $dirs{$f->dir} = $f->parent->files;
         }

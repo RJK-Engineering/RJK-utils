@@ -1,11 +1,8 @@
 use strict;
 use warnings;
 
-use File::Copy qw(move);
-use File::stat;
-use Time::localtime;
-use Options::Pod;
-use Media::Info::FFmpeg;
+use RJK::Commands::Move;
+use RJK::Options::Pod;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -94,74 +91,25 @@ A backup is created.
 ###############################################################################
 
 my %opts = (exitStatus => 0);
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'd|dry-run' => \$opts{dryRun}, "Don't actually move files.",
     'e|exit-status=i' => \$opts{exitStatus}, "Exit status on successful execution.",
     'q|quiet' => \$opts{quiet}, "Be quiet.",
     ['HELP'],
-    Options::Pod::HelpOptions("DESCRIPTION|SYNOPSIS|OPTIONS|HELP|POD"),
+    RJK::Options::Pod::HelpOptions,
     ['POD'],
-    Options::Pod::Options
+    RJK::Options::Pod::Options
 );
 
-@ARGV || Options::Pod::pod2usage(
+@ARGV || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP"
 );
 
-###############################################################################
+@opts{qw(filelist dirFormat)} = @ARGV;
+defined $opts{filelist} or die "No filelist";
+$opts{dirFormat} //= "{mtime.year}";
+#~ $opts{dirFormat} //= "{mtime.year}{mtime.mon}{mtime.mday}";
 
-my ($filelist, $dirFormat) = @ARGV;
-defined $filelist or die "No filelist";
--T $filelist or die "Not a text file: $filelist";
-
-my $prop = "atime";
-$dirFormat //= "{mtime.year}";
-#~ my $dirFormat //= "{mtime.year}{mtime.mon}{mtime.mday}";
-
-open my $fh, '<', $filelist or die "$!: $filelist";
-while (<$fh>) {
-    chomp;
-    next if !-f;
-    my $file = $_;
-    my $st = stat $file or die "$!: $file";
-
-    my $dirName = $dirFormat;
-    $dirName =~ s/\{(\w+)\.?(\w+)?\}/
-        my $major = $1;
-        my $minor = $2;
-        if ($major eq 'video') {
-            return if ! $minor;
-            my $mi = Media::Info::FFmpeg->info($file);
-            $mi &&
-            $mi->{video} &&
-            $mi->{video}[0] &&
-            defined $mi->{video}[0]{$minor} ? $mi->{video}[0]{$minor} : "";
-        } elsif ($major eq 'audio') {
-            return if ! $minor;
-            my $mi = Media::Info::FFmpeg->info($file);
-            $mi &&
-            $mi->{audio} &&
-            $mi->{audio}[0] &&
-            defined $mi->{audio}[0]{$minor} ? $mi->{audio}[0]{$minor} : "";
-        } elsif ($minor) {
-            my $t = localtime $st->$major;
-            my $v = $t->$minor;
-            $v += 1900 if $minor eq 'year';
-            $v = sprintf("%02u", $v+1) if $minor eq 'mon';
-            $v = sprintf("%02u", $v) if $minor eq 'mday';
-            $v;
-        } else {
-            $st->$major;
-        }
-    /ge; #/
-
-    next if ! $dirName && $dirName ne '0';
-
-    print "$dirName $file\n" unless $opts{quiet};
-    next if $opts{dryRun};
-    mkdir $dirName;
-    move $file, $dirName or die "$!: $file";
-}
-
-exit $opts{exitStatus};
+RJK::Commands::Move->new(\%opts)->execute();
+RJK::CommandExecutor->execute("RJK::Commands::Move", \%opts);

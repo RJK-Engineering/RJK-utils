@@ -1,14 +1,14 @@
 use strict;
 use warnings;
 
-use Options::Pod;
 
 use DateTime;
 use DateTime::Format::Strptime;
 use Try::Tiny;
 
-use Media::TimeFormat;
-use Media::Humax::Hmt;
+use RJK::Media::TimeFormat;
+use RJK::Media::Humax::Hmt;
+use RJK::Options::Pod;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -93,7 +93,7 @@ Display extended help.
 my %opts = (
     columns => 65
 );
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'p|properties:s' => \$opts{props},
         "Comma separated list of properties to display. Display available properties if [{names}] is undefined.",
@@ -103,12 +103,12 @@ Options::Pod::GetOptions(
         "Write to file instead of standard out.",
 
     ['POD'],
-    Options::Pod::Options,
+    RJK::Options::Pod::Options,
     ['HELP'],
-    Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions
 );
 
-@ARGV || Options::Pod::pod2usage(
+@ARGV || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 
@@ -158,7 +158,7 @@ sub ProcessFile {
     my $file = shift;
     my $info;
     try {
-        $info = Media::Humax::Hmt::GetInfo($file);
+        $info = RJK::Media::Humax::Hmt::GetInfo($file);
     } catch {
         if ( $_->isa('Exception') ) {
             printf "%s: %s\n", ref $_, $_->error;
@@ -201,7 +201,7 @@ sub ProcessFile {
     if ($display{bookmarks}) {
         printf $fh "Bookmarks: %s\n",
             join " ",
-                map { Media::TimeFormat::humanReadableFormat($_) }
+                map { RJK::Media::TimeFormat::humanReadableFormat($_) }
                 @{$info->{bookmarks}}
                      if @{$info->{bookmarks}};
     }

@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Options::Pod;
+use RJK::Options::Pod;
 
 use DBI;
 use DBD::mysql;
@@ -151,9 +151,9 @@ A backup is created.
 
 my %opts = RJK::LocalConf::GetOptions("emule-known.conf");
 
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['HELP OPTIONS'],
-    Options::Pod::HelpOptions([
+    RJK::Options::Pod::HelpOptions([
         [ "DESCRIPTION|SYNOPSIS|HELP OPTIONS|CONFIGURATION OPTIONS", "Display this extended help." ],
         [ "MESSAGE OPTIONS", "Display message options." ],
         [ "POD OPTIONS", "Display POD options." ],
@@ -178,14 +178,14 @@ Options::Pod::GetOptions(
     'db-name=s' => \$opts{database}, "Database name.",
 
     ['MESSAGE OPTIONS'],
-    Options::Pod::MessageOptions(\%opts),
+    RJK::Options::Pod::MessageOptions(\%opts),
 
     ['POD OPTIONS'],
-    Options::Pod::Options
+    RJK::Options::Pod::Options
 );
 
 $opts{inputFile} //
-$opts{outputFile} // Options::Pod::pod2usage(
+$opts{outputFile} // RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 

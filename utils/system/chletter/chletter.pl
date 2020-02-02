@@ -1,9 +1,8 @@
 use strict;
 use warnings;
 
-use Options::Pod;
-
 use RJK::LocalConf;
+use RJK::Options::Pod;
 use RJK::Win32::DriveUtils qw(DisconnectDrive);
 
 ###############################################################################
@@ -97,19 +96,20 @@ my %opts = RJK::LocalConf::GetOptions(
         tempFile => 'chdl.txt',
     )
 );
-Options::Pod::GetOptions(
+
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     't|temp-file=s' => \$opts{tempFile}, "{Path} to temp file.",
     'd|disconnect-network-drive' => \$opts{disconnectNetworkDrive},
         "Disconnect network drive if one is connected with drive letter [new].",
 
     ['POD'],
-    Options::Pod::Options,
+    RJK::Options::Pod::Options,
     ['HELP'],
-    Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions
 );
 
-@ARGV == 2 || Options::Pod::pod2usage(
+@ARGV == 2 || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 

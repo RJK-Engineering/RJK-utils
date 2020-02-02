@@ -3,10 +3,9 @@ use warnings;
 
 use Number::Bytes::Human qw(format_bytes);
 
-use Media::EMule::PartMet;
-use Options::Pod;
+use RJK::Media::EMule::PartMet;
+use RJK::Options::Pod;
 use RJK::LocalConf;
-use Data::Dump;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -112,7 +111,7 @@ Display complete help.
 
 my %opts = RJK::LocalConf::GetOptions("emule-downloads.conf");
 
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'd|directory=s' => \$opts{directory},
         "{Path} to directory containing C<.part.met> files.",
@@ -128,15 +127,15 @@ Options::Pod::GetOptions(
         "Read metadata from C<.part.met> files.",
 
     ['POD'],
-    Options::Pod::Options,
+    RJK::Options::Pod::Options,
 
     ['HELP'],
-    Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions
 );
 
 $opts{readMetFiles} ||= $opts{checkPartFiles};
 
-@ARGV || $opts{directory} || Options::Pod::pod2usage(
+@ARGV || $opts{directory} || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 
@@ -176,6 +175,7 @@ if (my $key = $opts{sort}) {
 }
 
 $stats{metFiles} = scalar @met;
+use Data::Dump;
 dd(\%stats);
 
 sub display {
@@ -236,7 +236,7 @@ sub getData {
     my $metFile = shift;
     binmode(STDOUT, ":utf8");
 
-    my $data = Media::EMule::PartMet::read($metFile);
+    my $data = RJK::Media::EMule::PartMet::read($metFile);
     $data->{path} = $metFile;
 
     $stats{totalSize} += $data->{size};

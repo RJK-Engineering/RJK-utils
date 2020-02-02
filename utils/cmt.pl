@@ -1,8 +1,8 @@
 use strict;
 use warnings;
 
-use File::Search qw(Files);
-use Options::Pod;
+use RJK::File::Search qw(Files);
+use RJK::Options::Pod;
 
 use Win32::Clipboard;
 use Win32::Console::ANSI;
@@ -117,7 +117,7 @@ my %opts = (
     searchIn => "text",
     commentsDir => ".",
 );
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'a|display-all' => \$opts{displayAll}, "Display all comments.",
     'c|copy-urls' => \$opts{copyUrlsToClip}, "Copy urls to clipboard.",
@@ -133,17 +133,17 @@ Options::Pod::GetOptions(
     'L|list' => \$opts{list}, "List comment files.",
 
     ['POD'],
-    Options::Pod::Options,
+    RJK::Options::Pod::Options,
 
     ['HELP'],
-    Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions
 );
 
 @ARGV ||
 $opts{displayAll} ||
 $opts{tagFilter} ||
 $opts{list} ||
-$opts{minLikeCount} || Options::Pod::pod2usage(
+$opts{minLikeCount} || RJK::Options::Pod::pod2usage(
     -verbose => 99,
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );

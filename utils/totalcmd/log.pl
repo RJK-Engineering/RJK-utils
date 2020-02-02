@@ -4,11 +4,10 @@ use warnings;
 use File::Copy qw(move);
 use File::Spec::Functions qw(splitpath);
 
-use Options::Pod;
-
 use RJK::HashToStringFormatter;
 use RJK::LocalConf;
-use TotalCmd::Log;
+use RJK::Options::Pod;
+use RJK::TotalCmd::Log;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -155,7 +154,7 @@ my %opts = RJK::LocalConf::GetOptions(
     )
 );
 
-Options::Pod::GetOptions(
+RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'a|archives' => \$opts{searchArchives},
         "Search archives.",
@@ -199,9 +198,9 @@ Options::Pod::GetOptions(
         "Show last [{n}] results.",
 
     ['POD'],
-    Options::Pod::Options,
+    RJK::Options::Pod::Options,
     ['HELP'],
-    Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions
 );
 
 # default values
@@ -214,7 +213,7 @@ defined $opts{fields} ||
 $opts{list} ||
 $opts{archiveSize} ||
 $opts{head} ||
-$opts{tail} || Options::Pod::pod2usage(
+$opts{tail} || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 
@@ -294,7 +293,7 @@ foreach my $logfile (@logfiles) {
         next;
     }
 
-    TotalCmd::Log->traverse(
+    RJK::TotalCmd::Log->traverse(
         $logfile,
         sub {
             if (match($_)) {
@@ -324,7 +323,7 @@ if (defined $opts{fields}) {
             print $formatter->format($r, @fields), "\n";
         }
     } else {
-        print "@TotalCmd::Log::fields\n";
+        print "@RJK::TotalCmd::Log::fields\n";
     }
 } else {
     foreach (@results) {
