@@ -5,13 +5,13 @@ use RJK::File::PathInfo qw(basename extension);
 
 # https://trac.ffmpeg.org/wiki/Concatenate
 
-my ($listFile, $outputFile) = @ARGV;
+my ($listFile, $method) = @ARGV;
 die "List file required" if ! $listFile;
 
 my %opts = (
-    outputFile => $outputFile,
+    outputFile => undef,
     run => 1,
-    method => "s",
+    method => $method || "s",
 );
 
 if ($opts{method} =~ /^s/) {
@@ -21,29 +21,39 @@ if ($opts{method} =~ /^s/) {
 } elsif ($opts{method} =~ /^t/) {
     concatTransportStreams($listFile);
 } else {
-    die "Valid methods: s(tream) f(ile) t(ransportstream)";
+    die "Valid methods (default=s): s(tream) f(ile) t(ransportstream)";
 }
 
 sub concatStreams {
     my $listFile = shift;
     my $firstFile;
+    my $c = 0;
+    my $tempListFile = "$listFile.temp";
 
-    @ARGV = $listFile;
-    local $^I = ".orig";
-    while (<>) {
+    open my $fh, '<', $listFile or die "$!";
+    open my $fhTemp, '>', $tempListFile or die "$!";
+    while (<$fh>) {
         chomp;
-        print "file '$_'\n";
+        print $fhTemp "file '$_'\n";
         $firstFile //= $_;
+        $c++;
     }
-    unlink $listFile . $^I;
+    close $fh;
+    close $fhTemp;
+
+    if ($c < 2) {
+        die "Less than two files in list";
+    }
 
     runffmpeg(
         -f => "concat",
         -safe => 0,
-        -i => $listFile,
+        -i => $tempListFile,
         -c => "copy",
         getOutputFile($firstFile)
     );
+
+    unlink $tempListFile;
 }
 
 sub concatFiles {
@@ -93,6 +103,10 @@ sub loadFiles {
     open my $fh, '<', $listFile or die "$!";
     chomp (my @files = <$fh>);
     close $fh;
+
+    if (@files < 2) {
+        die "Less than two files in list";
+    }
     return @files;
 }
 
