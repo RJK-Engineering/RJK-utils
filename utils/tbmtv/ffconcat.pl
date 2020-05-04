@@ -5,11 +5,11 @@ use RJK::File::PathInfo qw(basename extension);
 
 # https://trac.ffmpeg.org/wiki/Concatenate
 
-my ($listFile, $method) = @ARGV;
+my ($listFile, $method, $outputFile) = @ARGV;
 die "List file required" if ! $listFile;
 
 my %opts = (
-    outputFile => undef,
+    outputFile => $outputFile,
     run => 1,
     method => $method || "s",
 );
