@@ -1,2 +1,1 @@
-@set RJK_UTIL=totalcmd\log.pl
-@call rjk-util %*
+@call rjk-util totalcmd\log.pl %*

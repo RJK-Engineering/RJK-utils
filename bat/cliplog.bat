@@ -1,2 +1,1 @@
-@set RJK_UTIL=system\cliplog\cliplog.pl
-@call rjk-util %*
+@call rjk-util system\cliplog\cliplog.pl %*

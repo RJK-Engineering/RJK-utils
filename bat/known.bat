@@ -1,2 +1,1 @@
-@set RJK_UTIL=emule\known\known.pl
-@call rjk-util %*
+@call rjk-util emule\known\known.pl %*

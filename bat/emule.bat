@@ -1,2 +1,1 @@
-@set RJK_UTIL=emule\downloads\downloads.pl
-@call rjk-util %*
+@call rjk-util emule\downloads\downloads.pl %*

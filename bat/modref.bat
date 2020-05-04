@@ -1,2 +1,1 @@
-@set RJK_UTIL=perl\modref.pl
-@call rjk-util %*
+@call rjk-util perl\modref.pl %*

@@ -1,2 +1,1 @@
-@set RJK_UTIL=cmt.pl
-@call rjk-util %*
+@call rjk-util cmt.pl %*

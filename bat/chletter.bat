@@ -1,2 +1,1 @@
-@set RJK_UTIL=system\chletter\chletter.pl
-@call rjk-util %*
+@call rjk-util system\chletter\chletter.pl %*
