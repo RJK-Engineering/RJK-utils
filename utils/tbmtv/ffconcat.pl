@@ -12,6 +12,7 @@ my %opts = (
     outputFile => $outputFile,
     run => 1,
     method => $method || "s",
+    quiet => 0,
 );
 
 if ($opts{method} =~ /^s/) {
@@ -123,7 +124,6 @@ sub runffmpeg {
         print "ffmpeg @args\n";
     }
     if ($opts{run}) {
-        <STDIN>;
         system "ffmpeg", @_;
     }
 }
