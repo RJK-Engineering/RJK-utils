@@ -2,6 +2,8 @@
 
 REM switch between environments
 
+set _to_env=
+
 if /i "%cd:~0,12%"=="c:\workspace" (
     set _subdirs=%cd:~13%
     set _to_env=scripts
