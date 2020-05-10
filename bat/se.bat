@@ -2,21 +2,28 @@
 
 REM switch between environments
 
-SET _dir1=%cd:~0,10%
-SET _dir2=%cd:~0,12%
-
+set _perl5lib_before=%PERL5LIB%
+set PERL5LIB=%PERL5LIB:c:\workspace\RJK-perl5lib\lib;=c:\scripts\RJK-perl5lib\lib;%
 set _to_env=
-if /i "%_dir1%"=="c:\scripts" (
+
+if /i "%cd:~0,12%"=="c:\workspace" (
+    set _subdirs=%cd:~13%
+    if "%PERL5LIB%"=="%_perl5lib_before%" (
+        REM switch to workspace environment if in workspace and workspace environment not set yet
+        set _to_env=workspace
+    ) else (
+        set _to_env=scripts
+        set PATH=%PATH:c:\workspace\RJK-utils\bat;=c:\scripts\RJK-utils\bat;%
+    )
+)
+if /i "%cd:~0,10%"=="c:\scripts" (
     set _to_env=workspace
-    SET _subdirs=%cd:~11%
+    set _subdirs=%cd:~11%
+)
+
+if "%_to_env%"=="workspace" (
     set PATH=%PATH:c:\scripts\RJK-utils\bat;=c:\workspace\RJK-utils\bat;%
     set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib;=c:\workspace\RJK-perl5lib\lib;%
-)
-if /i "%_dir2%"=="c:\workspace" (
-    set _to_env=scripts
-    SET _subdirs=%cd:~13%
-    set PATH=%PATH:c:\workspace\RJK-utils\bat;=c:\scripts\RJK-utils\bat;%
-    set PERL5LIB=%PERL5LIB:c:\workspace\RJK-perl5lib\lib;=c:\scripts\RJK-perl5lib\lib;%
 )
 
 if defined _to_env (
