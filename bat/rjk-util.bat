@@ -11,6 +11,10 @@ SET util=%~1
 SHIFT
 
 rem [OPTIONS]
+SET DEBUG=
+SET WORKSPACEENVIRONMENT=
+SET NOPAUSE=
+SET PAUSEONEXIT=
 :getopt
 IF "%~1" == "/d" SET DEBUG=1 & GOTO nextopt
 IF "%~1" == "/w" SET WORKSPACEENVIRONMENT=1 & GOTO nextopt
@@ -22,12 +26,15 @@ SHIFT & GOTO getopt
 :endgetopt
 
 rem [ARGS]
+set args=
 :getarg
 IF "%~1" == "" GOTO endgetarg
 IF "%~1" == "--" GOTO endgetarg
 IF DEFINED args (SET args=%args% %1) ELSE (SET args=%1)
 SHIFT & GOTO getarg
 :endgetarg
+
+if defined WORKSPACEENVIRONMENT call se workspace
 
 perl %RJK_UTILS_HOME%\utils\%util% %args%
 
