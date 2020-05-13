@@ -2,38 +2,45 @@
 
 REM switch between environments
 
-set _to_env=%~1
+set _environment=%~df1
 
-if not defined _to_env (
+if defined _environment (
+    if not exist "%_environment%" echo Environment does not exist & goto END
+) else (
     if /i "%cd:~0,12%"=="c:\workspace" (
-        set _subdirs=%cd:~13%
-        set _to_env=c:\scripts
+        set _environment_subdirs=%cd:~13%
+        set _environment=c:\scripts
     )
     if /i "%cd:~0,10%"=="c:\scripts" (
-        set _subdirs=%cd:~11%
-        set _to_env=c:\workspace
+        set _environment_subdirs=%cd:~11%
+        set _environment=c:\workspace
     )
 )
 
-if "%_to_env%"=="c:\workspace" (
+if "%_environment%"=="c:\workspace" (
     set PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
     set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
-) else if "%_to_env%"=="c:\scripts" (
+) else if "%_environment%"=="c:\scripts" (
     set PATH=%PATH:c:\workspace\RJK-utils\bat=c:\scripts\RJK-utils\bat%
     set PERL5LIB=%PERL5LIB:c:\workspace\RJK-perl5lib\lib=c:\scripts\RJK-perl5lib\lib%
+) else if defined _environment (
+    echo Invalid environment & goto END
 )
 
-if defined _to_env (
-    set RJK_UTILS_HOME=%_to_env%\RJK-utils
-    cd "%_to_env%"
-    FOR /F "tokens=1-10 delims=\ " %%i in ("%_subdirs%") do (
+if defined _environment (
+    set RJK_UTILS_HOME=%_environment%\RJK-utils
+    cd "%_environment%"
+    FOR /F "tokens=1-10 delims=\ " %%i in ("%_environment_subdirs%") do (
         cd %%i>NUL 2>&1 && cd %%j>NUL 2>&1 && cd %%k>NUL 2>&1 && cd %%l>NUL 2>&1 && cd %%l>NUL 2>&1 && ^
         cd %%m>NUL 2>&1 && cd %%n>NUL 2>&1 && cd %%o>NUL 2>&1 && cd %%p>NUL 2>&1 && cd %%q>NUL 2>&1
     )
 ) else (
     echo Not in environment
+    goto END
 )
 
 echo PATH=%PATH%
 echo PERL5LIB=%PERL5LIB%
 echo RJK_UTILS_HOME=%RJK_UTILS_HOME%
+
+:END
