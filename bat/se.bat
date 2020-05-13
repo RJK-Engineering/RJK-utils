@@ -1,6 +1,6 @@
 @echo off
 
-REM switch between environments
+REM set environment/switch between environments
 
 set _environment=%~df1
 
