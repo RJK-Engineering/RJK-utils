@@ -3,7 +3,6 @@
 REM switch between environments
 
 set _to_env=%1
-set _arg=%1
 
 if not defined _to_env (
     if /i "%cd:~0,12%"=="c:\workspace" (
@@ -27,12 +26,13 @@ if "%_to_env%"=="scripts" (
 
 if defined _to_env (
     set RJK_UTILS_HOME=c:\%_to_env%\RJK-utils
+    cd "c:\%_to_env%"
+    FOR /F "tokens=1-10 delims=\ " %%i in ("%_subdirs%") do (
+        cd %%i>NUL 2>&1 && cd %%j>NUL 2>&1 && cd %%k>NUL 2>&1 && cd %%l>NUL 2>&1 && cd %%l>NUL 2>&1 && ^
+        cd %%m>NUL 2>&1 && cd %%n>NUL 2>&1 && cd %%o>NUL 2>&1 && cd %%p>NUL 2>&1 && cd %%q>NUL 2>&1
+    )
 ) else (
     echo Not in environment
-)
-
-if not defined _arg (
-    cd "c:\%_to_env%\%_subdirs%"
 )
 
 echo PATH=%PATH%
