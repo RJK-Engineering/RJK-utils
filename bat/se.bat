@@ -17,12 +17,12 @@ if not defined _to_env (
 )
 
 if "%_to_env%"=="workspace" (
-    set PATH=%PATH:c:\scripts\RJK-utils\bat;=c:\workspace\RJK-utils\bat;%
-    set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib;=c:\workspace\RJK-perl5lib\lib;%
+    set PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
+    set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
 )
 if "%_to_env%"=="scripts" (
-    set PATH=%PATH:c:\workspace\RJK-utils\bat;=c:\scripts\RJK-utils\bat;%
-    set PERL5LIB=%PERL5LIB:c:\workspace\RJK-perl5lib\lib;=c:\scripts\RJK-perl5lib\lib;%
+    set PATH=%PATH:c:\workspace\RJK-utils\bat=c:\scripts\RJK-utils\bat%
+    set PERL5LIB=%PERL5LIB:c:\workspace\RJK-perl5lib\lib=c:\scripts\RJK-perl5lib\lib%
 )
 
 if defined _to_env (
