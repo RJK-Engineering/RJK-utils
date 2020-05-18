@@ -2,13 +2,8 @@
 
 REM set environment/switch between environments
 
-set _environment=%~df1
-
-if defined _environment (
-    if not exist "%_environment%" echo Environment does not exist & goto END
-) else if not defined _environment (
-    rem initial environment
-    set _environment=c:\workspace
+if not "%~1"=="" (
+    set _environment=%~df1
 ) else (
     if /i "%cd:~0,12%"=="c:\workspace" (
         set _environment_subdirs=%cd:~13%
@@ -18,6 +13,11 @@ if defined _environment (
         set _environment=c:\workspace
     )
 )
+
+rem initial environment
+if not defined _environment set _environment=c:\workspace
+
+if not exist "%_environment%" echo Environment does not exist & goto END
 
 if "%_environment%"=="c:\workspace" (
     set PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
@@ -31,7 +31,7 @@ if "%_environment%"=="c:\workspace" (
 
 if defined _environment (
     set RJK_UTILS_HOME=%_environment%\RJK-utils
-    cd "%_environment%"
+    cd /d "%_environment%"
     FOR /F "tokens=1-10 delims=\ " %%i in ("%_environment_subdirs%") do (
         cd %%i>NUL 2>&1 && cd %%j>NUL 2>&1 && cd %%k>NUL 2>&1 && cd %%l>NUL 2>&1 && cd %%l>NUL 2>&1 && ^
         cd %%m>NUL 2>&1 && cd %%n>NUL 2>&1 && cd %%o>NUL 2>&1 && cd %%p>NUL 2>&1 && cd %%q>NUL 2>&1
