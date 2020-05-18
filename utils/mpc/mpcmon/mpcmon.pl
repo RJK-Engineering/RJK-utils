@@ -157,16 +157,13 @@ my %opts = RJK::LocalConf::GetOptions("mpc-monitor.properties", (
     snapshotDir => '.',
     windowTitle => $0,
     pollingInterval => 5,
-    'Directory monitor' => 1,
-    'Auto complete' => 1,
-    'Open mode' => 0,
 ));
 
 RJK::Options::Pod::GetOptions(
     ['Options'],
     'snapshot-dir=s' => \$opts{snapshotDir}, "{Path} to snapshot directory.",
     'snapshot-bin=s' => \$opts{snapshotBinDir}, "{Path} to snapshot bin.",
-    'status-file=s' => \$opts{statusFile}, "{Path} to status file.",
+    'settings-file=s' => \$opts{settingsFile}, "{Path} to settings file.",
     'lock-file=s' => \$opts{lockFile}, "{Path} to lock file.",
     'log-file=s' => \$opts{logFile}, "{Path} to log file.",
 
@@ -183,7 +180,7 @@ RJK::Options::Pod::GetOptions(
     'r|run' => \$opts{run}, "Start monitoring. Ctrl+C = stop and exit.",
     's|status' => \$opts{status}, "Show Media Player Classic status.",
     'open-log' => \$opts{openLog}, "Open log file.",
-    'e|edit' => \$opts{editStatus}, "Edit status file.",
+    'e|edit' => \$opts{editSettings}, "Edit settings file.",
 
     'v|verbose' => \$opts{verbose}, "Be verbose.",
     'q|quiet' => \$opts{quiet}, "Be quiet.",
@@ -196,7 +193,7 @@ RJK::Options::Pod::GetOptions(
     RJK::Options::Pod::HelpOptions
 );
 
-exit Edit($opts{statusFile}) if $opts{editStatus};
+exit Edit($opts{settingsFile}) if $opts{editSettings};
 exit Edit($opts{logFile}) if $opts{openLog};
 
 # required options and/or arguments
@@ -207,8 +204,6 @@ $opts{status} || RJK::Options::Pod::pod2usage(
 
 # quiet!
 $opts{verbose} = 0 if $opts{quiet};
-
-$opts{'Auto complete'} = 1 if $opts{completeCommand};
 
 # array of categories
 $opts{categories} = [ split /,/, $opts{categories} ];
