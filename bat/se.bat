@@ -6,7 +6,7 @@ set _environment=%~df1
 
 if defined _environment (
     if not exist "%_environment%" echo Environment does not exist & goto END
-) else if not defined _environment_subdirs (
+) else if not defined _environment (
     rem initial environment
     set _environment=c:\workspace
 ) else (
