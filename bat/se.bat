@@ -6,12 +6,14 @@ set _environment=%~df1
 
 if defined _environment (
     if not exist "%_environment%" echo Environment does not exist & goto END
+) else if not defined _environment_subdirs (
+    rem initial environment
+    set _environment=c:\workspace
 ) else (
     if /i "%cd:~0,12%"=="c:\workspace" (
         set _environment_subdirs=%cd:~13%
         set _environment=c:\scripts
-    )
-    if /i "%cd:~0,10%"=="c:\scripts" (
+    ) else if /i "%cd:~0,10%"=="c:\scripts" (
         set _environment_subdirs=%cd:~11%
         set _environment=c:\workspace
     )
