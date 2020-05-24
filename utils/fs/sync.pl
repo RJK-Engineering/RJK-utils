@@ -1,10 +1,9 @@
 use strict;
 use warnings;
 
-
-use File::Copy qw(move);
-use File::Path qw(make_path);
-use Number::Bytes::Human qw(format_bytes);
+use File::Copy ();
+use File::Path ();
+use Number::Bytes::Human;
 
 use RJK::File::Traverse::Stats;
 use RJK::Options::Pod;
@@ -23,69 +22,53 @@ sync.pl [options] [target directory]
 
 sync.pl -h
 
-=head1 OPTIONS
-
 =for options start
+
+=head1 Options
 
 =over 4
 
-=item B<--web [name]>
-
-Web name. Default: Main
-
-=item B<--dir-table [name]>
-
-Directory table name. Default: Directory
-
-=item B<--part-table [name]>
-
-Partition table name. Default: Partition
-
-=item B<--save>
-
-Save table.
-
-=item B<-i --refresh-interval [seconds]>
+=item B<-i -refresh-interval [seconds]>
 
 Refresh interval in seconds. Real number, default: 0.2
 
-=item B<--mds --move-diff-size>
+=item B<-mds -move-diff-size>
 
-=item B<-v --verbose>
+=item B<-v -verbose>
 
 Be verbose.
 
-=item B<-q --quiet>
+=item B<-q -quiet>
 
 Be quiet.
 
-=item B<--debug>
+=item B<-debug>
 
 Display debug information.
 
 =back
 
-=head2 Pod
+=head1 Pod
 
 =over 4
 
-=item B<--podcheck>
+=item B<-podcheck>
 
 Run podchecker.
 
-=item B<--pod2html --html [path]>
+=item B<-pod2html -html [path]>
 
 Run pod2html. Writes to [path] if specified. Writes to
 F<[path]/{scriptname}.html> if [path] is a directory.
 E.g. C<--html .> writes to F<./{scriptname}.html>.
 
-=item B<--genpod>
+=item B<-genpod>
 
 Generate POD for options.
 
-=item B<--savepod>
+=item B<-writepod>
 
-Save generated POD to script file.
+Write generated POD to script file.
 The POD text will be inserted between C<=for options start> and
 C<=for options end> tags.
 If no C<=for options end> tag is present, the POD text will be
@@ -95,46 +78,38 @@ A backup is created.
 
 =back
 
-=head2 Help
+=head1 Help
 
 =over 4
 
-=item B<-h -? --help>
+=item B<-h -help -?>
 
-Display extended help.
+Display program options.
+
+=item B<-hh "-help -help" -??>
+
+Display help options.
+
+=item B<-hhh "-help -help -help" -???>
+
+Display POD options.
+
+=item B<-hhhh "-help -help -help -help" -????>
+
+Display complete help.
 
 =back
 
 =for options end
-
-=head1 USAGE
-
-Type a drive letter to toggle between active/inactive.
-
-=head2 Keys
-
-[`]=Summary [1]=List [Tab]=Poke [F1]=[?]=Help [Esc]=Quit
 
 =cut
 ###############################################################################
 
 my %opts = (
     refreshInterval => .2,
-    web => 'Main',
-    dirDataTable => 'Directory',
-    partDataTable => 'Partition',
-    save => 0,
 );
 RJK::Options::Pod::GetOptions(
     ['Options'],
-    'web=s' => \$opts{web},
-        "Web {name}. Default: $opts{web}",
-    'dir-table=s' => \$opts{dirDataTable},
-        "Directory table {name}. Default: $opts{dirDataTable}",
-    'part-table=s' => \$opts{partDataTable},
-        "Partition table {name}. Default: $opts{partDataTable}",
-
-    'save' => \$opts{save}, "Save table.",
     'i|refresh-interval=f' => \$opts{refreshInterval},
         "Refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
     'mds|move-diff-size' => \$opts{moveDifferentSize}, "",
@@ -209,10 +184,10 @@ sub Synchronize {
     my $stats = $traverse->stats;
 
     foreach my $dir (@dirs) {
-        print "Synchronizing $dir ...\n";
+        print "\nSynchronizing $dir ...\n";
 
         if (! -e $dir) {
-            print "Directory does not exist in source\n";
+            print "Directory does not exist in source: $dir\n";
             next;
         } elsif (! -d $dir) {
             warn "Source is not a directory";
@@ -224,7 +199,6 @@ sub Synchronize {
 
         $traverse->traverse($dir);
         DisplayStats($stats);
-        $console->newline();
     }
 }
 
@@ -234,7 +208,7 @@ sub DisplayStats {
     my $stats = shift;
     $console->updateLine(
         sprintf "%s in %s files",
-            format_bytes($stats->size),
+            Number::Bytes::Human::format_bytes($stats->size),
             $stats->files
     );
 }
@@ -242,7 +216,7 @@ sub DisplayStats {
 # find source file in target and move to correct dir
 sub VisitFile {
     my $source = shift;
-    my $targetPath = "$opts{targetDir}\\$source->{path}";
+    my $targetPath = $opts{targetDir}.$source->{dirs}.$source->{name};
 
     if (-e $targetPath) {
         return;
@@ -288,15 +262,15 @@ sub VisitFile {
     }
 
     printf "<%s\n", $target->path;
-    my $targetDir = "$opts{targetDir}\\$source->{dir}";
+    my $targetDir = $opts{targetDir}.$source->{dirs};
     print ">$targetDir\n";
 
     if (! -e $targetDir) {
-        make_path($targetDir) or die "Error creating directory";
+        File::Path::make_path($targetDir) or die "Error creating directory";
     }
     -e $targetDir or die "Target directory does not exist";
 
-    move($target->path, $targetDir) or die "Error moving file";
+    File::Copy::move($target->path, $targetDir) or die "Error moving file";
     sleep 1 if $opts{verbose};
 
     # remove from index
