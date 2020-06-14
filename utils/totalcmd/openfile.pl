@@ -107,7 +107,7 @@ my $sites = new RJK::Util::JSON($opts{sitesConf})->read->data
 
 my @cmd;
 if ($props->{site}) {
-    my $site = new RJK::Filecheck::Site(%{$sites->{$props->{site}}});
+    my $site = new RJK::Filecheck::Site($sites->{$props->{site}});
     my $url;
     if ($props->{id}) {
         $url = $site->downloadUrl($props->{id});
