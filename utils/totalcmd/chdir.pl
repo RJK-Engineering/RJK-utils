@@ -4,10 +4,9 @@ use warnings;
 use Win32::Clipboard;
 
 use RJK::File::PathUtils qw(ExtractPath);
-use RJK::Interactive qw(ItemFromList Pause);
-RJK::Interactive::SetClass('Term::ReadKey'); # Allows reading of single characters
 use RJK::Options::Pod;
 use RJK::TotalCmd::Utils;
+use RJK::Win32::Console;
 use RJK::Win32::DriveUtils qw(ConnectDrive GetDriveLetter);
 
 ###############################################################################
@@ -159,7 +158,8 @@ if (@urls) {
 } elsif (@paths == 1) {
     $path = $paths[0];
 } elsif (@paths) {
-    $path = ItemFromList(\@paths);
+    my $c = new RJK::Win32::Console();
+    $path = $c->itemFromList(\@paths);
 } else {
     Exit("No paths found");
 }
@@ -195,7 +195,6 @@ RJK::TotalCmd::Utils::setSourceTargetPaths($path);
 
 sub Exit {
     print shift, "\n";
-    Pause;
     exit;
 }
 if (! -e "$drive:\\") {
