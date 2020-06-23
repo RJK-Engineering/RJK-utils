@@ -24,19 +24,21 @@ log.pl [options] [search terms]
 
 log.pl -h
 
-=head1 OPTIONS
-
 =for options start
 
-=item B<-a -archives>
+=head1 OPTIONS
 
-Search archives.
+=over 4
 
-=item B<-s -search-source>
+=item B<-a -all>
+
+Search all available archives.
+
+=item B<-S -search-source>
 
 Only search sources (search sources and destinations by default).
 
-=item B<-d -search-destination>
+=item B<-D -search-destination>
 
 Only search destinations (search sources and destinations by default).
 
@@ -48,15 +50,15 @@ List log files.
 
 Move log to archive when exceeding [n] mb.
 
-=item B<-F -search-files>
+=item B<-f -search-files>
 
 TODO
 
-=item B<-D -search-directories>
+=item B<-g -search-directories>
 
 TODO
 
-=item B<-b -begin [date]>
+=item B<-d -start-date [date]>
 
 Search start date. YYYYMMDD formatted number, does numeric comparison, zero padded on right-hand-side, e.g. for "201": 20100000 < 20100101
 
@@ -72,7 +74,7 @@ Filter by operation matching start of operation name, i.e. 'm' for 'Move'.
 
 TODO
 
-=item B<-logfile [string]>
+=item B<-log-file [string]>
 
 Path to Total Commander log file.
 
@@ -104,7 +106,7 @@ Show last [n] results.
 
 =back
 
-=head1 Pod
+=head1 POD
 
 =over 4
 
@@ -134,13 +136,25 @@ A backup is created.
 
 =back
 
-=head1 Help
+=head1 HELP
 
 =over 4
 
 =item B<-h -help -?>
 
-Display extended help.
+Display program options.
+
+=item B<-hh "-help -help" -??>
+
+Display help options.
+
+=item B<-hhh "-help -help -help" -???>
+
+Display POD options.
+
+=item B<-hhhh "-help -help -help -help" -????>
+
+Display complete help.
 
 =back
 
