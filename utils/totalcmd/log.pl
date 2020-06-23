@@ -1,13 +1,15 @@
 use strict;
 use warnings;
 
-use File::Copy qw(move);
+use Exception::Class;
+use File::Copy ();
 use File::Spec::Functions qw(splitpath);
 
 use RJK::HashToStringFormatter;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::TotalCmd::Log;
+
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -147,30 +149,27 @@ Display extended help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions(
-    "totalcmd-log.conf", (
-        showPluginOp => 1,
-        #~ string => "default",
-    )
-);
+my %opts = RJK::LocalConf::GetOptions("totalcmd-log.conf", (
+    showPluginOp => 1,
+));
 
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
-    'a|archives' => \$opts{searchArchives},
-        "Search archives.",
-    's|search-source' => \$opts{searchSource},
+    'a|all' => \$opts{all},
+        "Search all available archives.",
+    'S|search-source' => \$opts{searchSource},
         "Only search sources (search sources and destinations by default).",
-    'd|search-destination' => \$opts{searchDestination},
+    'D|search-destination' => \$opts{searchDestination},
         "Only search destinations (search sources and destinations by default).",
     'l|list' => \$opts{list},
         "List log files.",
     'm|archive-size=i' => \$opts{archiveSize},
         "Move log to archive when exceeding [{n}] mb.",
-    'F|search-files' => \$opts{searchFiles},
+    'f|search-files' => \$opts{searchFiles},
         "TODO",
-    'D|search-directories' => \$opts{searchDirectories},
+    'g|search-directories' => \$opts{searchDirectories},
         "TODO",
-    'b|begin=s' => \$opts{begin},
+    'd|start-date=s' => \$opts{startDate},
         "Search start {date}. YYYYMMDD formatted number, does numeric comparison,".
         " zero padded on right-hand-side, e.g. for \"201\": 20100000 < 20100101",
 
@@ -222,90 +221,29 @@ $opts{tail} || RJK::Options::Pod::pod2usage(
 my @searchTerms;
 if (@ARGV) {
     @searchTerms = GetTerms(@ARGV);
-    die "Invalid search terms" unless @searchTerms;
+    if (! @searchTerms) {
+        throw Exception("Invalid search terms");
+    }
 }
 
 my @fields = split /,/, $opts{fields} if $opts{fields};
 
 ###############################################################################
 
+my @logFiles = getLogFiles();
+
+if ($opts{startDate}) {
+    my $l = length $opts{startDate};
+    $opts{startDate} .= "0" x (8 - $l);
+} else {
+    my @date = localtime;
+    $opts{startDate} = sprintf "%4u%02u%02u", $date[5]+1900, ++$date[4], $date[3];
+    $opts{startDate} -= 10000; # subtract one year
+}
+
 my @results;
-my $i;
-
-my $logSize = (-s $opts{logFile}) || 0;
-if ($opts{archiveSize} && $logSize > $opts{archiveSize} * 1024**2) {
-    if (! -e $opts{archiveDir}) {
-        mkdir $opts{archiveDir} or die "$!: $opts{archiveDir}";
-    }
-    if (! -r $opts{archiveDir}) {
-        die "$!: $opts{archiveDir}";
-    }
-
-    my (undef, undef, $file) = splitpath($opts{logFile});
-    my @d = localtime;
-    my $d = sprintf "%04d%02d%02d", $d[5]+1900, $d[4]+1, $d[3];
-    $file =~ s/\.log$/-$d.log/;
-    $file = "$opts{archiveDir}\\$file";
-
-    if (-e $file) {
-        warn "File exists: $file";
-    } else {
-        move $opts{logFile}, $file or die "$!: $file";
-    }
-}
-
-my @logfiles = $opts{logFile};
-if ($opts{searchArchives}) {
-    opendir my $dh, $opts{archiveDir} or die "$!: $opts{archiveDir}";
-    foreach (grep { /\.log$/ } readdir $dh) {
-        push @logfiles, "$opts{archiveDir}\\$_";
-    }
-    closedir $dh;
-}
-
-if ($opts{begin}) {
-    my $l = length $opts{begin};
-    $opts{begin} .= "0" x (8 - $l);
-}
-
-foreach my $logfile (@logfiles) {
-    my (undef, undef, $file) = splitpath($logfile);
-    if ($opts{begin}) {
-        my ($date) = $file =~ /(\d{8})/;
-        if ($date && $date < $opts{begin}) {
-            next;
-        }
-    }
-
-    if ($opts{list}) {
-        print "$logfile\n";
-        next;
-    }
-    if ($opts{searchArchives}) {
-        print "$logfile\n";
-    }
-    if (! -e $logfile) {
-        warn "Log file does not exist: $logfile";
-        next;
-    }
-    if (! -r $logfile) {
-        warn "Log file is not readable: $logfile";
-        next;
-    }
-
-    RJK::TotalCmd::Log->traverse(
-        $logfile,
-        sub {
-            if (match($_)) {
-                push @results, $_;
-                return 1 if ++$i == $opts{head};
-            }
-        },
-        sub {
-            warn "Corrupt line: $_[0]";
-            return 0;
-        },
-    );
+foreach (@logFiles) {
+    processLogfile($_, \@results);
 }
 
 if ($opts{tail}) {
@@ -315,23 +253,51 @@ if ($opts{tail}) {
     }
 }
 
-my $formatter = new RJK::HashToStringFormatter($opts{format});
+displayResults(\@results);
+logRotate();
 
-if (defined $opts{fields}) {
-    if (@fields) {
-        foreach my $r (@results) {
-            print $formatter->format($r, @fields), "\n";
-        }
-    } else {
-        print "@RJK::TotalCmd::Log::fields\n";
-    }
-} else {
-    foreach (@results) {
-        print "$_->{operation} $_->{source}\n";
-        if ($_->{destination}) {
-            print "  -> $_->{destination}\n";
+###############################################################################
+
+sub processLogfile {
+    my ($logfile, $results) = @_;
+
+    my (undef, undef, $file) = splitpath($logfile);
+    if (! $opts{all} && $opts{startDate}) {
+        my ($date) = $file =~ /(\d{8})/;
+        if ($date && $date < $opts{startDate}) {
+            return;
         }
     }
+
+    if ($opts{list}) {
+        print "$logfile\n";
+        return;
+    }
+
+    if (! -e $logfile) {
+        throw Exception("Log file does not exist: $logfile");
+        return;
+    }
+    if (! -r $logfile) {
+        throw Exception("Log file is not readable: $logfile");
+        return;
+    }
+
+    print "$logfile\n";
+
+    RJK::TotalCmd::Log->traverse(
+        $logfile,
+        sub {
+            if (match($_)) {
+                push @$results, $_;
+                return 1 if @$results == $opts{head};
+            }
+        },
+        sub {
+            warn "Corrupt line: $_[0]";
+            return 0;
+        },
+    );
 }
 
 sub match {
@@ -377,4 +343,62 @@ sub GetTerms {
         push @searchTerms, $_ if $_;
     }
     return wantarray ? @searchTerms : \@searchTerms;
+}
+
+sub displayResults {
+    my $results = shift;
+    my $formatter = new RJK::HashToStringFormatter($opts{format});
+
+    if (defined $opts{fields}) {
+        if (@fields) {
+            foreach my $r (@$results) {
+                print $formatter->format($r, @fields), "\n";
+            }
+        } else {
+            print "@RJK::TotalCmd::Log::fields\n";
+        }
+    } else {
+        foreach (@$results) {
+            print "$_->{operation} $_->{source}\n";
+            if ($_->{destination}) {
+                print "  -> $_->{destination}\n";
+            }
+        }
+    }
+}
+
+sub logRotate {
+    my $logSize = (-s $opts{logFile}) || 0;
+    if ($opts{archiveSize} && $logSize > $opts{archiveSize} * 1024**2) {
+        if (! -e $opts{archiveDir}) {
+            mkdir $opts{archiveDir} or throw Exception("$!: $opts{archiveDir}");
+        }
+        if (! -r $opts{archiveDir}) {
+            throw Exception("$!: $opts{archiveDir}");
+        }
+
+        my (undef, undef, $file) = splitpath($opts{logFile});
+        my @d = localtime;
+        my $d = sprintf "%04d%02d%02d", $d[5]+1900, $d[4]+1, $d[3];
+        $file =~ s/\.log$/-$d.log/;
+        $file = "$opts{archiveDir}\\$file";
+
+        if (-e $file) {
+            throw Exception("File exists: $file");
+        } else {
+            File::Copy::move($opts{logFile}, $file) or throw Exception("$!: $file");
+        }
+    }
+}
+
+sub getLogFiles {
+    my @logFiles = $opts{logFile};
+
+    opendir my $dh, $opts{archiveDir} or throw Exception("$!: $opts{archiveDir}");
+    foreach (grep { /\.log$/ } readdir $dh) {
+        push @logFiles, "$opts{archiveDir}\\$_";
+    }
+    closedir $dh;
+
+    return @logFiles;
 }
