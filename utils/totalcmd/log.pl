@@ -401,12 +401,24 @@ sub logRotate {
             throw Exception("File exists: $file");
         } else {
             File::Copy::move($opts{logFile}, $file) or throw Exception("$!: $file");
+            if (open my $fh, '>', $opts{logFile}) {
+                close $fh;
+            } else {
+                warn "$!: $opts{logFile}";
+            }
         }
     }
 }
 
 sub getLogFiles {
-    my @logFiles = $opts{logFile};
+    my @logFiles;
+    if ($opts{logFile}) {
+        if (! -e $opts{logFile}) {
+            warn "Log file does not exist: $opts{logFile}";
+        } else {
+            @logFiles = $opts{logFile}
+        }
+    }
 
     opendir my $dh, $opts{archiveDir} or throw Exception("$!: $opts{archiveDir}");
     foreach (grep { /\.log$/ } readdir $dh) {
