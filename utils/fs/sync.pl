@@ -4,8 +4,11 @@ use warnings;
 use File::Copy ();
 use File::Path ();
 use Number::Bytes::Human;
+use Time::HiRes ();
 
-use RJK::File::Traverse::Stats;
+use RJK::File::Paths;
+use RJK::Files::Stats;
+use RJK::SimpleFileVisitor;
 use RJK::Options::Pod;
 use RJK::Win32::Console;
 
@@ -146,42 +149,48 @@ opendir my $dh, $opts{targetDir} or die "$!";
 my @dirs = grep { -d "$opts{targetDir}\\$_" && ! /^\./ && ! Ignore($_) } readdir $dh;
 closedir $dh;
 
-my $filesInTarget; # filename => [ File ]
+my $filesInTarget; # filename => [ [path, stat] ]
 my $console = new RJK::Win32::Console();
+my $stats;
 
 IndexTarget();
 Synchronize();
 
 sub IndexTarget {
-    my $stats;
     my $lastDisplay = 0;
-    my $traverse = new RJK::File::Traverse::Stats(
+
+    my $stats = RJK::Files::Stats::CreateStats();
+    my $visitor = new RJK::SimpleFileVisitor(
         visitFile => sub {
-            my $file = shift;
-            if ($lastDisplay < $stats->time - $opts{refreshInterval}) {
+            my ($file, $stat) = @_;
+            my $time = Time::HiRes::gettimeofday;
+            if ($lastDisplay < $time - $opts{refreshInterval}) {
                 DisplayStats($stats);
-                $lastDisplay = $stats->time;
+                $lastDisplay = $time;
             }
-            push @{$filesInTarget->{$file->name}}, $file;
+            push @{$filesInTarget->{$file->{name}}}, [$file, $stat];
+        },
+        visitFileFailed => sub {
+            my ($file, $error) = @_;
+            print "$error: $file->{path}\n";
         },
     );
-    $stats = $traverse->stats;
 
     foreach (@dirs) {
         my $path = "$opts{targetDir}\\$_";
         $console->updateLine("Indexing $path ...\n");
         DisplayStats($stats);
-        $traverse->traverse($path);
+        RJK::Files::Stats::Traverse($path, $visitor, {}, $stats);
     }
     DisplayStats($stats);
     $console->newline;
 }
 
 sub Synchronize {
-    my $traverse = new RJK::File::Traverse::Stats(
-        visitFile => sub { VisitFile(shift) },
+    $stats = RJK::Files::Stats::CreateStats();
+    my $visitor = new RJK::SimpleFileVisitor(
+        visitFile => sub { VisitFile(@_) },
     );
-    my $stats = $traverse->stats;
 
     foreach my $dir (@dirs) {
         print "\nSynchronizing $dir ...\n";
@@ -197,7 +206,7 @@ sub Synchronize {
             exit;
         }
 
-        $traverse->traverse($dir);
+        RJK::Files::Stats::Traverse($dir, $visitor, {}, $stats);
         DisplayStats($stats);
     }
 }
@@ -208,35 +217,36 @@ sub DisplayStats {
     my $stats = shift;
     $console->updateLine(
         sprintf "%s in %s files",
-            Number::Bytes::Human::format_bytes($stats->size),
-            $stats->files
+            Number::Bytes::Human::format_bytes($stats->{size}),
+            $stats->{visitFile}
     );
 }
 
 # find source file in target and move to correct dir
 sub VisitFile {
-    my $source = shift;
-    my $targetPath = $opts{targetDir}.$source->{dirs}.$source->{name};
+    my ($source, $sourceStat) = @_;
 
+    my $targetPath = RJK::File::Paths::get($opts{targetDir}, $source->{directories}, $source->{name})->{path};
     if (-e $targetPath) {
         return;
     }
 
-    my $files = $filesInTarget->{$source->name};
-    unless ($files) {
+    my $inTarget = $filesInTarget->{$source->{name}};
+    if (! $inTarget) {
         print "File not found: $source->{name}\n" if $opts{verbose};
         return;
     }
 
     my @filesNew;
-    if (@$files > 1) {
+    if (@$inTarget > 1) {
         printf "%u files with same name: %s\n",
-            scalar @$files, $source->{name};
+            scalar @$inTarget, $source->{name};
 
         my @sameSize;
-        foreach (@$files) {
+        foreach (@$inTarget) {
+            my ($path, $stat) = @$_;
             # find same size
-            if ($_->size == $source->size) {
+            if ($stat->{size} == $sourceStat->{size}) {
                 push @sameSize, $_;
             } else {
                 push @filesNew, $_;
@@ -252,17 +262,17 @@ sub VisitFile {
             exit if $opts{exitOnDupes};
             return;
         }
-        $files = \@sameSize;
+        $inTarget = \@sameSize;
     }
 
-    my $target = $files->[0];
-    if ($source->size != $target->size) {
+    my ($target, $stat) = @{$inTarget->[0]};
+    if ($sourceStat->{size} != $stat->{size}) {
         print "Same name, different size: $source->{name}\n";
         return unless $opts{moveDifferentSize};
     }
 
-    printf "<%s\n", $target->path;
-    my $targetDir = $opts{targetDir}.$source->{dirs};
+    printf "<%s\n", $target->{path};
+    my $targetDir = RJK::File::Paths::get($opts{targetDir}, $source->{directories})->{path};
     print ">$targetDir\n";
 
     if (! -e $targetDir) {
@@ -270,14 +280,14 @@ sub VisitFile {
     }
     -e $targetDir or die "Target directory does not exist";
 
-    File::Copy::move($target->path, $targetDir) or die "Error moving file";
+    File::Copy::move($target->{path}, $targetDir) or die "Error moving file";
     sleep 1 if $opts{verbose};
 
     # remove from index
     if (@filesNew) {
         # new array with file to be moved removed
-        $filesInTarget->{$source->name} = \@filesNew;
+        $filesInTarget->{$source->{name}} = \@filesNew;
     } else {
-        delete $filesInTarget->{$source->name};
+        delete $filesInTarget->{$source->{name}};
     }
 }
