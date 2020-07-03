@@ -13,6 +13,10 @@ use RJK::Options::Pod;
 use RJK::SimpleFileVisitor;
 use RJK::Win32::Console;
 
+use File::Basename;
+use lib dirname (__FILE__);
+use SyncFileVisitor;
+
 ###############################################################################
 =head1 DESCRIPTION
 
@@ -147,11 +151,11 @@ $opts{targetDir} = shift;
 $opts{targetDir} =~ s|\/|\\|g;      # replace forward with backward slashes
 $opts{targetDir} =~ s|\\+$||;   # remove trailing slashes
 if (! -e $opts{targetDir}) {
-    die "Target does not exist";
+    die "Target does not exist: $opts{targetDir}";
 } elsif (! -d $opts{targetDir}) {
-    die "Target is not a directory";
+    die "Target is not a directory: $opts{targetDir}";
 } elsif (! -r $opts{targetDir}) {
-    die "Target dir is not readable";
+    die "Target dir is not readable: $opts{targetDir}";
 }
 
 ###############################################################################
@@ -161,12 +165,19 @@ opendir my $dh, $opts{targetDir} or die "$!";
 my @dirs = grep { -d "$opts{targetDir}\\$_" && ! /^\./ && ! Ignore($_) } readdir $dh;
 closedir $dh;
 
+if (! @dirs) {
+    die "No dirs in target: $opts{targetDir}";
+}
+
+foreach (@dirs) {
+    print "Dir: $_\n";
+}
+
 my $filesInTarget = { # index by name and size
     name => {},
     size => {},
 };
 my $console = new RJK::Win32::Console();
-my (@modified, @notInSource, @notInTarget);
 
 IndexTarget();
 Synchronize();
@@ -189,7 +200,7 @@ sub IndexTarget {
         },
         visitFileFailed => sub {
             my ($file, $error) = @_;
-            print "$error: $file->{path}\n";
+            die "$error: $file->{path}";
         },
     );
 
@@ -205,9 +216,7 @@ sub IndexTarget {
 
 sub Synchronize {
     my $stats = RJK::Files::Stats::CreateStats();
-    my $visitor = new RJK::SimpleFileVisitor(
-        visitFile => sub { VisitFile(@_) },
-    );
+    my $visitor = new SyncFileVisitor($filesInTarget, \%opts);
 
     foreach my $dir (@dirs) {
         print "\nSynchronizing $dir ...\n";
@@ -235,139 +244,4 @@ sub DisplayStats {
             Number::Bytes::Human::format_bytes($stats->{size}),
             $stats->{visitFile}
     );
-}
-
-# find source file in target and move to correct dir
-sub VisitFile {
-    my ($source, $sourceStat) = @_;
-
-    my $targetDir = RJK::File::Paths::get($opts{targetDir}, $source->{directories})->{path};
-    my $targetPath = RJK::File::Paths::get($targetDir, $source->{name})->{path};
-
-    if (-e $targetPath) {
-        checkTarget($sourceStat, $targetPath);
-        return;
-    }
-
-    my $inTarget = findMoved($source->{name}, $sourceStat)
-        || findRenamed($sourceStat);
-
-    if (! $inTarget) {
-        push @notInTarget, $source;
-        return;
-    }
-
-    if ($source->{name} eq $inTarget->{name}) {
-        moveFile($inTarget->{path}, $targetDir);
-    } else {
-        moveFile($inTarget->{path}, $targetDir, $targetPath);
-    }
-
-    removeFromIndex($source, $sourceStat, $inTarget);
-}
-
-sub checkTarget {
-    my ($sourceStat, $targetPath) = @_;
-    my $targetStat = RJK::File::Stat::get($targetPath);
-    if ($sourceStat->{size} != $targetStat->{size}) {
-        die "Size mismatch, $sourceStat->{size} != $targetStat->{size}: $targetPath";
-    }
-    if (! checkDates($sourceStat, $targetStat)) {
-        warn "Date mismatch: $targetPath";
-    }
-}
-
-sub checkDates {
-    my ($sourceStat, $targetStat) = @_;
-    return $sourceStat->{modified} == $targetStat->{modified};
-}
-
-# files in diffent directory (same name, size and modified date)
-sub findMoved {
-    my ($name, $sourceStat) = @_;
-    my $inTarget = $filesInTarget->{name}{$name};
-
-    if (! $inTarget) {
-        return;
-    }
-
-    if (@$inTarget > 1) {
-        printf "%u files with same name: %s\n",
-            scalar @$inTarget, $name;
-    }
-
-    my @same;
-    foreach my $target (@$inTarget) {
-        if ($sourceStat->{size} != $target->{stat}{size}) {
-            print "Same name, different size: $target->{path}\n";
-        } elsif (! checkDates($sourceStat, $target->{stat})) {
-            print "Same name, same size, diffent dates: $target->{path}\n";
-        } else {
-            push @same, $target;
-        }
-    }
-
-    if (@same > 1) {
-        printf "%u duplicate files: %s\n",
-            scalar @same, join(" ", map { $_->{path} } @same);
-        return;
-    }
-
-    return shift @same;
-}
-
-# files with same size and modified date (can be in different directory)
-sub findRenamed {
-    my ($sourceStat) = @_;
-    my $inTarget = $filesInTarget->{size}{$sourceStat->{size}};
-
-    if (! $inTarget) {
-        return;
-    }
-
-    if (@$inTarget > 1) {
-        printf "%u files with same size: %u\n",
-            scalar @$inTarget, $sourceStat->{size};
-    }
-
-    my @same;
-    foreach my $target (@$inTarget) {
-        if (checkDates($sourceStat, $target->{stat})) {
-            push @same, $target;
-        }
-    }
-
-    if (@same > 1) {
-        printf "%u files with same size and dates: %s\n",
-            scalar @same, join(" ", map { $_->{path} } @same);
-        return;
-    }
-
-    return shift @same;
-}
-
-sub moveFile {
-    my ($sourcePath, $targetDir, $targetPath) = @_;
-
-    if (! -e $targetDir) {
-        File::Path::make_path($targetDir) or die "Error creating directory: $targetDir";
-    }
-    -e $targetDir or die "Target directory does not exist: $targetDir";
-
-    $targetPath //= $targetDir;
-    print "<$sourcePath\n";
-    print ">$targetPath\n";
-    #~ File::Copy::move($targetPath, $targetPath) or die "Error moving file";
-
-    sleep 1 if $opts{verbose};
-}
-
-sub removeFromIndex {
-    my ($source, $sourceStat, $inTarget) = @_;
-
-    my $it = $filesInTarget->{name}{$source->{name}};
-    @$it = grep { $_ != $inTarget } @$it;
-
-    $it = $filesInTarget->{size}{$sourceStat->{size}};
-    @$it = grep { $_ != $inTarget } @$it;
 }
