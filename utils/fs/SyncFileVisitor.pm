@@ -11,7 +11,6 @@ sub new {
     $self->{filesInTarget} = shift;
     $self->{opts} = shift;
     $self->{modified} = [];
-    $self->{notInSource} = [];
     $self->{notInTarget} = [];
     return $self;
 }
@@ -19,11 +18,10 @@ sub new {
 sub visitFile {
     my ($self, $source, $sourceStat) = @_;
 
-    my $targetDir = RJK::File::Paths::get($self->{opts}{targetDir}, $source->{directories})->{path};
-    my $targetPath = RJK::File::Paths::get($targetDir, $source->{name})->{path};
+    my $target = RJK::File::Paths::get($self->{opts}{targetDir}, $source->{directories}, $source->{name});
 
-    if (-e $targetPath) {
-        $self->checkTarget($sourceStat, $targetPath);
+    if (-e $target->{path}) {
+        $self->checkTarget($sourceStat, $target->{path});
         return;
     }
 
@@ -35,12 +33,7 @@ sub visitFile {
         return;
     }
 
-    if ($source->{name} eq $inTarget->{name}) {
-        $self->moveFile($inTarget->{path}, $targetDir);
-    } else {
-        $self->moveFile($inTarget->{path}, $targetDir, $targetPath);
-    }
-
+    $self->moveFile($inTarget, $target, $source->{name});
     $self->removeFromIndex($source, $sourceStat, $inTarget);
 }
 
@@ -49,9 +42,11 @@ sub checkTarget {
     my $targetStat = RJK::File::Stat::get($targetPath);
     if ($sourceStat->{size} != $targetStat->{size}) {
         die "Size mismatch, $sourceStat->{size} != $targetStat->{size}: $targetPath";
+        push @{$self->{modified}}, $targetPath;
     }
     if (! $self->checkDates($sourceStat, $targetStat)) {
         warn "Date mismatch: $targetPath";
+        push @{$self->{modified}}, $targetPath;
     }
 }
 
@@ -125,17 +120,18 @@ sub findRenamed {
 }
 
 sub moveFile {
-    my ($self, $sourcePath, $targetDir, $targetPath) = @_;
+    my ($self, $inTarget, $target, $sourceName) = @_;
 
-    if (! -e $targetDir) {
-        File::Path::make_path($targetDir) or die "Error creating directory: $targetDir";
+    if (! -e $target->{dir}) {
+        File::Path::make_path($target->{dir}) or die "Error creating directory: $target->{dir}";
     }
-    -e $targetDir or die "Target directory does not exist: $targetDir";
+    -e $target->{dir} or die "Target directory does not exist: $target->{dir}";
 
-    $targetPath //= $targetDir;
-    print "<$sourcePath\n";
+    my $targetPath = $sourceName eq $inTarget->{name} ? $target->{dir} : $target->{path};
+
+    print "<$inTarget->{path}\n";
     print ">$targetPath\n";
-    #~ File::Copy::move($targetPath, $targetPath) or die "Error moving file";
+    File::Copy::move($targetPath, $targetPath) or die "Error moving file";
 
     sleep 1 if $self->{opts}{verbose};
 }
