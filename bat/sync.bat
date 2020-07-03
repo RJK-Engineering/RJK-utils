@@ -1,1 +1,1 @@
-@call rjk-util fs\sync.pl %*
+@call rjk-util fs\sync\sync.pl %*
