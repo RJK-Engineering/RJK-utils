@@ -1,8 +1,6 @@
 use strict;
 use warnings;
 
-use RJK::File::PathInfo qw(basename extension);
-
 my ($listFile, @ffargs) = @ARGV;
 die "List file required" if ! $listFile;
 

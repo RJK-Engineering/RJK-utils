@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use RJK::File::PathInfo qw(basename extension);
+use RJK::File::Paths;
 
 # https://trac.ffmpeg.org/wiki/Concatenate
 
@@ -112,10 +112,9 @@ sub loadFiles {
 }
 
 sub getOutputFile {
-    my $file = shift;
-    my $outputFile = $opts{outputFile};
-    $outputFile //= basename($file) . "_out." . extension($file);
-    return $outputFile;
+    return $opts{outputFile} if $opts{outputFile};
+    my $file = RJK::File::Paths::get(shift);
+    return "$file->{basename}_out.$file->{extension}";
 }
 
 sub runffmpeg {
