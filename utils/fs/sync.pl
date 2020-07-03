@@ -9,6 +9,7 @@ use Time::HiRes ();
 use RJK::File::Paths;
 use RJK::File::Stat;
 use RJK::Files::Stats;
+use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::SimpleFileVisitor;
 use RJK::Win32::Console;
@@ -123,14 +124,18 @@ Display complete help.
 =cut
 ###############################################################################
 
-my %opts = (
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/fs/sync.properties", (
     refreshInterval => .2,
-);
+));
 RJK::Options::Pod::GetOptions(
     ['Options'],
     'i|refresh-interval=f' => \$opts{refreshInterval},
         "Refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
-    'mds|move-diff-size' => \$opts{moveDifferentSize}, "",
+    #~ 'mds|move-diff-size' => \$opts{moveDifferentSize}, "",
+    'm|move-files-in-target' => \$opts{moveFilesInTarget}, "Rename/move files in target.",
+    #~ 'c|copy-missing-files' => \$opts{copyMissingFiles}, "Copy files from source to target.",
+    #~ 'r|remove-files-in-target' => \$opts{removeFilesInTarget}, "Delete files in target not in source.",
+    'd|dry-run' => \$opts{dryRun}, "Don't copy or move any files.",
 
     'v|verbose' => \$opts{verbose}, "Be verbose.",
     'q|quiet' => \$opts{quiet}, "Be quiet.",
@@ -173,17 +178,17 @@ foreach (@dirs) {
     print "Dir: $_\n";
 }
 
-my $filesInTarget = { # index by name and size
-    name => {},
-    size => {},
-};
 my $console = new RJK::Win32::Console();
 
-IndexTarget();
-Synchronize();
+Synchronize(IndexTarget());
 
 sub IndexTarget {
     my $lastDisplay = 0;
+
+    my $filesInTarget = {
+        name => {},
+        size => {},
+    };
 
     my $stats = RJK::Files::Stats::CreateStats();
     my $visitor = new RJK::SimpleFileVisitor(
@@ -212,9 +217,13 @@ sub IndexTarget {
     }
     DisplayStats($stats);
     $console->newline;
+
+    return $filesInTarget;
 }
 
 sub Synchronize {
+    my $filesInTarget = shift;
+
     my $stats = RJK::Files::Stats::CreateStats();
     my $visitor = new SyncFileVisitor($filesInTarget, \%opts);
 
