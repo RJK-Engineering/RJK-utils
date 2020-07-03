@@ -163,7 +163,7 @@ Display complete help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("totalcmd-log.conf", (
+my %opts = RJK::LocalConf::GetOptions("totalcmd/log.properties", (
     showPluginOp => 1,
 ));
 

@@ -58,7 +58,7 @@ Display extended help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("openfile.properties", (
+my %opts = RJK::LocalConf::GetOptions("totalcmd/openfile.properties", (
     sitesConf => 'sites.json',
     filenamesConfDir => '',
     browser => 'firefox',

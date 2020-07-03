@@ -1,13 +1,12 @@
 use strict;
 use warnings;
 
-use RJK::Options::Pod;
-
 use DBI;
 use DBD::mysql;
 
 use RJK::DbTable;
 use RJK::LocalConf;
+use RJK::Options::Pod;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -149,7 +148,7 @@ A backup is created.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("emule-known.conf");
+my %opts = RJK::LocalConf::GetOptions("emule/known.properties");
 
 RJK::Options::Pod::GetOptions(
     ['HELP OPTIONS'],

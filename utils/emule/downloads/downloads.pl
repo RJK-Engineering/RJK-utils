@@ -109,7 +109,7 @@ Display complete help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("emule-downloads.conf");
+my %opts = RJK::LocalConf::GetOptions("emule/downloads.properties");
 
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],

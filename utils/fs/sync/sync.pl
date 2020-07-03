@@ -124,7 +124,7 @@ Display complete help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("RJK-utils/fs/sync.properties", (
+my %opts = RJK::LocalConf::GetOptions("fs/sync.properties", (
     refreshInterval => .2,
 ));
 RJK::Options::Pod::GetOptions(
