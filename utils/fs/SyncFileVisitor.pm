@@ -33,8 +33,10 @@ sub visitFile {
         return;
     }
 
-    $self->moveFile($inTarget, $target, $source->{name});
-    $self->removeFromIndex($source, $sourceStat, $inTarget);
+    if ($self->{opts}{moveFilesInTarget}) {
+        $self->moveFile($inTarget, $target, $source->{name});
+        $self->removeFromIndex($source, $sourceStat, $inTarget);
+    }
 }
 
 sub checkTarget {
@@ -122,16 +124,22 @@ sub findRenamed {
 sub moveFile {
     my ($self, $inTarget, $target, $sourceName) = @_;
 
-    if (! -e $target->{dir}) {
-        File::Path::make_path($target->{dir}) or die "Error creating directory: $target->{dir}";
+    if ($self->{opts}{dryRun}) {
+        -e $target->{dir} or print "Target directory does not exist: $target->{dir}\n";
+    } else {
+        if (! -e $target->{dir}) {
+            File::Path::make_path($target->{dir}) or die "Error creating directory: $target->{dir}";
+        }
+        -e $target->{dir} or die "Target directory does not exist: $target->{dir}";
     }
-    -e $target->{dir} or die "Target directory does not exist: $target->{dir}";
 
     my $targetPath = $sourceName eq $inTarget->{name} ? $target->{dir} : $target->{path};
 
     print "<$inTarget->{path}\n";
     print ">$targetPath\n";
-    File::Copy::move($targetPath, $targetPath) or die "Error moving file";
+    if (! $self->{opts}{dryRun}) {
+        File::Copy::move($targetPath, $targetPath) or die "Error moving file";
+    }
 
     sleep 1 if $self->{opts}{verbose};
 }
