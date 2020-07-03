@@ -1,5 +1,2 @@
 @cd\
-@call rjk-util system\drivestatus\drivestatus.pl /n --start ^
---poke-interval 20 ^
---status-file "%LOCALAPPDATA%\.disks.status" ^
---window-title "%~n0" %*
+@call rjk-util system\drivestatus\drivestatus.pl /n --window-title "%~n0" %*

@@ -6,6 +6,7 @@ use Try::Tiny;
 
 use RJK::Win32::Console;
 use RJK::Win32::DriveStatus;
+use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::Util::JSON;
 
@@ -125,11 +126,11 @@ Type a drive letter to toggle between active/inactive.
 =cut
 ###############################################################################
 
-my %opts = (
+my %opts = RJK::LocalConf::GetOptions("system/drivestatus.properties", (
     pokeInterval => 234,
     ignore => "",
     windowTitle => $0,
-);
+));
 RJK::Options::Pod::GetOptions(
     ['Options'],
     'l|list' => \$opts{list}, "List drives.",
