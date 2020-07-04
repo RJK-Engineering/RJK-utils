@@ -1,7 +1,11 @@
 use strict;
 use warnings;
 
-use RJK::Commands::Move;
+use File::Copy qw(move);
+use File::stat;
+use Time::localtime;
+
+use RJK::Media::Info::FFmpeg;
 use RJK::Options::Pod;
 
 ###############################################################################
@@ -111,5 +115,55 @@ defined $opts{filelist} or die "No filelist";
 $opts{dirFormat} //= "{mtime.year}";
 #~ $opts{dirFormat} //= "{mtime.year}{mtime.mon}{mtime.mday}";
 
-RJK::Commands::Move->new(\%opts)->execute();
-RJK::CommandExecutor->execute("RJK::Commands::Move", \%opts);
+-T $opts{filelist} or die "Not a text file: $opts{filelist}";
+
+open my $fh, '<', $opts{filelist} or die "$!: $opts{filelist}";
+while (<$fh>) {
+    chomp;
+    next if !-f;
+    moveFile($_);
+}
+
+exit $opts{exitStatus};
+
+sub moveFile {
+    my $file = shift;
+    my $st = stat $file or die "$!: $file";
+
+    my $dirName = $opts{dirFormat};
+    $dirName =~ s/\{(\w+)\.?(\w+)?\}/
+        my $major = $1;
+        my $minor = $2;
+        if ($major eq 'video') {
+            return if ! $minor;
+            my $mi = RJK::Media::Info::FFmpeg->info($file);
+            $mi &&
+            $mi->{video} &&
+            $mi->{video}[0] &&
+            defined $mi->{video}[0]{$minor} ? $mi->{video}[0]{$minor} : "";
+        } elsif ($major eq 'audio') {
+            return if ! $minor;
+            my $mi = RJK::Media::Info::FFmpeg->info($file);
+            $mi &&
+            $mi->{audio} &&
+            $mi->{audio}[0] &&
+            defined $mi->{audio}[0]{$minor} ? $mi->{audio}[0]{$minor} : "";
+        } elsif ($minor) {
+            my $t = localtime $st->$major;
+            my $v = $t->$minor;
+            $v += 1900 if $minor eq 'year';
+            $v = sprintf("%02u", $v+1) if $minor eq 'mon';
+            $v = sprintf("%02u", $v) if $minor eq 'mday';
+            $v;
+        } else {
+            $st->$major;
+        }
+    /ge; #/
+
+    next if ! $dirName && $dirName ne '0';
+
+    print "$dirName $file\n" unless $opts{quiet};
+    next if $opts{dryRun};
+    mkdir $dirName;
+    move $file, $dirName or die "$!: $file";
+}
