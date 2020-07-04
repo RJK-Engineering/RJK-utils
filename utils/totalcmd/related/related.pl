@@ -44,10 +44,11 @@ sub load {
     foreach my $path ($selection->files) {
         # TODO skip files
         my $f = new RJK::IO::File($path);
-        if (! $dirs{$f->dir}) {
-            $dirs{$f->dir} = $f->parent->files;
+        my $p = $f->getParentFile();
+        if (! $dirs{$p->path}) {
+            $dirs{$p->path} = $p->files(sub {$_[0]->isFile});
         }
-        $selection{$f->dir}{$f->name} = $f;
+        $selection{$p->path}{$f->name} = $f;
     }
     return { dirs => \%dirs, selection => \%selection };
 }
