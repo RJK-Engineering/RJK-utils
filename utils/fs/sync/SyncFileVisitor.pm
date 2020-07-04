@@ -1,10 +1,16 @@
 package SyncFileVisitor;
 use parent 'RJK::FileVisitor';
 
+# find source file in target and move to correct dir
+
 use strict;
 use warnings;
 
-# find source file in target and move to correct dir
+use File::Copy ();
+use File::Path ();
+
+use RJK::File::Paths;
+use RJK::File::Stat;
 
 sub new {
     my $self = bless {}, shift;

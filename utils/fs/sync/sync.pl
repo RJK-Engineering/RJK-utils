@@ -1,13 +1,9 @@
 use strict;
 use warnings;
 
-use File::Copy ();
-use File::Path ();
 use Number::Bytes::Human;
 use Time::HiRes ();
 
-use RJK::File::Paths;
-use RJK::File::Stat;
 use RJK::Files::Stats;
 use RJK::LocalConf;
 use RJK::Options::Pod;
