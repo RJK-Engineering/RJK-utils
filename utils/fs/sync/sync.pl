@@ -39,15 +39,21 @@ sync.pl -h
 
 =for options start
 
-=head1 Options
+=head1 OPTIONS
 
 =over 4
 
 =item B<-i -refresh-interval [seconds]>
 
-Refresh interval in seconds. Real number, default: 0.2
+Refresh interval in seconds. Real number, default: .2
 
-=item B<-mds -move-diff-size>
+=item B<-m -move-files-in-target>
+
+Rename/move files in target.
+
+=item B<-d -dry-run>
+
+Don't copy or move any files.
 
 =item B<-v -verbose>
 
@@ -63,7 +69,7 @@ Display debug information.
 
 =back
 
-=head1 Pod
+=head1 POD
 
 =over 4
 
@@ -93,7 +99,7 @@ A backup is created.
 
 =back
 
-=head1 Help
+=head1 HELP
 
 =over 4
 
@@ -124,7 +130,7 @@ my %opts = RJK::LocalConf::GetOptions("fs/sync.properties", (
     refreshInterval => .2,
 ));
 RJK::Options::Pod::GetOptions(
-    ['Options'],
+    ['OPTIONS'],
     'i|refresh-interval=f' => \$opts{refreshInterval},
         "Refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
     #~ 'mds|move-diff-size' => \$opts{moveDifferentSize}, "",
@@ -137,10 +143,10 @@ RJK::Options::Pod::GetOptions(
     'q|quiet' => \$opts{quiet}, "Be quiet.",
     'debug' => \$opts{debug}, "Display debug information.",
 
-    ['Pod'],
+    ['POD'],
     RJK::Options::Pod::Options,
 
-    ['Help'],
+    ['HELP'],
     RJK::Options::Pod::HelpOptions
 );
 
