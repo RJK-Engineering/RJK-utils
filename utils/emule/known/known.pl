@@ -17,121 +17,117 @@ Store F<known.met> CVS data exported by I<eMule MET Viewer> in a database table.
 
 known.pl [options]
 
-=head1 DISPLAY EXTENDED HELP
-
-script.pl -h
-
 =for options start
 
-=head1 HELP OPTIONS
+=head1 OPTIONS
 
 =over 4
 
-=item B<-h -help -?>
-
-Display extended help.
-
-=item B<-help-message>
-
-Display message options.
-
-=item B<-help-pod>
-
-Display POD options.
-
-=item B<-help-all>
-
-Display complete help.
-
-=back
-
-=head1 CONFIGURATION OPTIONS
-
-=over 4
-
-=item B<-i -input-file [path]>
+=item B<-i --input-file [path]>
 
 Input CSV file exported by eMule MET Viewer.
 
-=item B<-o -output-file [path]>
+=item B<-o --output-file [path]>
 
 Write database contents to CVS file.
 
-=item B<-f -force>
+=item B<-f --force>
 
 Force file overwrite.
 
-=item B<-n -no-commit>
+=item B<-n --no-commit>
 
 Do not commit database changes and don't write anything to disk.
 
-=item B<-c -commit-size [n]>
+=item B<-c --commit-size [n]>
 
 Commit after [n] database inserts/updates. Default: 100
 
-=item B<-s -show-info-after [n]>
+=item B<-s --show-info-after [n]>
 
 Show process information after each [n] lines processed. Default: 100
 
-=item B<-l -log [path]>
+=item B<-l --log [path]>
 
 Append to log. Optional [path] to file, default: write log file to cwd using filename format: "known-[timestamp].log". Ignored when using <-n>.
 
-=item B<-db-host [string]>
+=item B<--db-host [string]>
 
 Database host.
 
-=item B<-db-user [string]>
+=item B<--db-user [string]>
 
 Database user.
 
-=item B<-db-pass [string]>
+=item B<--db-pass [string]>
 
 Database password.
 
-=item B<-db-name [string]>
+=item B<--db-name [string]>
 
 Database name.
 
 =back
 
-=head1 MESSAGE OPTIONS
+=head1 MESSAGES
 
 =over 4
 
-=item B<-v -verbose>
+=item B<-v --verbose>
 
 Be verbose.
 
-=item B<-q -quiet>
+=item B<-q --quiet>
 
 Be quiet.
 
-=item B<-debug>
+=item B<--debug>
 
 Display debug information.
 
 =back
 
-=head1 POD OPTIONS
+=head1 HELP
 
 =over 4
 
-=item B<-podcheck>
+=item B<-h --help -?>
+
+Display extended help.
+
+=item B<--help-message>
+
+Display message options.
+
+=item B<--help-pod>
+
+Display POD options.
+
+=item B<--help-all>
+
+Display all help.
+
+=back
+
+=head1 POD
+
+=over 4
+
+=item B<--podcheck>
 
 Run podchecker.
 
-=item B<-pod2html -html [path]>
+=item B<--pod2html --html [path]>
 
 Run pod2html. Writes to [path] if specified. Writes to
 F<[path]/{scriptname}.html> if [path] is a directory.
 E.g. C<--html .> writes to F<./{scriptname}.html>.
 
-=item B<-genpod>
+=item B<--genpod>
 
 Generate POD for options.
 
-=item B<-writepod>
+=item B<--writepod>
 
 Write generated POD to script file.
 The POD text will be inserted between C<=for options start> and
@@ -151,14 +147,7 @@ A backup is created.
 my %opts = RJK::LocalConf::GetOptions("emule/known.properties");
 
 RJK::Options::Pod::GetOptions(
-    ['HELP OPTIONS'],
-    RJK::Options::Pod::HelpOptions(
-        [ 'h|help|?', "Display extended help.", "DESCRIPTION|SYNOPSIS|HELP OPTIONS|CONFIGURATION OPTIONS" ],
-        [ 'help-message', "Display message options.", "MESSAGE OPTIONS" ],
-        [ 'help-pod', "Display POD options.", "POD OPTIONS" ]
-    ),
-
-    ['CONFIGURATION OPTIONS'],
+    ['OPTIONS'],
     'i|input-file=s' => \$opts{inputFile}, [ "Input CSV file exported by eMule MET Viewer.", "path" ],
     'o|output-file=s' => \$opts{outputFile}, [ "Write database contents to CVS file.", "path" ],
     'f|force' => \$opts{force}, "Force file overwrite.",
@@ -175,17 +164,20 @@ RJK::Options::Pod::GetOptions(
     'db-pass=s' => \$opts{password}, "Database password.",
     'db-name=s' => \$opts{database}, "Database name.",
 
-    ['MESSAGE OPTIONS'],
+    ['MESSAGES'],
     RJK::Options::Pod::MessageOptions(\%opts),
-
-    ['POD OPTIONS'],
-    RJK::Options::Pod::Options
+    ['POD'],
+    RJK::Options::Pod::Options,
+    ['HELP'],
+    RJK::Options::Pod::HelpOptions(
+        [],
+        ['help-message', "Display message options.", "MESSAGE"],
+        ['help-pod', "Display POD options.", "POD"]
+    )
 );
 
 $opts{inputFile} //
-$opts{outputFile} // RJK::Options::Pod::pod2usage(
-    -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
-);
+$opts{outputFile} // RJK::Options::Pod::ShortHelp;
 
 # quiet!
 $opts{verbose} = 0 if $opts{quiet};
