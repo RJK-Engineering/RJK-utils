@@ -83,7 +83,7 @@ TODO
 
 =back
 
-=head1 Formatting
+=head1 FORMATTING
 
 =over 4
 
@@ -139,19 +139,11 @@ A backup is created.
 
 =over 4
 
-=item B<-h -help -?>
+=item B<-help -?>
 
-Display program options.
+Display extended help.
 
-=item B<-hh "-help -help" -??>
-
-Display help options.
-
-=item B<-hhh "-help -help -help" -???>
-
-Display POD options.
-
-=item B<-hhhh "-help -help -help -help" -????>
+=item B<-help-all>
 
 Display complete help.
 
