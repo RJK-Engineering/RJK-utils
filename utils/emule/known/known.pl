@@ -29,17 +29,17 @@ script.pl -h
 
 =item B<-h -help -?>
 
-Display this extended help.
+Display extended help.
 
-=item B<-hh "-help -help" -??>
+=item B<-help-message>
 
 Display message options.
 
-=item B<-hhh "-help -help -help" -???>
+=item B<-help-pod>
 
 Display POD options.
 
-=item B<-hhhh "-help -help -help -help" -????>
+=item B<-help-all>
 
 Display complete help.
 
@@ -152,12 +152,11 @@ my %opts = RJK::LocalConf::GetOptions("emule/known.properties");
 
 RJK::Options::Pod::GetOptions(
     ['HELP OPTIONS'],
-    RJK::Options::Pod::HelpOptions([
-        [ "DESCRIPTION|SYNOPSIS|HELP OPTIONS|CONFIGURATION OPTIONS", "Display this extended help." ],
-        [ "MESSAGE OPTIONS", "Display message options." ],
-        [ "POD OPTIONS", "Display POD options." ],
-        [ "", "Display complete help." ]
-    ]),
+    RJK::Options::Pod::HelpOptions(
+        [ 'h|help|?', "Display extended help.", "DESCRIPTION|SYNOPSIS|HELP OPTIONS|CONFIGURATION OPTIONS" ],
+        [ 'help-message', "Display message options.", "MESSAGE OPTIONS" ],
+        [ 'help-pod', "Display POD options.", "POD OPTIONS" ]
+    ),
 
     ['CONFIGURATION OPTIONS'],
     'i|input-file=s' => \$opts{inputFile}, [ "Input CSV file exported by eMule MET Viewer.", "path" ],
