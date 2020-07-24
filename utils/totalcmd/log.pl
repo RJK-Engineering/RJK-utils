@@ -10,7 +10,6 @@ use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::TotalCmd::Log;
 
-
 ###############################################################################
 =head1 DESCRIPTION
 
@@ -199,7 +198,7 @@ RJK::Options::Pod::GetOptions(
     'archive-dir=s' => \$opts{archiveDir},
         "TODO",
 
-    ['Formatting'],
+    ['FORMATTING'],
     'f|fields:s' => \$opts{fields},
         "Comma separated list of fields to show. Shows available fields if no [{names}] are specified.",
     's|format:s' => \$opts{format},
@@ -213,18 +212,15 @@ RJK::Options::Pod::GetOptions(
     ['POD'],
     RJK::Options::Pod::Options,
     ['HELP'],
-    RJK::Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions(undef, 'help')
 );
 
-# default values
 $opts{head} ||= defined $opts{head} ? 10 : 0;
 $opts{tail} ||= defined $opts{tail} ? 10 : 0;
 
-# arguments required
 @ARGV ||
 defined $opts{fields} ||
 $opts{list} ||
-$opts{archiveSize} ||
 $opts{head} ||
 $opts{tail} || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
@@ -257,7 +253,7 @@ if ($opts{startDate}) {
 
 my @results;
 foreach (@logFiles) {
-    processLogfile($_, \@results);
+    last if processLogfile($_, \@results);
 }
 
 if ($opts{tail}) {
@@ -300,14 +296,14 @@ sub processLogfile {
     print "$logfile\n";
 
     RJK::TotalCmd::Log->traverse(
-        $logfile,
-        sub {
+        file => $logfile,
+        visitEntry => sub {
             if (match($_)) {
                 push @$results, $_;
                 return 1 if @$results == $opts{head};
             }
         },
-        sub {
+        visitFailed => sub {
             warn "Corrupt line: $_[0]";
             return 0;
         },
@@ -317,9 +313,8 @@ sub processLogfile {
 sub match {
     my $entry = shift;
 
-    # no fs plugin operations
-    return if !$opts{showPluginOp} &&
-        $entry->{fsPluginOp};
+    # skip fs plugin operations
+    return if $entry->{isFsPluginOp} && !$opts{showPluginOp};
 
     # filter on operation
     return if $opts{operation} &&
