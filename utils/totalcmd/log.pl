@@ -212,7 +212,7 @@ RJK::Options::Pod::GetOptions(
     ['POD'],
     RJK::Options::Pod::Options,
     ['HELP'],
-    RJK::Options::Pod::HelpOptions(undef, 'help')
+    RJK::Options::Pod::HelpOptions(['help|?'])
 );
 
 $opts{head} ||= defined $opts{head} ? 10 : 0;
