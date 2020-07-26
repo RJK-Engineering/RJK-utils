@@ -90,10 +90,10 @@ RJK::Options::Pod::GetOptions(
     'm|max-tabs=i' => \$opts{maxTabs}, "Maximum number of tabs to open/paths to choose from. Default: 30",
     't|target' => \$opts{target}, "Open in target window. (/R)",
     'l|left-right' => \$opts{leftRight}, "Interprets paths as left/right instead of source/target. (opposite of /S)",
+    ['POD'],
+    RJK::Options::Pod::Options,
     ['HELP'],
     RJK::Options::Pod::HelpOptions
-    ['POD'],
-    RJK::Options::Pod::Options
 );
 
 $opts{clipboard} // @ARGV || RJK::Options::Pod::pod2usage(
