@@ -102,8 +102,7 @@ if ($opts{dump}) {
     exit;
 }
 
-my $sites = new RJK::Util::JSON($opts{sitesConf})->read->data
-    or die "Error loading sites conf";
+my $sites = RJK::Util::JSON->read($opts{sitesConf});
 
 my @cmd;
 if ($props->{site}) {
@@ -149,7 +148,7 @@ sub getNameParser {
     opendir my $dh, $opts{filenamesConfDir} or die "$!";
     while (readdir $dh) {
         next unless /\.json$/;
-        my $conf = new RJK::Util::JSON("$opts{filenamesConfDir}/$_")->read->data;
+        my $conf = RJK::Util::JSON->read("$opts{filenamesConfDir}/$_");
         $nameParser->addConf($conf);
     }
     closedir $dh;
