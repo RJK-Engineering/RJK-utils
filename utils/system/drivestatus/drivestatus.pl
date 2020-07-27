@@ -166,19 +166,16 @@ $opts{ignore} = { map { $_ => 1 } @ignore };
 
 ###############################################################################
 
-my $statusFile = new RJK::Util::JSON($opts{statusFile});
 my $status;
 try {
-    $statusFile->read;
     $status = new RJK::Win32::DriveStatus(
         ignore => $opts{ignore},
-        status => $statusFile->data,
+        status => RJK::Util::JSON->read($opts{statusFile}),
     );
-    $status->update;
-    $statusFile->write;
+    UpdateStatus();
 } catch {
     if ( $_->isa('Exception') ) {
-        printf "%s: %s\n", ref $_, $_->error;
+        printf "%s: %s\n", ref, $_->error;
     } else {
         die "$_";
     }
@@ -245,7 +242,8 @@ my $actions = {
         } else {
             $console->updateLine("$driveLetter now inactive\n");
         }
-        WriteStatus();
+        updateWindowTitle();
+        writeStatusFile();
     },
 };
 
@@ -390,29 +388,27 @@ sub PreventSleep {
 
 sub UpdateStatus {
     try {
-        $status->update;
-        $statusFile->write();
+        if ($status->update) {
+            writeStatusFile();
+        }
     } catch {
         if ( $_->isa('Exception') ) {
-            $console->updateLine(sprintf "%s: %s\n", ref $_, $_->error);
+            $console->updateLine(sprintf "%s: %s\n", ref, $_->error);
         } else {
             die "$!";
         }
     };
 }
 
-sub WriteStatus {
-    try {
-        $statusFile->write();
-        my @volumes = map { $_->{driveLetter} } $status->active;
-        @volumes = '(none)' unless @volumes;
-        $console->title("$opts{windowTitle} | @volumes");
-    } catch {
-        if ( $_->isa('Exception') ) {
-            $console->updateLine(sprintf "%s: %s\n", ref $_, $_->error);
-        } else {
-            die "$!";
-        }
-        exit 1;
-    };
+###############################################################################
+
+sub writeStatusFile {
+    RJK::Util::JSON->write($opts{statusFile}, $status->{status});
+}
+
+sub updateWindowTitle {
+    my $self = shift;
+    my @volumes = map { $_->{driveLetter} } $status->active;
+    @volumes = '(none)' unless @volumes;
+    $console->title("$opts{windowTitle} | @volumes");
 }
