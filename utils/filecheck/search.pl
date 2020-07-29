@@ -7,11 +7,12 @@ use RJK::Exception;
 use RJK::IO::File;
 use RJK::LocalConf;
 use RJK::Options::Pod;
-use RJK::SimpleFileVisitor;
 use RJK::TotalCmd::DiskDirFiles;
-use RJK::TotalCmd::Searches;
 use RJK::TotalCmd::Settings::Ini;
-use RJK::TreeVisitResult;
+
+use File::Basename;
+use lib dirname (__FILE__);
+use DdfVisitor;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -532,7 +533,7 @@ sub go {
         return listSearches();
     }
 
-    my $tcSearch = getSearch(\%opts);
+    my $tcSearch = getSearch();
     if ($tcSearch->{name}) {
         use Data::Dump;
         dd $tcSearch;
@@ -542,8 +543,9 @@ sub go {
     my $lstDir = new RJK::IO::File($opts{lstDir});
     my @files = $lstDir->filenames(sub { /\.lst$/i });
 
+    my $visitor = new DdfVisitor($tcSearch);
     foreach (@files) {
-        search("$opts{lstDir}\\$_", $tcSearch);
+        RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor);
         last;
     }
 }
@@ -557,24 +559,23 @@ sub listSearches {
 }
 
 sub getSearch {
-    my $opts = shift;
     my $search;
     my $ini = getTotalCmdIni();
 
-    if ($opts->{storedSearchName}) {
-        $search = $ini->getSearch($opts->{storedSearchName})
-            or die "Search not found: $opts->{storedSearchName}";
+    if ($opts{storedSearchName}) {
+        $search = $ini->getSearch($opts{storedSearchName})
+            or die "Search not found: $opts{storedSearchName}";
     } else {
         $search = $ini->getSearch;
         $search->{SearchFor} = "@ARGV";
     }
 
-    updateSearch($search, $opts);
+    updateSearch($search);
     return $search;
 }
 
 sub updateSearch {
-    my ($search, $opts) = @_;
+    my $search = shift;
 
     if ($opts{binaryTest}) {
         $search->addRule("perl", "isBinary", "=", 1);
@@ -582,40 +583,11 @@ sub updateSearch {
         $search->addRule("perl", "isText", "=", 1);
     }
 
-    $search->{SearchIn} = $opts->{searchIn};
-    $search->{SearchText} = $opts->{searchText};
+    $search->{SearchIn} = $opts{searchIn};
+    $search->{SearchText} = $opts{searchText};
 }
 
 sub getTotalCmdIni {
     my $path = -e $opts{tcmdini} ? $opts{tcmdini} : undef; # path is taken from env var if it's undef
     return new RJK::TotalCmd::Settings::Ini($path)->read;
-}
-
-sub search {
-    my ($file, $search) = @_;
-
-    RJK::TotalCmd::DiskDirFiles->traverse($file, new RJK::SimpleFileVisitor(
-        visitFile => sub {
-            my ($file, $stat) = @_;
-            my $result = RJK::TotalCmd::Searches->match($search, $file, $stat);
-            if ($result->{matched}) {
-                print "$stat->{size}\t$stat->{modified}\t$file->{path}\n";
-            }
-            #~ return TERMINATE;
-            #~ return SKIP_SIBLINGS;
-        },
-        preVisitFiles => sub {
-            my ($dir, $stat, $files, $dirs) = @_;
-            #~ return TERMINATE;
-            #~ return SKIP_SIBLINGS;
-            #~ return SKIP_SUBTREE;
-            #~ print "---> $dir->{path}\t$stat->{modified}\n";
-        },
-        postVisitFiles => sub {
-            my ($dir, $error, $files, $dirs) = @_;
-            #~ print "<--- $dir->{path}\n";
-            #~ return TERMINATE;
-            #~ return SKIP_SIBLINGS;
-        }
-    ));
 }
