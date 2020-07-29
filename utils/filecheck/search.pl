@@ -17,7 +17,7 @@ use DdfVisitor;
 ###############################################################################
 =head1 DESCRIPTION
 
-Search for files or directories.
+Search for files and directories.
 
 =head1 SYNOPSIS
 
@@ -567,7 +567,9 @@ sub getSearch {
             or die "Search not found: $opts{storedSearchName}";
     } else {
         $search = $ini->getSearch;
-        $search->{SearchFor} = "@ARGV";
+        foreach (@ARGV) {
+            $search->addRule(qw(tc name contains), $_);
+        }
     }
 
     updateSearch($search);
@@ -578,9 +580,9 @@ sub updateSearch {
     my $search = shift;
 
     if ($opts{binaryTest}) {
-        $search->addRule("perl", "isBinary", "=", 1);
+        $search->addRule(qw(perl binary = 1));
     } elsif ($opts{searchText} || $opts{textTest}) {
-        $search->addRule("perl", "isText", "=", 1);
+        $search->addRule(qw(perl text = 1));
     }
 
     $search->{SearchIn} = $opts{searchIn};
