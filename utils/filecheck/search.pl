@@ -636,7 +636,11 @@ sub go {
     my $visitor = new DdfVisitor($tcSearch, \%opts);
     foreach (@files) {
         print "$_\n";
-        last if RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor);
+        if (RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor)) {
+            print "Maximum of $opts{numberOfResults} results reached."
+                if $opts{numberOfResults} == $visitor->{numberOfResults};
+            last;
+        }
     }
 }
 
