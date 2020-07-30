@@ -545,8 +545,9 @@ sub go {
 
     my $visitor = new DdfVisitor($tcSearch);
     foreach (@files) {
-        RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor);
-        last;
+        print "$_\n";
+        my $result = RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor);
+        last if $result;
     }
 }
 
