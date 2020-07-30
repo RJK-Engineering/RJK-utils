@@ -10,6 +10,7 @@ sub new {
     my $self = bless {}, shift;
     $self->{search} = shift;
     $self->{opts} = shift;
+    $self->{opts}{numberOfResults} //= 0;
     $self->{numberOfResults} = 0;
     return $self;
 }
