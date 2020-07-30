@@ -395,7 +395,7 @@ Display all help.
 ###############################################################################
 
 my %opts = RJK::LocalConf::GetOptions("filecheck.properties", (
-    #~ recursive => 1,
+    ignoreCase => 1,
     delimiters => ",;:.'\\|/[]",
 ));
 
@@ -404,8 +404,10 @@ my $flags = $opts{flags} = {};
 my @searchOpts = (
     ['OPTIONS'],
     's|search-name:s' => \$opts{storedSearchName}, "Total Commander stored search {name}.",
-    'n=i' => \$opts{numberOfResults}, "Stop after C<n> results",
+    'n=i' => \$opts{numberOfResults}, "Stop after C<n> results.",
     'in=s' => \$opts{searchIn}, "Directories separated by C<;>. TODO: default is cwd",
+    'i|ignore-case!' => \$opts{ignoreCase},
+        "Case insensitive search (default). C<--no-i> does case sensitive search.",
 
     'e|regex' => \$flags->{regex}, "Search For: Regex.",
     'selected' => \$flags->{selected}, "Only search in selected.",
@@ -566,8 +568,9 @@ sub getSearch {
             or die "Search not found: $opts{storedSearchName}";
     } else {
         $search = $ini->getSearch;
+        my $op = $opts{ignoreCase} ? "contains" : "cont.(case)";
         foreach (@ARGV) {
-            $search->addRule(qw(tc name contains), $_);
+            $search->addRule(qw(tc name), $op, $_);
         }
     }
 
