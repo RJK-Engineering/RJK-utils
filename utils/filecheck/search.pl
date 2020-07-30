@@ -395,6 +395,7 @@ Display all help.
 ###############################################################################
 
 my %opts = RJK::LocalConf::GetOptions("filecheck.properties", (
+    fullnameSearch => 1,
     ignoreCase => 1,
     delimiters => ",;:.'\\|/[]",
 ));
@@ -402,12 +403,10 @@ my %opts = RJK::LocalConf::GetOptions("filecheck.properties", (
 my $flags = $opts{flags} = {};
 
 my @searchOpts = (
-    ['OPTIONS'],
-    's|search-name:s' => \$opts{storedSearchName}, "Total Commander stored search {name}.",
-    'n=i' => \$opts{numberOfResults}, "Stop after C<n> results.",
+    ['General'],
     'in=s' => \$opts{searchIn}, "Directories separated by C<;>. TODO: default is cwd",
     'i|ignore-case!' => \$opts{ignoreCase},
-        "Case insensitive search (default). C<--no-i> does case sensitive search.",
+        "Case insensitive search (default). Can be negated: C<--no-i>.",
 
     'e|regex' => \$flags->{regex}, "Search For: Regex.",
     'selected' => \$flags->{selected}, "Only search in selected.",
@@ -478,14 +477,8 @@ my @searchOpts = (
 );
 
 RJK::Options::Pod::GetOptions(
-    @searchOpts,
-
-    ['Other'],
-    'lst-dir=s' => \$opts{lstDir}, "Path to list directory.",
-    'status-file=s' => \$opts{statusFile}, "Path to status file.",
-    'delimiters=s' => \$opts{delimiters}, "A string of field delimiter characters.",
-    'tcmdini=s' => \$opts{tcmdini}, "Path to Total Commander INI file.",
-
+    ['OPTIONS'],
+    'n=i' => \$opts{numberOfResults}, "Stop after C<n> results.",
     'l|list' => \$opts{list}, "Show list of saved searches.",
 
     'a|all' => \$opts{all},
@@ -496,7 +489,12 @@ RJK::Options::Pod::GetOptions(
         "If no C<-p> or C<-a> is specified, searches partitions\n".
         "previously specified with C<-p>.",
 
-    'x|exact' => \$opts{exact}, "Do not clean up search terms.",
+    'clean' => \$opts{clean}, "Clean up search terms, remove all non-word characters.",
+    'x|exact' => \$opts{exact}, "Match full name.",
+    'path-search' => \$opts{pathSearch}, "Search file paths.",
+    'fullname-search!' => \$opts{fullnameSearch},
+        "Also search extensions (default), can be negated: C<--no-f>. No effect in combo with C<--path-search>.",
+    's|search-name:s' => \$opts{storedSearchName}, "Total Commander stored search {name}.",
 
     'names' => \$opts{names}, "Display filenames only.",
     'paths' => \$opts{paths}, "Display full paths.",
@@ -511,6 +509,14 @@ RJK::Options::Pod::GetOptions(
     'v|verbose' => \$opts{verbose}, "Be verbose.",
     'q|quiet' => \$opts{quiet}, "Be quiet.",
     'debug' => \$opts{debug}, "Display debug information.",
+
+    ['System Settings'],
+    'lst-dir=s' => \$opts{lstDir}, "Path to list directory.",
+    'status-file=s' => \$opts{statusFile}, "Path to status file.",
+    'delimiters=s' => \$opts{delimiters}, "A string of field delimiter characters.",
+    'tcmdini=s' => \$opts{tcmdini}, "Path to Total Commander INI file.",
+
+    @searchOpts,
 
     ['Pod'],
     RJK::Options::Pod::Options,
@@ -568,9 +574,21 @@ sub getSearch {
             or die "Search not found: $opts{storedSearchName}";
     } else {
         $search = $ini->getSearch;
-        my $op = $opts{ignoreCase} ? "contains" : "cont.(case)";
+
+        my $op;
+        if ($opts{exact}) {
+            $op = $opts{ignoreCase} ? '=' : '=(case)';
+        } elsif ($opts{regex}) {
+            $op = $opts{ignoreCase} ? 'regex' : 're.(case)';
+        } else {
+            $op = $opts{ignoreCase} ? 'contains' : 'cont.(case)';
+        }
+
+        my $prop = $opts{pathSearch} ? 'path' : $opts{fullnameSearch} ? 'fullname' : 'name';
+
         foreach (@ARGV) {
-            $search->addRule(qw(tc name), $op, $_);
+            s/\W//g if $opts{clean};
+            $search->addRule('tc', $prop, $op, $_);
         }
     }
 
