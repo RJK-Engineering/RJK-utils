@@ -33,13 +33,124 @@ fcs.pl -h
 
 =over 4
 
-=item B<-n --name [name]>
+=item B<-n [integer]>
+
+Stop after C<n> results.
+
+=item B<-l --list>
+
+Show list of saved searches.
+
+=item B<-a --all>
+
+Search all partitions. If no C<-a> or C<-p> is specified,
+searches partitions previously specified with C<-p>.
+
+=item B<-p --partitions [string]>
+
+Comma separated list of names of partitions to search.
+If no C<-p> or C<-a> is specified, searches partitions
+previously specified with C<-p>.
+
+=item B<--clean>
+
+Clean up search terms, remove all non-word characters.
+
+=item B<-x --exact>
+
+Match either full name with extension (default), full name without extension (in combo with C<--no-ext-search>), or full path (in combo with C<--path-search>).
+
+=item B<--path-search>
+
+Search file paths.
+
+=item B<--no-ext-search>
+
+Do not search extensions. No effect in combo with C<--path-search>.
+
+=item B<-s --search-name [name]>
 
 Total Commander stored search name.
+
+=item B<--names>
+
+Display filenames only.
+
+=item B<--paths>
+
+Display full paths.
+
+=item B<--gpaths>
+
+Display paths with drive letters replaced by drive labels (default).
+
+=item B<--format [string]>
+
+Printf style display format.
+
+=item B<--dir-format [string]>
+
+Printf style display format for directories.
+
+=item B<--captured>
+
+Display captured substrings when using a regular expression.
+
+=item B<--summary>
+
+Do not display results.
+
+=item B<-c --set-clipboard>
+
+Copy results to clipboard.
+
+=item B<-v --verbose>
+
+Be verbose.
+
+=item B<-q --quiet>
+
+Be quiet.
+
+=item B<--debug>
+
+Display debug information.
+
+=back
+
+=head1 System Settings
+
+=over 4
+
+=item B<--lst-dir [string]>
+
+Path to list directory.
+
+=item B<--status-file [string]>
+
+Path to status file.
+
+=item B<--delimiters [string]>
+
+A string of field delimiter characters.
+
+=item B<--tcmdini [string]>
+
+Path to Total Commander INI file.
+
+=back
+
+=head1 General
+
+=over 4
 
 =item B<--in [string]>
 
 Directories separated by C<;>. TODO: default is cwd
+
+=item B<-i --ignore-case>
+
+Case insensitive search (default). Can be negated: C<--no-i>.
 
 =item B<-e --regex>
 
@@ -260,91 +371,6 @@ Plugin arguments.
 
 =back
 
-=head1 Other
-
-=over 4
-
-=item B<--lst-dir [string]>
-
-Path to list directory.
-
-=item B<--status-file [string]>
-
-Path to status file.
-
-=item B<--delimiters [string]>
-
-A string of field delimiter characters.
-
-=item B<--tcmdini [string]>
-
-Path to Total Commander INI file.
-
-=item B<-l --list>
-
-Show list of saved searches.
-
-=item B<-a --all>
-
-Search all partitions. If no C<-a> or C<-p> is specified,
-searches partitions previously specified with C<-p>.
-
-=item B<-p --partitions [string]>
-
-Comma separated list of names of partitions to search.
-If no C<-p> or C<-a> is specified, searches partitions
-previously specified with C<-p>.
-
-=item B<-x --exact>
-
-Do not clean up search terms.
-
-=item B<--names>
-
-Display filenames only.
-
-=item B<--paths>
-
-Display full paths.
-
-=item B<--gpaths>
-
-Display paths with drive letters replaced by drive labels (default).
-
-=item B<--format [string]>
-
-Printf style display format.
-
-=item B<--dir-format [string]>
-
-Printf style display format for directories.
-
-=item B<--captured>
-
-Display captured substrings when using a regular expression.
-
-=item B<--summary>
-
-Do not display results.
-
-=item B<-c --set-clipboard>
-
-Copy results to clipboard.
-
-=item B<-v --verbose>
-
-Be verbose.
-
-=item B<-q --quiet>
-
-Be quiet.
-
-=item B<--debug>
-
-Display debug information.
-
-=back
-
 =head1 Pod
 
 =over 4
@@ -395,7 +421,6 @@ Display all help.
 ###############################################################################
 
 my %opts = RJK::LocalConf::GetOptions("filecheck.properties", (
-    fullnameSearch => 1,
     ignoreCase => 1,
     delimiters => ",;:.'\\|/[]",
 ));
@@ -490,10 +515,12 @@ RJK::Options::Pod::GetOptions(
         "previously specified with C<-p>.",
 
     'clean' => \$opts{clean}, "Clean up search terms, remove all non-word characters.",
-    'x|exact' => \$opts{exact}, "Match full name.",
+    'x|exact' => \$opts{exact},
+        "Match either full name with extension (default), full name without extension".
+        " (in combo with C<--no-ext-search>), or full path (in combo with C<--path-search>).",
     'path-search' => \$opts{pathSearch}, "Search file paths.",
-    'fullname-search!' => \$opts{fullnameSearch},
-        "Also search extensions (default), can be negated: C<--no-f>. No effect in combo with C<--path-search>.",
+    'no-ext-search' => \$opts{noExtSearch},
+        "Do not search extensions. No effect in combo with C<--path-search>.",
     's|search-name:s' => \$opts{storedSearchName}, "Total Commander stored search {name}.",
 
     'names' => \$opts{names}, "Display filenames only.",
@@ -584,7 +611,7 @@ sub getSearch {
             $op = $opts{ignoreCase} ? 'contains' : 'cont.(case)';
         }
 
-        my $prop = $opts{pathSearch} ? 'path' : $opts{fullnameSearch} ? 'fullname' : 'name';
+        my $prop = $opts{pathSearch} ? 'path' : $opts{noExtSearch} ? 'name' : 'fullname';
 
         foreach (@ARGV) {
             s/\W//g if $opts{clean};
