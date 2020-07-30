@@ -403,10 +403,9 @@ my $flags = $opts{flags} = {};
 
 my @searchOpts = (
     ['OPTIONS'],
-    'n|name:s' => \$opts{storedSearchName},
-        "Total Commander stored search {name}.",
-    'in=s' => \$opts{searchIn},
-        "Directories separated by C<;>. TODO: default is cwd",
+    's|search-name:s' => \$opts{storedSearchName}, "Total Commander stored search {name}.",
+    'n=i' => \$opts{numberOfResults}, "Stop after C<n> results",
+    'in=s' => \$opts{searchIn}, "Directories separated by C<;>. TODO: default is cwd",
 
     'e|regex' => \$flags->{regex}, "Search For: Regex.",
     'selected' => \$flags->{selected}, "Only search in selected.",
@@ -543,11 +542,10 @@ sub go {
     my $lstDir = new RJK::IO::File($opts{lstDir});
     my @files = $lstDir->filenames(sub { /\.lst$/i });
 
-    my $visitor = new DdfVisitor($tcSearch);
+    my $visitor = new DdfVisitor($tcSearch, \%opts);
     foreach (@files) {
         print "$_\n";
-        my $result = RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor);
-        last if $result;
+        last if RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor);
     }
 }
 

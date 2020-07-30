@@ -4,11 +4,13 @@ use strict;
 use warnings;
 
 use RJK::TotalCmd::Searches;
-#~ use RJK::TreeVisitResult;
+use RJK::TreeVisitResult;
 
 sub new {
     my $self = bless {}, shift;
     $self->{search} = shift;
+    $self->{opts} = shift;
+    $self->{numberOfResults} = 0;
     return $self;
 }
 
@@ -17,9 +19,8 @@ sub visitFile {
     my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
     if ($result->{matched}) {
         print "$stat->{size}\t$stat->{modified}\t$file->{path}\n";
+        return TERMINATE if ++$self->{numberOfResults} == $self->{opts}{numberOfResults};
     }
-    #~ return TERMINATE;
-    #~ return SKIP_SIBLINGS;
 }
 
 sub preVisitFiles {
