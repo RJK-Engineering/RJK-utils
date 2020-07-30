@@ -104,18 +104,6 @@ Do not display results.
 
 Copy results to clipboard.
 
-=item B<-v --verbose>
-
-Be verbose.
-
-=item B<-q --quiet>
-
-Be quiet.
-
-=item B<--debug>
-
-Display debug information.
-
 =back
 
 =head1 System Settings
@@ -371,7 +359,7 @@ Plugin arguments.
 
 =back
 
-=head1 Pod
+=head1 POD
 
 =over 4
 
@@ -401,6 +389,24 @@ A backup is created.
 
 =back
 
+=head1 MESSAGE
+
+=over 4
+
+=item B<-v --verbose>
+
+Be verbose.
+
+=item B<-q --quiet>
+
+Be quiet.
+
+=item B<--debug>
+
+Display debug information.
+
+=back
+
 =head1 Help
 
 =over 4
@@ -408,6 +414,46 @@ A backup is created.
 =item B<-h --help -?>
 
 Display extended help.
+
+=item B<--help-general>
+
+General options.
+
+=item B<--help-text>
+
+Text options.
+
+=item B<--help-date>
+
+Date options.
+
+=item B<--help-size>
+
+Size options.
+
+=item B<--help-attributes>
+
+Attributes options.
+
+=item B<--help-duplicates>
+
+Duplicates options.
+
+=item B<--help-plugin>
+
+Plugin options.
+
+=item B<--help-system>
+
+System options.
+
+=item B<--help-pod>
+
+Pod options.
+
+=item B<--help-message>
+
+Message options.
 
 =item B<--help-all>
 
@@ -533,10 +579,6 @@ RJK::Options::Pod::GetOptions(
     'summary' => \$opts{summary}, "Do not display results.",
     'c|set-clipboard' => \$opts{setClipboard}, "Copy results to clipboard.",
 
-    'v|verbose' => \$opts{verbose}, "Be verbose.",
-    'q|quiet' => \$opts{quiet}, "Be quiet.",
-    'debug' => \$opts{debug}, "Display debug information.",
-
     ['System Settings'],
     'lst-dir=s' => \$opts{lstDir}, "Path to list directory.",
     'status-file=s' => \$opts{statusFile}, "Path to status file.",
@@ -545,11 +587,25 @@ RJK::Options::Pod::GetOptions(
 
     @searchOpts,
 
-    ['Pod'],
+    ['POD'],
     RJK::Options::Pod::Options,
-
+    ['MESSAGE'],
+    RJK::Options::Pod::MessageOptions,
     ['Help'],
-    RJK::Options::Pod::HelpOptions
+    #~ RJK::Options::Pod::HelpOptions
+    RJK::Options::Pod::HelpOptions(
+        [],
+        ['help-general', "General options.", "General" ],
+        ['help-text', "Text options.", "Text" ],
+        ['help-date', "Date options.", "Date" ],
+        ['help-size', "Size options.", "Size" ],
+        ['help-attributes', "Attributes options.", "Attributes" ],
+        ['help-duplicates', "Duplicates options.", "Duplicates" ],
+        ['help-plugin', "Plugin options.", "Plugin" ],
+        ['help-system', "System options.", "System Settings" ],
+        ['help-pod', "Pod options.", "POD" ],
+        ['help-message', "Message options.", "MESSAGE"],
+    )
 );
 
 try {
