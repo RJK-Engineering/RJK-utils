@@ -9,6 +9,7 @@ use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::TotalCmd::DiskDirFiles;
 use RJK::TotalCmd::Settings::Ini;
+use RJK::Util::JSON;
 
 use File::Basename;
 use lib dirname (__FILE__);
@@ -100,7 +101,7 @@ Display captured substrings when using a regular expression.
 
 Do not display results.
 
-=item B<-c --set-clipboard>
+=item B<-c --clipboard>
 
 Copy results to clipboard.
 
@@ -552,7 +553,7 @@ RJK::Options::Pod::GetOptions(
     'n=i' => \$opts{numberOfResults}, "Stop after C<n> results.",
     'l|list' => \$opts{list}, "Show list of saved searches.",
 
-    'a|all' => \$opts{all},
+    'a|all-partitions' => \$opts{allPartitions},
         "Search all partitions. If no C<-a> or C<-p> is specified,\n".
         "searches partitions previously specified with C<-p>.",
     'p|partitions=s' => \$opts{partitions},
@@ -577,11 +578,12 @@ RJK::Options::Pod::GetOptions(
     'dir-format=s' => \$opts{dirFormat}, "Printf style display format for directories.",
     'captured' => \$opts{captured}, "Display captured substrings when using a regular expression.",
     'summary' => \$opts{summary}, "Do not display results.",
-    'c|set-clipboard' => \$opts{setClipboard}, "Copy results to clipboard.",
+    'c|clipboard' => \$opts{setClipboard}, "Copy results to clipboard.",
 
     ['System Settings'],
     'lst-dir=s' => \$opts{lstDir}, "Path to list directory.",
     'status-file=s' => \$opts{statusFile}, "Path to status file.",
+    'set-default' => \$opts{setDefault}, "Set default partitions.",
     'delimiters=s' => \$opts{delimiters}, "A string of field delimiter characters.",
     'tcmdini=s' => \$opts{tcmdini}, "Path to Total Commander INI file.",
 
@@ -619,19 +621,11 @@ try {
 };
 
 sub go {
-    if ($opts{list}) {
-        return listSearches();
-    }
+    return listSearches() if $opts{list};
 
     my $tcSearch = getSearch();
-    if ($tcSearch->{name}) {
-        use Data::Dump;
-        dd $tcSearch;
-        exit;
-    }
-
     my $lstDir = new RJK::IO::File($opts{lstDir});
-    my @files = $lstDir->filenames(sub { /\.lst$/i });
+    my @files = getDdfFiles($lstDir);
 
     my $visitor = new DdfVisitor($tcSearch, \%opts);
     foreach (@files) {
@@ -642,6 +636,38 @@ sub go {
             last;
         }
     }
+}
+
+sub getDdfFiles {
+    my $lstDir = shift;
+    my $status = RJK::Util::JSON->read($opts{statusFile});
+
+    if ($opts{allPartitions}) {
+        return $lstDir->filenames(sub { /\.lst$/i });
+    }
+
+    my @partitions;
+    if ($opts{partitions}) {
+        @partitions = split /[\Q$opts{delimiters}\E]/, $opts{partitions};
+        if ($opts{setDefault}) {
+            $status->{partitions} = \@partitions;
+            RJK::Util::JSON->write($opts{statusFile}, $status);
+        }
+    } else {
+        $status->{partitions} ||= [];
+        @partitions = @{$status->{partitions}};
+    }
+
+    my @files;
+    foreach (@partitions) {
+        my $f = new RJK::IO::File($opts{lstDir}, "$_.lst");
+        if ($f->exists) {
+            push @files, $f->name;
+        } else {
+            die "No such file: $f->{path}";
+        }
+    }
+    return @files;
 }
 
 sub listSearches {
