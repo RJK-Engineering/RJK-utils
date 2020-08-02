@@ -472,7 +472,14 @@ my %opts = RJK::LocalConf::GetOptions("filecheck.properties", (
     delimiters => ",;:.'\\|/[]",
 ));
 
-my $flags = $opts{flags} = {};
+my $flags = $opts{flags} = {
+    archive => 2,
+    readonly => 2,
+    hidden => 2,
+    system => 2,
+    compressed => 2,
+    encrypted => 2,
+};
 
 my @searchOpts = (
     ['General'],
@@ -518,24 +525,20 @@ my @searchOpts = (
         "Maximum file size. See C<-minsize> for format.",
 
     ['Attributes'],
-    'A|archive:0' => \$flags->{archive},
-        [   "Archive attribute set(+)/cleared(-).", "", "+A -A +archive -archive" ],
-    'R|readonly:0' => \$flags->{readonly},
-        [ "Read-only attribute set(+)/cleared(-).", "", "+R -R +readonly -readonly" ],
-    'H|hidden:0' => \$flags->{hidden},
-        [    "Hidden attribute set(+)/cleared(-).", "", "+H -H +hidden -hidden" ],
-    'S|system:0' => \$flags->{system},
-        [    "System attribute set(+)/cleared(-).", "", "+S -S +system -system" ],
-    'C|compressed:0' => \$flags->{compressed},
-        [         "Compressed(+)/uncompressed(-).", "", "+C -C +compressed -compressed" ],
-    'E|encrypted:0' => \$flags->{encrypted},
-        [           "Encrypted(+)/unencrypted(-).", "", "+E -E +encrypted -encrypted" ],
-    'D|directory:0' => \$flags->{directory},
-        [    "Directory(+)/not a directory(-).", "", "+D -D +directory -directory" ],
-    #~ 'F|file:0' => \$opts{file},
-    #~     [    "Search for files(+)/directories(-).", "", "+F -F +files -files" ],
-    'd|dirs' => \$opts{dirs}, "Search for directories (same as +D)",
-    'f|files' => \$opts{files}, "Search for files (same as -D)",
+    'A|archive!' => \$flags->{archive},
+        [   "Archive attribute set. Can be negated: C<--no-archive>" ],
+    'R|readonly!' => \$flags->{readonly},
+        [ "Read-only attribute set. Can be negated: C<--no-readonly>" ],
+    'H|hidden!' => \$flags->{hidden},
+        [    "Hidden attribute set. Can be negated: C<--no-hidden>" ],
+    'S|system!' => \$flags->{system},
+        [    "System attribute set. Can be negated: C<--no-system>" ],
+    'C|compressed!' => \$flags->{compressed},
+        [         "Compressed. Can be negated: C<--no-compressed>" ],
+    'E|encrypted!' => \$flags->{encrypted},
+        [           "Encrypted. Can be negated: C<--no-encrypted>" ],
+    'd|dirs' => \$opts{searchDirs}, "Search for directories.",
+    'f|files' => \$opts{searchFiles}, "Search for files.",
 
     ['Duplicates'],
     #~ 'dupes' => \$flags->{dupes}, "Find duplicate files.",
@@ -627,6 +630,11 @@ sub go {
     my $lstDir = new RJK::IO::File($opts{lstDir});
     my @files = getDdfFiles($lstDir);
 
+    if ($tcSearch->{name}) {
+        $opts{searchDirs} //= $tcSearch->{flags}{directory};
+        $opts{searchFiles} //= $tcSearch->{flags}{directory} == 0;
+    }
+
     my $visitor = new DdfVisitor($tcSearch, \%opts);
     foreach (@files) {
         print "$_\n";
@@ -687,22 +695,22 @@ sub getSearch {
             or die "Search not found: $opts{storedSearchName}";
     } else {
         $search = $ini->getSearch;
+    }
 
-        my $op;
-        if ($opts{exact}) {
-            $op = $opts{ignoreCase} ? '=' : '=(case)';
-        } elsif ($opts{regex}) {
-            $op = $opts{ignoreCase} ? 'regex' : 're.(case)';
-        } else {
-            $op = $opts{ignoreCase} ? 'contains' : 'cont.(case)';
-        }
+    my $op;
+    if ($opts{exact}) {
+        $op = $opts{ignoreCase} ? '=' : '=(case)';
+    } elsif ($opts{regex}) {
+        $op = $opts{ignoreCase} ? 'regex' : 're.(case)';
+    } else {
+        $op = $opts{ignoreCase} ? 'contains' : 'cont.(case)';
+    }
 
-        my $prop = $opts{pathSearch} ? 'path' : $opts{noExtSearch} ? 'name' : 'fullname';
+    my $prop = $opts{pathSearch} ? 'path' : $opts{noExtSearch} ? 'name' : 'fullname';
 
-        foreach (@ARGV) {
-            s/\W//g if $opts{clean};
-            $search->addRule('tc', $prop, $op, $_);
-        }
+    foreach (@ARGV) {
+        s/\W//g if $opts{clean};
+        $search->addRule('tc', $prop, $op, $_);
     }
 
     updateSearch($search);

@@ -17,6 +17,8 @@ sub new {
 
 sub visitFile {
     my ($self, $file, $stat) = @_;
+    return if $self->{opts}{searchDirs};
+
     my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
     if ($result->{matched}) {
         print "$stat->{size}\t$stat->{modified}\t$file->{path}\n";
@@ -26,6 +28,13 @@ sub visitFile {
 
 sub preVisitFiles {
     my ($self, $dir, $stat, $files, $dirs) = @_;
+    return if $self->{opts}{searchFiles};
+
+    my $result = RJK::TotalCmd::Searches->match($self->{search}, $dir, $stat);
+    if ($result->{matched}) {
+        print "$stat->{modified}\t$dir->{path}\n";
+        return TERMINATE if ++$self->{numberOfResults} == $self->{opts}{numberOfResults};
+    }
     #~ return TERMINATE;
     #~ return SKIP_SIBLINGS;
     #~ return SKIP_SUBTREE;
