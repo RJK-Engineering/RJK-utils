@@ -25,26 +25,30 @@ sub visitFile {
 
 sub preVisitFiles {
     my ($self, $dir, $stat, $files, $dirs) = @_;
+    $self->{view}->showDirSearchStart($dir, $stat);
     return if $self->{opts}{searchFiles};
     return $self->_match($dir, $stat);
 }
 
 sub postVisitFiles {
     my ($self, $dir, $error, $files, $dirs) = @_;
-    #~ print "<--- $dir->{path}\n";
-    #~ return TERMINATE;
-    #~ return SKIP_SIBLINGS;
+    $self->{view}->showDirSearchDone($dir);
 }
 
 sub _match {
     my ($self, $file, $stat) = @_;
 
     my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
-    if ($result->{matched}) {
-        $self->{size} += $stat->{size} // 0;
-        $self->{view}->showResult($file, $stat, $result);
-        return TERMINATE if ++$self->{numberOfResults} == $self->{opts}{numberOfResults};
-    }
+    return if ! $result->{matched};
+
+    $self->{size} += $stat->{size} // 0;
+    $self->{view}->showResult($file, $stat, "asldfkmsdlfkadslfkjsadf");
+    return if ++$self->{numberOfResults} < $self->{opts}{numberOfResults};
+
+    $self->{view}->showDirSearchDone($file, undef, {
+        info => "Maximum of $self->{numberOfResults} results reached."
+    });
+    return TERMINATE;
 }
 
 1;
