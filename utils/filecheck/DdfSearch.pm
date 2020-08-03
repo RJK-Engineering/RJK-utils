@@ -12,17 +12,16 @@ sub execute {
 
     my $lstDir = new RJK::IO::File($opts->{lstDir});
     my @files = getDdfFiles($lstDir, $partitions);
-
     my $visitor = new DdfVisitor($view, $tcSearch, $opts);
+
+    $view->showSearchStart($tcSearch);
     foreach (@files) {
-        $view->showParitionSearchStart($_);
-        if (RJK::TotalCmd::DiskDirFiles->traverse("$opts->{lstDir}\\$_", $visitor)) {
-            $view->showMessage("Maximum of $opts->{numberOfResults} results reached.")
-                if $opts->{numberOfResults} == $visitor->{numberOfResults};
-            last;
-        }
-        $view->showParitionSearchDone($_, $visitor->{size});
+        $view->showPartitionSearchStart($_);
+        my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$opts->{lstDir}\\$_", $visitor);
+        $view->showPartitionSearchDone($_, { size => $visitor->{size} });
+        last if $terminated;
     }
+    $view->showSearchDone($tcSearch);
 }
 
 sub getDdfFiles {
