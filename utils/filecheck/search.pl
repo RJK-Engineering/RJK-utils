@@ -468,6 +468,7 @@ Display all help.
 
 my %opts = RJK::LocalConf::GetOptions("filecheck.properties", (
     ignoreCase => 1,
+    extMatch => 1,
     delimiters => ",;:.'\\|/[]",
 ));
 
@@ -525,17 +526,17 @@ my @searchOpts = (
 
     ['Attributes'],
     'A|archive!' => \$flags->{archive},
-        [   "Archive attribute set. Can be negated: C<--no-archive>" ],
+        "Archive attribute set. Can be negated: C<--no-archive>",
     'R|readonly!' => \$flags->{readonly},
-        [ "Read-only attribute set. Can be negated: C<--no-readonly>" ],
+        "Read-only attribute set. Can be negated: C<--no-readonly>",
     'H|hidden!' => \$flags->{hidden},
-        [    "Hidden attribute set. Can be negated: C<--no-hidden>" ],
+        "Hidden attribute set. Can be negated: C<--no-hidden>",
     'S|system!' => \$flags->{system},
-        [    "System attribute set. Can be negated: C<--no-system>" ],
+        "System attribute set. Can be negated: C<--no-system>",
     'C|compressed!' => \$flags->{compressed},
-        [         "Compressed. Can be negated: C<--no-compressed>" ],
+        "Compressed. Can be negated: C<--no-compressed>",
     'E|encrypted!' => \$flags->{encrypted},
-        [           "Encrypted. Can be negated: C<--no-encrypted>" ],
+        "Encrypted. Can be negated: C<--no-encrypted>",
     'd|dirs' => \$opts{searchDirs}, "Search for directories.",
     'f|files' => \$opts{searchFiles}, "Search for files.",
 
@@ -566,10 +567,11 @@ RJK::Options::Pod::GetOptions(
     'clean' => \$opts{clean}, "Clean up search terms, remove all non-word characters.",
     'x|exact' => \$opts{exact},
         "Match either full name with extension (default), full name without extension".
-        " (in combo with C<--no-ext-search>), or full path (in combo with C<--path-search>).",
-    'path-search' => \$opts{pathSearch}, "Search file paths.",
-    'no-ext-search' => \$opts{noExtSearch},
-        "Do not search extensions. No effect in combo with C<--path-search>.",
+        " (in combo with C<--no-ext-match>), or full path (in combo with C<--path-match>).",
+    'path-match' => \$opts{pathMatch}, "Match file paths.",
+    'ext-match!' => \$opts{extMatch},
+        "Match extensions. Can be negated: C<--no-ext-match>. No effect in combo with C<--path-match>.",
+    'parent=s' => \$opts{parent}, "Match file parent.",
     's|search-name:s' => \$opts{storedSearchName}, "Total Commander stored search {name}.",
 
     'names' => \$opts{names}, "Display filenames only.",
@@ -672,6 +674,17 @@ sub getSearch {
         $search = $ini->getSearch;
     }
 
+    $search->{SearchIn} = $opts{searchIn};
+    $search->{SearchText} = $opts{searchText};
+
+    addNameRules($search);
+    addPerlRules($search);
+    return $search;
+}
+
+sub addNameRules {
+    my $search = shift;
+
     my $op;
     if ($opts{exact}) {
         $op = $opts{ignoreCase} ? '=' : '=(case)';
@@ -681,18 +694,19 @@ sub getSearch {
         $op = $opts{ignoreCase} ? 'contains' : 'cont.(case)';
     }
 
-    my $prop = $opts{pathSearch} ? 'path' : $opts{noExtSearch} ? 'name' : 'fullname';
+    my $prop = $opts{pathMatch} ? 'path' : $opts{extMatch} ? 'name' : 'fullname';
 
     foreach (@ARGV) {
         s/\W//g if $opts{clean};
         $search->addRule('tc', $prop, $op, $_);
     }
 
-    updateSearch($search);
-    return $search;
+    if ($opts{parent}) {
+        $search->addRule('perl', 'parent', $op, $opts{parent});
+    }
 }
 
-sub updateSearch {
+sub addPerlRules {
     my $search = shift;
 
     if ($opts{binaryTest}) {
@@ -700,9 +714,6 @@ sub updateSearch {
     } elsif ($opts{searchText} || $opts{textTest}) {
         $search->addRule(qw(perl text = 1));
     }
-
-    $search->{SearchIn} = $opts{searchIn};
-    $search->{SearchText} = $opts{searchText};
 }
 
 sub getTotalCmdIni {
