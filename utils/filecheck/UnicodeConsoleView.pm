@@ -1,4 +1,4 @@
-package View;
+package UnicodeConsoleView;
 
 use strict;
 use warnings;

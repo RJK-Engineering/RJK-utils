@@ -12,7 +12,7 @@ use RJK::TotalCmd::Settings::Ini;
 use RJK::Util::JSON;
 
 use DdfSearch;
-use View;
+use UnicodeConsoleView;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -631,7 +631,7 @@ sub go {
         $opts{searchFiles} //= $tcSearch->{flags}{directory} == 0;
     }
 
-    my $view = new View();
+    my $view = new UnicodeConsoleView();
     my @partitions = getPartitions() unless $opts{allPartitions};
 
     DdfSearch->execute($view, $tcSearch, \@partitions, \%opts);
