@@ -63,12 +63,11 @@ sub showResult {
     if ($stat->{isDir}) {
         printf "│%s\n", $file->{path};
         printf "╞> %s\n", _formatMessage($message) if $message;
-        return;
+    } else {
+        $self->_showDirHeader if ! $self->{shownDirHeader};
+        printf "││%4.4s %s\n", format_bytes($stat->{size}), $file->{path};
+        printf "│╞> %s\n", _formatMessage($message) if $message;
     }
-
-    $self->_showDirHeader if ! $self->{shownDirHeader};
-    printf "││%4.4s %s\n", format_bytes($stat->{size}), $file->{path};
-    printf "│╞> %s\n", _formatMessage($message) if $message;
 }
 
 sub _showDirHeader {
