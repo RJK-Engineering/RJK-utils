@@ -1,9 +1,9 @@
 use strict;
 use warnings;
 
+use File::Basename;
+use lib dirname (__FILE__);
 use Try::Tiny;
-use Win32::Console;
-Win32::Console::OutputCP(65001);
 
 use RJK::Exception;
 use RJK::LocalConf;
@@ -11,8 +11,6 @@ use RJK::Options::Pod;
 use RJK::TotalCmd::Settings::Ini;
 use RJK::Util::JSON;
 
-use File::Basename;
-use lib dirname (__FILE__);
 use DdfSearch;
 use View;
 
