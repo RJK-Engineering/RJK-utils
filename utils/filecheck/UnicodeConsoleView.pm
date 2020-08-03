@@ -79,9 +79,11 @@ sub showDirSearchDone {
 
     if ($self->{shownDirHeader}) {
         $c->Attr($FG_WHITE);
-        $c->Write("│╰╴");
+        $c->Write("│╰");
+        my $s = format_bytes $stats->{size};
+        $c->Write("─"x(4 - length $s) . "╴");
         $c->Attr($ATTR_NORMAL);
-        $c->Write(format_bytes($stats->{size}) . "\n");
+        $c->Write("$s\n");
     }
 
     if ($message) {
@@ -98,7 +100,7 @@ sub showResult {
 
     if ($stat->{isDir}) {
         $c->Attr($FG_WHITE);
-        $c->Write("│");
+        $c->Write("│ ");
         $c->Attr($FG_BLUE);
         $c->Write("$file->{path}\n");
         $c->Attr($ATTR_NORMAL);
