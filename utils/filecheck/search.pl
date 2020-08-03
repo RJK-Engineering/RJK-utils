@@ -2,18 +2,19 @@ use strict;
 use warnings;
 
 use Try::Tiny;
+use Win32::Console;
+Win32::Console::OutputCP(65001);
 
 use RJK::Exception;
-use RJK::IO::File;
 use RJK::LocalConf;
 use RJK::Options::Pod;
-use RJK::TotalCmd::DiskDirFiles;
 use RJK::TotalCmd::Settings::Ini;
 use RJK::Util::JSON;
 
 use File::Basename;
 use lib dirname (__FILE__);
-use DdfVisitor;
+use DdfSearch;
+use View;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -627,33 +628,19 @@ sub go {
     return listSearches() if $opts{list};
 
     my $tcSearch = getSearch();
-    my $lstDir = new RJK::IO::File($opts{lstDir});
-    my @files = getDdfFiles($lstDir);
-
     if ($tcSearch->{name}) {
         $opts{searchDirs} //= $tcSearch->{flags}{directory};
         $opts{searchFiles} //= $tcSearch->{flags}{directory} == 0;
     }
 
-    my $visitor = new DdfVisitor($tcSearch, \%opts);
-    foreach (@files) {
-        print "$_\n";
-        if (RJK::TotalCmd::DiskDirFiles->traverse("$opts{lstDir}\\$_", $visitor)) {
-            print "Maximum of $opts{numberOfResults} results reached."
-                if $opts{numberOfResults} == $visitor->{numberOfResults};
-            last;
-        }
-    }
+    my $view = new View();
+    my @partitions = getPartitions() unless $opts{allPartitions};
+
+    DdfSearch->execute($view, $tcSearch, \@partitions, \%opts);
 }
 
-sub getDdfFiles {
-    my $lstDir = shift;
+sub getPartitions {
     my $status = RJK::Util::JSON->read($opts{statusFile});
-
-    if ($opts{allPartitions}) {
-        return $lstDir->filenames(sub { /\.lst$/i });
-    }
-
     my @partitions;
     if ($opts{partitions}) {
         @partitions = split /[\Q$opts{delimiters}\E]/, $opts{partitions};
@@ -665,17 +652,7 @@ sub getDdfFiles {
         $status->{partitions} ||= [];
         @partitions = @{$status->{partitions}};
     }
-
-    my @files;
-    foreach (@partitions) {
-        my $f = new RJK::IO::File($opts{lstDir}, "$_.lst");
-        if ($f->exists) {
-            push @files, $f->name;
-        } else {
-            die "No such file: $f->{path}";
-        }
-    }
-    return @files;
+    return @partitions;
 }
 
 sub listSearches {

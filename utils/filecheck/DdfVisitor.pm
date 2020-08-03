@@ -8,37 +8,25 @@ use RJK::TreeVisitResult;
 
 sub new {
     my $self = bless {}, shift;
+    $self->{view} = shift;
     $self->{search} = shift;
     $self->{opts} = shift;
     $self->{opts}{numberOfResults} //= 0;
     $self->{numberOfResults} = 0;
+    $self->{size} = 0;
     return $self;
 }
 
 sub visitFile {
     my ($self, $file, $stat) = @_;
     return if $self->{opts}{searchDirs};
-
-    my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
-    if ($result->{matched}) {
-        print "$stat->{size}\t$stat->{modified}\t$file->{path}\n";
-        return TERMINATE if ++$self->{numberOfResults} == $self->{opts}{numberOfResults};
-    }
+    return $self->_match($file, $stat);
 }
 
 sub preVisitFiles {
     my ($self, $dir, $stat, $files, $dirs) = @_;
     return if $self->{opts}{searchFiles};
-
-    my $result = RJK::TotalCmd::Searches->match($self->{search}, $dir, $stat);
-    if ($result->{matched}) {
-        print "$stat->{modified}\t$dir->{path}\n";
-        return TERMINATE if ++$self->{numberOfResults} == $self->{opts}{numberOfResults};
-    }
-    #~ return TERMINATE;
-    #~ return SKIP_SIBLINGS;
-    #~ return SKIP_SUBTREE;
-    #~ print "---> $dir->{path}\t$stat->{modified}\n";
+    return $self->_match($dir, $stat);
 }
 
 sub postVisitFiles {
@@ -46,6 +34,17 @@ sub postVisitFiles {
     #~ print "<--- $dir->{path}\n";
     #~ return TERMINATE;
     #~ return SKIP_SIBLINGS;
+}
+
+sub _match {
+    my ($self, $file, $stat) = @_;
+
+    my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
+    if ($result->{matched}) {
+        $self->{size} += $stat->{size} // 0;
+        $self->{view}->showResult($file, $stat, $result);
+        return TERMINATE if ++$self->{numberOfResults} == $self->{opts}{numberOfResults};
+    }
 }
 
 1;
