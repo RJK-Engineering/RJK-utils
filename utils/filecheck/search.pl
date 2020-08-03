@@ -8,10 +8,10 @@ use Try::Tiny;
 use RJK::Exception;
 use RJK::LocalConf;
 use RJK::Options::Pod;
-use RJK::TotalCmd::Settings::Ini;
 use RJK::Util::JSON;
 
 use DdfSearch;
+use TotalCmdSearches;
 use UnicodeConsoleView;
 
 ###############################################################################
@@ -625,9 +625,9 @@ try {
 };
 
 sub go {
-    return listSearches() if $opts{list};
+    return TotalCmdSearches->listSearches() if $opts{list};
 
-    my $tcSearch = getSearch();
+    my $tcSearch = TotalCmdSearches->getSearch(\%opts);
     if ($tcSearch->{name}) {
         $opts{searchDirs} //= $tcSearch->{flags}{directory};
         $opts{searchFiles} //= $tcSearch->{flags}{directory} == 0;
@@ -653,70 +653,4 @@ sub getPartitions {
         @partitions = @{$status->{partitions}};
     }
     return @partitions;
-}
-
-sub listSearches {
-    my $ini = getTotalCmdIni();
-    my $searches = $ini->getSearches(sub {shift->{name} =~ /^\./});
-    foreach (sort keys %$searches) {
-        print "$searches->{$_}{name}\t$searches->{$_}{SearchFor}\n";
-    }
-}
-
-sub getSearch {
-    my $search;
-    my $ini = getTotalCmdIni();
-
-    if ($opts{storedSearchName}) {
-        $search = $ini->getSearch($opts{storedSearchName})
-            or die "Search not found: $opts{storedSearchName}";
-    } else {
-        $search = $ini->getSearch;
-    }
-
-    $search->{SearchIn} = $opts{searchIn};
-    $search->{SearchText} = $opts{searchText};
-
-    addNameRules($search);
-    addPerlRules($search);
-    return $search;
-}
-
-sub addNameRules {
-    my $search = shift;
-
-    my $op;
-    if ($opts{exact}) {
-        $op = $opts{ignoreCase} ? '=' : '=(case)';
-    } elsif ($opts{regex}) {
-        $op = $opts{ignoreCase} ? 'regex' : 're.(case)';
-    } else {
-        $op = $opts{ignoreCase} ? 'contains' : 'cont.(case)';
-    }
-
-    my $prop = $opts{pathMatch} ? 'path' : $opts{extMatch} ? 'name' : 'fullname';
-
-    foreach (@ARGV) {
-        s/\W//g if $opts{clean};
-        $search->addRule('tc', $prop, $op, $_);
-    }
-
-    if ($opts{parent}) {
-        $search->addRule('perl', 'parent', $op, $opts{parent});
-    }
-}
-
-sub addPerlRules {
-    my $search = shift;
-
-    if ($opts{binaryTest}) {
-        $search->addRule(qw(perl binary = 1));
-    } elsif ($opts{searchText} || $opts{textTest}) {
-        $search->addRule(qw(perl text = 1));
-    }
-}
-
-sub getTotalCmdIni {
-    my $path = -e $opts{tcmdini} ? $opts{tcmdini} : undef; # path is taken from env var if it's undef
-    return new RJK::TotalCmd::Settings::Ini($path)->read;
 }
