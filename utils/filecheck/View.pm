@@ -81,7 +81,7 @@ sub showDirSearchDone {
         $c->Attr($FG_WHITE);
         $c->Write("│╰╴");
         $c->Attr($ATTR_NORMAL);
-        $c->Write("$dir->{path}\n");
+        $c->Write(format_bytes($stats->{size}) . "\n");
     }
 
     if ($message) {
@@ -107,7 +107,7 @@ sub showResult {
         $c->Attr($FG_WHITE);
         $c->Write("││");
         $c->Attr($ATTR_NORMAL);
-        $c->Write(sprintf "%4.4s ", format_bytes $stat->{size});
+        $c->Write(sprintf " %4.4s ", format_bytes $stat->{size});
         $c->Write("$file->{path}\n");
     }
 
@@ -126,8 +126,9 @@ sub _showDirHeader {
 
     $c->Attr($FG_WHITE);
     $c->Write("├┬╴");
-    $c->Attr($ATTR_NORMAL);
+    $c->Attr($FG_BLUE);
     $c->Write("$self->{dir}{path}\n");
+    $c->Attr($ATTR_NORMAL);
 
     if ($self->{dirMessage}) {
         $c->Attr($FG_WHITE);
