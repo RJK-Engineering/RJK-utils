@@ -18,7 +18,7 @@ sub execute {
     foreach (@files) {
         $view->showPartitionSearchStart($_);
         my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$opts->{lstDir}\\$_", $visitor);
-        $view->showPartitionSearchDone($_, { size => $visitor->{size} });
+        $view->showPartitionSearchDone($_, $visitor->{stats});
         last if $terminated;
     }
     $view->showSearchDone($tcSearch);
