@@ -1,6 +1,8 @@
 use strict;
 use warnings;
 
+use Encode qw(decode);
+use Win32;
 use Win32::Clipboard;
 
 use RJK::File::PathUtils qw(ExtractPath);
@@ -102,43 +104,9 @@ $opts{clipboard} // @ARGV || RJK::Options::Pod::pod2usage(
 
 ###############################################################################
 
-use RJK::Util::YoutubeDl;
-###############################################################################
-my $ytdl = new RJK::Util::YoutubeDl;
-
-# stop download on interrupt
-my $interrupted = 1;
-$SIG{INT} = sub {
-    my ($signal) = @_;
-    if ($interrupted) {
-        exit 1;
-    } else {
-        $ytdl->stop;
-        $interrupted = 1;
-    }
-};
-###############################################################################
-
-my $conf = {
-    capture => [{
-        matcher => "url",       # matchers: regex (default) url path
-        #~ regex => "ph.*",     # /^ph.*$/i
-        #~ regex => "/^ph.*$/", # full expression if starting with '/'
-        #~ regex => [ "ph.*" ],
-        cmd => "ydl",
-    }],
-    commands => [{
-        name => "ydl",
-        action => "download",
-        site => "youtube",
-    }],
-};
-
-###############################################################################
-
 # get clipboard contents
 my $clip = Win32::Clipboard();
-my $path = $clip->GetText();
+my $path = decode("UTF16-LE", $clip->GetAs(CF_UNICODETEXT));
 
 # split on vertical whitespace characters, remove empty lines
 my @lines = grep { $_ } split /\v+\s*/s, $path
@@ -165,15 +133,6 @@ if (@urls) {
     Exit("No paths found");
 }
 
-#~ $path = CompletePath($path);
-
-#~ isdirpath = /[\\\/]/;
-#~ if (!isdirpath)
-#~     dir,file = split
-#~     if (-d dir)
-#~         files = readdir
-#~         path = match(files, file)
-
 my %map = split /[=\s]+/, $ENV{CHDIR_DRIVE_MAP} || "";
 my $skip;
 while (my ($a, $b) = each %map) {
@@ -191,14 +150,15 @@ if (! -e "$drive:\\") {
     ConnectDrive($drive) or Exit("Drive unavailable: $drive");
 }
 
-RJK::TotalCmd::Utils::setSourceTargetPaths($path);
-#~ RJK::TotalCmd::Utils::setSourceTargetPaths($source, $target, $newTab);
+if (! -e $path) {
+    # try short name
+    my $short = Win32::GetShortPathName($path);
+    $path = $short if -e $short;
+}
+
+RJK::TotalCmd::Utils::setSourcePath($path);
 
 sub Exit {
     print shift, "\n";
     exit;
-}
-if (! -e "$drive:\\") {
-    print "Connecting drive $drive\n";
-    ConnectDrive($drive) or Exit("Drive unavailable: $drive");
 }
