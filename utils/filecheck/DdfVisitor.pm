@@ -1,4 +1,5 @@
 package DdfVisitor;
+use parent 'RJK::FileVisitor';
 
 use strict;
 use warnings;
