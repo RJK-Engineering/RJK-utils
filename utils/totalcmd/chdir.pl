@@ -151,9 +151,11 @@ if (! -e "$drive:\\") {
 }
 
 if (! -e $path) {
-    # try short name
+    # try short name, if there is no short name available the input path is returned
     my $short = Win32::GetShortPathName($path);
-    $path = $short if -e $short;
+    $path = -e $short ? $short :
+        # replace non-printable and multi-byte chars with ? wildcards which totalcmd will try to match
+        $path =~ s/[^\x20-\xFF]/?/gr;
 }
 
 RJK::TotalCmd::Utils::setSourcePath($path);
