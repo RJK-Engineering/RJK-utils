@@ -34,7 +34,7 @@ IF DEFINED args (SET args=%args% %1) ELSE (SET args=%1)
 SHIFT & GOTO getarg
 :endgetarg
 
-if defined WORKSPACEENVIRONMENT call se workspace
+if defined WORKSPACEENVIRONMENT call se c:\workspace
 
 perl %RJK_UTILS_HOME%\utils\%util% %args%
 
