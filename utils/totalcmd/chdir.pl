@@ -138,7 +138,8 @@ my $conf = {
 
 # get clipboard contents
 my $clip = Win32::Clipboard();
-my $path = $clip->Get();
+my $path = $clip->GetText();
+
 # split on vertical whitespace characters, remove empty lines
 my @lines = grep { $_ } split /\v+\s*/s, $path
     or Exit("No text on clipboard");
