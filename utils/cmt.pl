@@ -144,8 +144,7 @@ $opts{displayAll} ||
 $opts{tagFilter} ||
 $opts{list} ||
 $opts{minLikeCount} || RJK::Options::Pod::pod2usage(
-    -verbose => 99,
-    -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
+    -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP"
 );
 
 # quiet!
