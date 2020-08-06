@@ -1,6 +1,8 @@
 package DdfSearch;
 
 use DdfVisitor;
+use RJK::File::TraverseStats;
+use RJK::FileVisitor::StatsWrapper;
 use RJK::IO::File;
 use RJK::TotalCmd::DiskDirFiles;
 
@@ -12,13 +14,18 @@ sub execute {
 
     my $lstDir = new RJK::IO::File($opts->{lstDir});
     my @files = getDdfFiles($lstDir, $partitions);
-    my $visitor = new DdfVisitor($view, $tcSearch, $opts);
+    my $traverseStats = new RJK::File::TraverseStats();
+    my $visitor = new DdfVisitor($view, $tcSearch, $opts, $traverseStats);
+    my $visitorWithStats = new RJK::FileVisitor::StatsWrapper($visitor, $traverseStats);
+    $view->{results} = $visitor->{results};
 
     $view->showSearchStart($tcSearch);
     foreach (@files) {
         $view->showPartitionSearchStart($_);
-        my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$opts->{lstDir}\\$_", $visitor);
-        $view->showPartitionSearchDone($_, $visitor->{stats});
+        my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$opts->{lstDir}\\$_", $visitorWithStats, $opts);
+        $view->showPartitionSearchDone($_);
+
+        $visitor->resetPartitionStats();
         last if $terminated;
     }
     $view->showSearchDone($tcSearch);
