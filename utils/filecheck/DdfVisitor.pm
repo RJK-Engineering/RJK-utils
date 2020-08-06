@@ -14,7 +14,7 @@ sub new {
     $self->{opts} = shift;
     $self->{opts}{numberOfResults} //= 0;
     $self->{numberOfResults} = 0;
-    $self->{stats}{size} = 0;
+    $self->{results} = {};
     return $self;
 }
 
@@ -27,14 +27,19 @@ sub visitFile {
 sub preVisitFiles {
     my ($self, $dir, $stat, $files, $dirs) = @_;
     $self->{view}->showDirSearchStart($dir, $stat);
-    $self->{dirStats}{size} = 0;
+    $self->{results}{dir} = {};
     return if $self->{opts}{searchFiles};
     return $self->_match($dir, $stat);
 }
 
 sub postVisitFiles {
     my ($self, $dir, $error, $files, $dirs) = @_;
-    $self->{view}->showDirSearchDone($dir, $self->{dirStats});
+    $self->{view}->showDirSearchDone($dir);
+}
+
+sub resetPartitionStats {
+    my $self = shift;
+    $self->{results}{part} = {};
 }
 
 sub _match {
@@ -43,12 +48,14 @@ sub _match {
     my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
     return if ! $result->{matched};
 
-    $self->{stats}{size} += $stat->{size} // 0;
-    $self->{dirStats}{size} += $stat->{size} // 0;
+    $self->{results}{size} += $stat->{size};
+    $self->{results}{dir}{size} += $stat->{size};
+    $self->{results}{part}{size} += $stat->{size};
+
     $self->{view}->showResult($file, $stat);
     return if ++$self->{numberOfResults} < $self->{opts}{numberOfResults};
 
-    $self->{view}->showDirSearchDone($file, $self->{dirStats}, {
+    $self->{view}->showDirSearchDone($file, {
         info => "Maximum of $self->{numberOfResults} results reached."
     });
     return TERMINATE;
