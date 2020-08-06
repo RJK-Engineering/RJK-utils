@@ -24,7 +24,7 @@ sub showSearchStart {
 }
 
 sub showSearchDone {
-    my ($self, $tcSearch, $stats, $message) = @_;
+    my ($self, $tcSearch, $message) = @_;
     $self->_writeMessage($message) if $message;
 }
 
@@ -45,7 +45,7 @@ sub showPartitionSearchStart {
 }
 
 sub showPartitionSearchDone {
-    my ($self, $partition, $stats, $message) = @_;
+    my ($self, $partition, $message) = @_;
     my $c = $self->{console};
 
     if ($message) {
@@ -58,7 +58,7 @@ sub showPartitionSearchDone {
     $c->Attr($FG_WHITE);
     $c->Write("╰╴");
     $c->Attr($ATTR_NORMAL);
-    $c->Write(format_bytes($stats->{size}) . "\n");
+    $c->Write(format_bytes($self->{results}{part}{size}) . "\n");
 }
 
 sub showDirSearchStart {
@@ -74,13 +74,13 @@ sub showDirSearchStart {
 }
 
 sub showDirSearchDone {
-    my ($self, $dir, $stats, $message) = @_;
+    my ($self, $dir, $message) = @_;
     my $c = $self->{console};
 
     if ($self->{shownDirHeader}) {
         $c->Attr($FG_WHITE);
         $c->Write("│╰");
-        my $s = format_bytes $stats->{size};
+        my $s = format_bytes $self->{results}{dir}{size};
         $c->Write("─"x(4 - length $s) . "╴");
         $c->Attr($ATTR_NORMAL);
         $c->Write("$s\n");
