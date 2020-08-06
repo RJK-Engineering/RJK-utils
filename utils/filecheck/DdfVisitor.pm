@@ -12,9 +12,10 @@ sub new {
     $self->{view} = shift;
     $self->{search} = shift;
     $self->{opts} = shift;
+    $self->{results} = { traverseStats => shift };
+
     $self->{opts}{numberOfResults} //= 0;
     $self->{numberOfResults} = 0;
-    $self->{results} = {};
     return $self;
 }
 
