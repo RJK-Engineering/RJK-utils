@@ -13,6 +13,7 @@ sub new {
     $self->{search} = shift;
     $self->{opts} = shift;
     $self->{results} = { traverseStats => shift };
+    $self->{matched} = [];
 
     $self->{opts}{numberOfResults} //= 0;
     $self->{numberOfResults} = 0;
@@ -49,10 +50,11 @@ sub _match {
     my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
     return if ! $result->{matched};
 
-    $self->{results}{size} += $stat->{size};
-    $self->{results}{dir}{size} += $stat->{size};
-    $self->{results}{part}{size} += $stat->{size};
+    $self->{results}{size} += $stat->{size} || 0;
+    $self->{results}{dir}{size} += $stat->{size} || 0;
+    $self->{results}{part}{size} += $stat->{size} || 0;
 
+    push @{$self->{matched}}, $file->{path};
     $self->{view}->showResult($file, $stat);
     return if ++$self->{numberOfResults} < $self->{opts}{numberOfResults};
 
