@@ -6,6 +6,8 @@ use RJK::FileVisitor::StatsWrapper;
 use RJK::IO::File;
 use RJK::TotalCmd::DiskDirFiles;
 
+use Win32::Clipboard;
+
 use strict;
 use warnings;
 
@@ -29,6 +31,10 @@ sub execute {
         last if $terminated;
     }
     $view->showSearchDone($tcSearch);
+
+    if ($opts->{setClipboard} && @{$visitor->{matched}}) {
+        Win32::Clipboard()->Set(join "\n", @{$visitor->{matched}});
+    }
 }
 
 sub getDdfFiles {
