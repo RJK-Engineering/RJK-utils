@@ -207,7 +207,7 @@ sub IndexTarget {
         },
         visitFileFailed => sub {
             my ($file, $error) = @_;
-            die "$error: $file->{path}";
+            warn "$error: $file->{path}";
         },
     );
 

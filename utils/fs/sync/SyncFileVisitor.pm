@@ -49,7 +49,7 @@ sub checkTarget {
     my ($self, $sourceStat, $targetPath) = @_;
     my $targetStat = RJK::File::Stat::get($targetPath);
     if ($sourceStat->{size} != $targetStat->{size}) {
-        die "Size mismatch, $sourceStat->{size} != $targetStat->{size}: $targetPath";
+        warn "Size mismatch, $sourceStat->{size} != $targetStat->{size}: $targetPath";
         push @{$self->{modified}}, $targetPath;
     }
     if (! $self->checkDates($sourceStat, $targetStat)) {
