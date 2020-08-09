@@ -15,6 +15,7 @@ use RJK::File::Stat;
 sub new {
     my $self = bless {}, shift;
     $self->{filesInTarget} = shift;
+    $self->{filesInSource} = {};
     $self->{opts} = shift;
     $self->{modified} = [];
     $self->{notInTarget} = [];
@@ -25,6 +26,12 @@ sub visitFile {
     my ($self, $source, $sourceStat) = @_;
 
     my $target = RJK::File::Paths::get($self->{opts}{targetDir}, $source->{directories}, $source->{name});
+
+    if ($self->{filesInSource}{$source->{name}}) {
+        warn "Skipping duplicate: $source->{name}";
+        return;
+    }
+    $self->{filesInSource}{$source->{name}} = 1;
 
     if (-e $target->{path}) {
         $self->checkTarget($sourceStat, $target->{path});
