@@ -67,7 +67,7 @@ sub checkTarget {
 
 sub checkDates {
     my ($self, $sourceStat, $targetStat) = @_;
-    return $sourceStat->{modified} == $targetStat->{modified};
+    return abs($sourceStat->{modified} - $targetStat->{modified}) < 3;
 }
 
 # files in diffent directory (same name, size and modified date)
