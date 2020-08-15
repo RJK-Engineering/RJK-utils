@@ -466,7 +466,7 @@ Display all help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("filecheck.properties", (
+my %opts = RJK::LocalConf::GetOptions("filecheck/search.properties", (
     ignoreCase => 1,
     extMatch => 1,
     delimiters => ",;:.'\\|/[]",
