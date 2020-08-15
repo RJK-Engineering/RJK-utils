@@ -7,6 +7,8 @@ backup.pl [drive] [directory]
 use strict;
 use warnings;
 
+use File::Basename;
+use lib dirname (__FILE__);
 use Try::Tiny;
 
 use RJK::Exception;
@@ -14,6 +16,8 @@ use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::Util::JSON;
 use RJK::Win32::VolumeInfo;
+
+use Store;
 
 my %opts = RJK::LocalConf::GetOptions("backup/backup.properties", (unknown => 1));
 
@@ -49,7 +53,7 @@ try {
 };
 
 sub go {
-    my $dirList = main->retrieveDirList();
+    my $dirList = Store->retrieveDirList;
 
     if ($opts{all}) {
         $opts{ignoreDrives} = { map { $_ => 1 } split(/,/, $opts{ignoreDrives}) };
@@ -61,7 +65,7 @@ sub go {
     }
 
     if ($opts{_dirty}) {
-        main->storeDirList($dirList);
+        Store->storeDirList($dirList);
     }
 }
 
@@ -213,81 +217,6 @@ sub readDirs {
 
 sub getDriveLetter {
     my ($self, $driveLabel) = @_;
-    $opts{_drives} //= main->retrieveDriveList();
+    $opts{_drives} //= Store->retrieveDriveList(\%opts);
     return $opts{_drives}{$driveLabel}{Letter};
-}
-
-sub retrieveDriveList {
-    $opts{driveListFile} // die "No drive list file specified";
-    my %drives;
-
-    main->fetchTableRows($opts{driveListFile}, sub {
-        my $row = shift;
-        $drives{$row->{Label}} = $row;
-    });
-
-    return \%drives;
-}
-
-sub fetchTableRows {
-    my ($self, $file, $callback) = @_;
-    my @header;
-
-    open my $fh, '<', $file or die "$!";
-    while (<$fh>) {
-        chomp;
-        my @row = split /\s*\|\s*/;
-        if (@row > 1) {
-            shift @row;
-            if (@header) {
-                my %row;
-                @row{@header} = @row;
-                $callback->(\%row);
-            } else {
-                @header = map { s/\*//gr } @row;
-            }
-        }
-    }
-    close $fh;
-}
-
-sub retrieveDirList {
-    $opts{dirListFile} // die "No dir list file specified";
-    my %dirs;
-
-    main->fetchTableRows($opts{dirListFile}, sub {
-        my $row = shift;
-        $dirs{$row->{Volume}}{$row->{Name}} = $row;
-    });
-
-    return \%dirs;
-}
-
-sub storeDirList {
-    my ($self, $list) = @_;
-
-    open my $fh, '<', $opts{dirListFile} or die "$!";
-    open my $fhw, '>', "$opts{dirListFile}~" or die "$!";
-    while (<$fh>) {
-        chomp;
-        my @row = split /\s*\|\s*/;
-        if (@row > 1) {
-            shift @row;
-            print $fhw "| ", join(" | ", @row), " |\n";
-            last;
-        } else {
-            print $fhw "$_\n";
-        }
-    }
-    close $fh;
-
-    foreach my $vol (sort { lc $a cmp lc $b } keys %$list) {
-        foreach (sort { lc $a cmp lc $b } keys %{$list->{$vol}}) {
-            my $dir = $list->{$vol}{$_};
-            my @row = ($vol, $_, $dir->{Files}, $dir->{Size}, $dir->{'Backup Location'},
-                $dir->{'Last Backup'}, $dir->{Removed}, $dir->{State});
-            print $fhw "| ", join(" | ", map { $_ // "" } @row), " |\n";
-        }
-    }
-    close $fhw;
 }
