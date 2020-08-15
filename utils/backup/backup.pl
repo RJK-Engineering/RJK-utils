@@ -25,7 +25,8 @@ RJK::Options::Pod::GetOptions(
     "r|remove" => \$opts{remove}, "Remove dir from list - set removed date to current local date, set state to \"Removed\".",
     "m|move=s" => \$opts{move}, "Move backup to {drive}.",
     "u|unknown!" => \$opts{unknown}, "List unknown directories, default enabled, can be negated C<--no-unknown>.",
-    "data-file" => \$opts{dataFile}, "{Path} to data file.",
+    "dir-list-file" => \$opts{dirListFile}, "{Path} to directory list file.",
+    "drive-list-file" => \$opts{driveListFile}, "{Path} to drive list file.",
     "ignore-drives" => \$opts{ignoreDrives}, "Comma-separated list of drives not to include in C<--all> list.",
     ['POD'],
     RJK::Options::Pod::Options,
@@ -34,7 +35,7 @@ RJK::Options::Pod::GetOptions(
 );
 
 @ARGV || $opts{all} || RJK::Options::Pod::ShortHelp;
-$opts{drive} = shift;
+$opts{driveLabel} = shift;
 $opts{dir} = shift;
 
 try {
@@ -48,25 +49,25 @@ try {
 };
 
 sub go {
-    my $dirList = getDirList($opts{dataFile});
+    my $dirList = main->retrieveDirList();
 
     if ($opts{all}) {
         $opts{ignoreDrives} = { map { $_ => 1 } split(/,/, $opts{ignoreDrives}) };
         main->listAll($dirList);
     } elsif ($opts{dir}) {
-        main->processDir($dirList, $opts{drive}, $opts{dir});
+        main->processDir($dirList, $opts{driveLabel}, $opts{dir});
     } else {
-        main->processDrive($dirList, $opts{drive});
+        main->processDrive($dirList, $opts{driveLabel});
     }
 
     if ($opts{_dirty}) {
-        writeDirList($opts{dataFile}, $dirList);
+        main->storeDirList($dirList);
     }
 }
 
 sub processDir {
-    my ($self, $dirList, $drive, $dir) = @_;
-    my $d = $dirList->{$drive}{$dir};
+    my ($self, $dirList, $driveLabel, $dir) = @_;
+    my $d = $dirList->{$driveLabel}{$dir};
 
     if ($opts{state}) {
         if ($d->{State} eq $opts{state}) {
@@ -78,7 +79,7 @@ sub processDir {
     }
 
     if ($opts{completed}) {
-        $d = $dirList->{$drive}{$dir} //= { Name => $dir };
+        $d = $dirList->{$driveLabel}{$dir} //= { Name => $dir };
         $d->{State} = "OK";
         $d->{'Last Backup'} = main->formatDate;
         $opts{_dirty} = 1;
@@ -95,7 +96,7 @@ sub processDir {
                 $d->{'Backup Location'} = $opts{move};
             }
         } elsif ($opts{remove}) {
-            delete $dirList->{$drive}{$dir};
+            delete $dirList->{$driveLabel}{$dir};
             $opts{_dirty} = 1;
         }
     }
@@ -117,23 +118,23 @@ sub formatDate {
 }
 
 sub processDrive {
-    my ($self, $dirList, $drive) = @_;
-    my $dirs = $dirList->{$drive};
+    my ($self, $dirList, $driveLabel) = @_;
+    my $dirs = $dirList->{$driveLabel};
     if (! $dirs) {
-        print "No data for drive: $drive\n";
+        print "No data for drive: $driveLabel\n";
     }
 
     try {
-        my @dirs = main->readDirs($drive);
+        my @dirs = main->readDirs($driveLabel);
         foreach (@dirs) {
             next if $dirs->{$_->{name}};
             $dirs->{$_->{name}} = {
-                Volume => $drive,
+                Volume => $driveLabel,
                 Name => $_->{name}
             };
         }
     } catch {
-        print "Drive not accessible: $drive\n";
+        print "$_";
     };
 
     if ($opts{state}) {
@@ -189,11 +190,13 @@ sub listAll {
 }
 
 sub readDirs {
-    my ($self, $drive) = @_;
-    my $dir = "$drive:\\";
+    my ($self, $driveLabel) = @_;
+
+    my $driveLetter = main->getDriveLetter($driveLabel) || $driveLabel;
+    my $dir = "$driveLetter:\\";
     my @dirs;
 
-    opendir my $dh, $dir or die "$!";
+    opendir my $dh, $dir or die "$!: $dir";
     while (readdir $dh) {
         my $path = "$dir$_";
         next if !-d $path;
@@ -201,16 +204,33 @@ sub readDirs {
             warn "Not accessible: $path";
             next;
         }
-        push @dirs, { drive => $drive, dir => $dir, name => $_, path => $path };
+        push @dirs, { driveLetter => $driveLetter, dir => $dir, name => $_, path => $path };
     }
     closedir $dh;
 
     return @dirs;
 }
 
-sub getDirList {
-    my $file = shift // die "No data file specified";
-    my %dirs;
+sub getDriveLetter {
+    my ($self, $driveLabel) = @_;
+    $opts{_drives} //= main->retrieveDriveList();
+    return $opts{_drives}{$driveLabel}{Letter};
+}
+
+sub retrieveDriveList {
+    $opts{driveListFile} // die "No drive list file specified";
+    my %drives;
+
+    main->fetchTableRows($opts{driveListFile}, sub {
+        my $row = shift;
+        $drives{$row->{Label}} = $row;
+    });
+
+    return \%drives;
+}
+
+sub fetchTableRows {
+    my ($self, $file, $callback) = @_;
     my @header;
 
     open my $fh, '<', $file or die "$!";
@@ -219,26 +239,35 @@ sub getDirList {
         my @row = split /\s*\|\s*/;
         if (@row > 1) {
             shift @row;
-            my ($volume, $dir) = @row;
             if (@header) {
                 my %row;
                 @row{@header} = @row;
-                $dirs{$volume}{$dir} = \%row;
+                $callback->(\%row);
             } else {
                 @header = map { s/\*//gr } @row;
             }
         }
     }
     close $fh;
+}
+
+sub retrieveDirList {
+    $opts{dirListFile} // die "No dir list file specified";
+    my %dirs;
+
+    main->fetchTableRows($opts{dirListFile}, sub {
+        my $row = shift;
+        $dirs{$row->{Volume}}{$row->{Name}} = $row;
+    });
 
     return \%dirs;
 }
 
-sub writeDirList {
-    my ($file, $list) = @_;
+sub storeDirList {
+    my ($self, $list) = @_;
 
-    open my $fh, '<', $file or die "$!";
-    open my $fhw, '>', "$file~" or die "$!";
+    open my $fh, '<', $opts{dirListFile} or die "$!";
+    open my $fhw, '>', "$opts{dirListFile}~" or die "$!";
     while (<$fh>) {
         chomp;
         my @row = split /\s*\|\s*/;
