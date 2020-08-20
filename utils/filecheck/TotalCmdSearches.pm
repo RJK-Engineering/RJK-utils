@@ -6,8 +6,7 @@ use warnings;
 use RJK::TotalCmd::Settings::Ini;
 
 sub listSearches {
-    my ($class, $opts) = @_;
-    my $ini = getTotalCmdIni($opts->{tcmdini});
+    my $ini = getTotalCmdIni();
     my $searches = $ini->getSearches(sub {shift->{name} =~ /^\./});
     foreach (sort keys %$searches) {
         print "$searches->{$_}{name}\t$searches->{$_}{SearchFor}\n";
@@ -17,7 +16,7 @@ sub listSearches {
 sub getSearch {
     my ($class, $opts) = @_;
     my $search;
-    my $ini = getTotalCmdIni($opts->{tcmdini});
+    my $ini = getTotalCmdIni();
 
     if ($opts->{storedSearchName}) {
         $search = $ini->getSearch($opts->{storedSearchName})
@@ -69,9 +68,7 @@ sub addPerlRules {
 }
 
 sub getTotalCmdIni {
-    my $tcmdini = shift;
-    my $path = -e $tcmdini ? $tcmdini : undef; # path is taken from env var if it's undef
-    return new RJK::TotalCmd::Settings::Ini($path)->read;
+    return new RJK::TotalCmd::Settings::Ini()->read;
 }
 
 1;

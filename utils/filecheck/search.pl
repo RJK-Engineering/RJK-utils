@@ -118,10 +118,6 @@ Path to status file.
 
 A string of field delimiter characters.
 
-=item B<--tcmdini [string]>
-
-Path to Total Commander INI file.
-
 =back
 
 =head1 General
@@ -584,7 +580,6 @@ RJK::Options::Pod::GetOptions(
     'status-file=s' => \$opts{statusFile}, "Path to status file.",
     'set-default' => \$opts{setDefault}, "Set default partitions.",
     'delimiters=s' => \$opts{delimiters}, "A string of field delimiter characters.",
-    #~ 'tcmdini=s' => \$opts{tcmdini}, "Path to Total Commander INI file.",
 
     @searchOpts,
 
