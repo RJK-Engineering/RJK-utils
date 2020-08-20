@@ -1,4 +1,11 @@
-package DdfVisitor;
+=begin TML
+
+---+ package FileSearchVisitor
+
+=cut
+###############################################################################
+
+package FileSearchVisitor;
 use parent 'RJK::FileVisitor';
 
 use strict;
@@ -6,6 +13,22 @@ use warnings;
 
 use RJK::TotalCmd::Searches;
 use RJK::TreeVisitResult;
+
+###############################################################################
+=pod
+
+---+++ FileSearchVisitor::new($view, $search, \%opts) -> $fileSearchVisitor
+   * =$view= - =View= object.
+   * =$search= - =RJK::TotalCmd::Search= object.
+   * =%opts= - option hash.
+      * =$opts{numberOfResults}= - Stop searching after n results.
+      * =$opts{searchDirs}= - Search for dirs.
+      * =$opts{searchFiles}= - Search for files.
+   * =$stats= - =RJK::File::TraverseStats= object.
+   * =$fileSearchVisitor= - New =FileSearchVisitor= object.
+
+=cut
+###############################################################################
 
 sub new {
     my $self = bless {}, shift;
