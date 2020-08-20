@@ -1,7 +1,8 @@
 package DdfSearch;
 
-use DdfVisitor;
+use FileSearchVisitor;
 use RJK::File::TraverseStats;
+use RJK::Filecheck::Config;
 use RJK::FileVisitor::StatsWrapper;
 use RJK::IO::File;
 use RJK::TotalCmd::DiskDirFiles;
@@ -13,18 +14,19 @@ use warnings;
 
 sub execute {
     my ($class, $view, $tcSearch, $partitions, $opts) = @_;
+    my $ddfLstDir = RJK::Filecheck::Config->get('ddf.lst.dir');
 
-    my $lstDir = new RJK::IO::File($opts->{lstDir});
+    my $lstDir = new RJK::IO::File($ddfLstDir);
     my @files = getDdfFiles($lstDir, $partitions);
     my $traverseStats = new RJK::File::TraverseStats();
-    my $visitor = new DdfVisitor($view, $tcSearch, $opts, $traverseStats);
+    my $visitor = new FileSearchVisitor($view, $tcSearch, $opts, $traverseStats);
     my $visitorWithStats = new RJK::FileVisitor::StatsWrapper($visitor, $traverseStats);
     $view->{results} = $visitor->{results};
 
     $view->showSearchStart($tcSearch);
     foreach (@files) {
         $view->showPartitionSearchStart($_);
-        my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$opts->{lstDir}\\$_", $visitorWithStats, $opts);
+        my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$ddfLstDir\\$_", $visitorWithStats, { nostat => 0 });
         $view->showPartitionSearchDone($_);
 
         $visitor->resetPartitionStats();
