@@ -8,17 +8,17 @@ use Module::Load;
 my $store;
 my $storeModule = "Store";
 
-sub retrieveDriveList {
-    getStore()->retrieveDriveList();
+sub getDrives {
+    getStore()->getDrives();
 }
 
-sub retrieveDirList {
-    getStore()->retrieveDirList();
+sub getBackupDirs {
+    getStore()->getBackupDirs();
 }
 
-sub storeDirList {
+sub storeBackupDirs {
     my ($class, $list) = @_;
-    getStore()->storeDirList($list);
+    getStore()->storeBackupDirs($list);
 }
 
 sub getStore {
