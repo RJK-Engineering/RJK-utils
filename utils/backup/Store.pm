@@ -33,7 +33,7 @@ sub retrieveDirList {
 
 sub storeDirList {
     my ($class, $list) = @_;
-    my $file = Filecheck::Config->get('dir.list.file') // die "No dir list file configured";
+    my $file = RJK::Filecheck::Config->get('dir.list.file') // die "No dir list file configured";
 
     open my $fh, '<', $file or die "$!: $file";
     open my $fhw, '>', "$file~" or die "$!: $file~";
