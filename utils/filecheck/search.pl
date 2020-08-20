@@ -110,10 +110,6 @@ Copy results to clipboard.
 
 =over 4
 
-=item B<--lst-dir [string]>
-
-Path to list directory.
-
 =item B<--status-file [string]>
 
 Path to status file.
@@ -585,7 +581,6 @@ RJK::Options::Pod::GetOptions(
     'c|clipboard' => \$opts{setClipboard}, "Copy results to clipboard.",
 
     ['System Settings'],
-    #~ 'lst-dir=s' => \$opts{lstDir}, "Path to list directory.",
     'status-file=s' => \$opts{statusFile}, "Path to status file.",
     'set-default' => \$opts{setDefault}, "Set default partitions.",
     'delimiters=s' => \$opts{delimiters}, "A string of field delimiter characters.",
