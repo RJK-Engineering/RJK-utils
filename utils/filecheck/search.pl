@@ -10,7 +10,7 @@ use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::Util::JSON;
 
-use DdfSearch;
+use FileSearch;
 use TotalCmdSearches;
 use UnicodeConsoleView;
 
@@ -585,11 +585,11 @@ RJK::Options::Pod::GetOptions(
     'c|clipboard' => \$opts{setClipboard}, "Copy results to clipboard.",
 
     ['System Settings'],
-    'lst-dir=s' => \$opts{lstDir}, "Path to list directory.",
+    #~ 'lst-dir=s' => \$opts{lstDir}, "Path to list directory.",
     'status-file=s' => \$opts{statusFile}, "Path to status file.",
     'set-default' => \$opts{setDefault}, "Set default partitions.",
     'delimiters=s' => \$opts{delimiters}, "A string of field delimiter characters.",
-    'tcmdini=s' => \$opts{tcmdini}, "Path to Total Commander INI file.",
+    #~ 'tcmdini=s' => \$opts{tcmdini}, "Path to Total Commander INI file.",
 
     @searchOpts,
 
@@ -636,7 +636,7 @@ sub go {
     my $view = new UnicodeConsoleView();
     my @partitions = getPartitions() unless $opts{allPartitions};
 
-    DdfSearch->execute($view, $tcSearch, \@partitions, \%opts);
+    FileSearch->execute($view, $tcSearch, \@partitions, \%opts);
 }
 
 sub getPartitions {
