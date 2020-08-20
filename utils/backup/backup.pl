@@ -17,7 +17,7 @@ use RJK::Options::Pod;
 use RJK::Util::JSON;
 use RJK::Win32::VolumeInfo;
 
-use Store;
+use Filecheck;
 
 my %opts = RJK::LocalConf::GetOptions("backup/backup.properties", (unknown => 1));
 
@@ -53,7 +53,7 @@ try {
 };
 
 sub go {
-    my $dirList = Store->retrieveDirList;
+    my $dirList = Filecheck->retrieveDirList;
 
     if ($opts{all}) {
         $opts{ignoreDrives} = { map { $_ => 1 } split(/,/, $opts{ignoreDrives}) };
@@ -65,7 +65,7 @@ sub go {
     }
 
     if ($opts{_dirty}) {
-        Store->storeDirList($dirList);
+        Filecheck->storeDirList($dirList);
     }
 }
 
@@ -217,6 +217,6 @@ sub readDirs {
 
 sub getDriveLetter {
     my ($self, $driveLabel) = @_;
-    $opts{_drives} //= Store->retrieveDriveList(\%opts);
+    $opts{_drives} //= Filecheck->retrieveDriveList;
     return $opts{_drives}{$driveLabel}{Letter};
 }
