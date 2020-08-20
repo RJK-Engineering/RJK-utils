@@ -24,7 +24,7 @@ my %opts = RJK::LocalConf::GetOptions("backup/backup.properties", (unknown => 1)
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     "a|all" => \$opts{all}, "List all directories on all accessible drives.",
-    "c|completed" => \$opts{completed}, "Set backup completed - set date to current local date, set state to \"OK\".",
+    "b|backup-ok|ok:s" => \$opts{backupOk}, "Mark backup ok - set date to current local date, set state to \"OK\".",
     "s|state=s" => \$opts{state}, "Set backup {state} - state should be set to \"Incomplete\" if dir changes.",
     "r|remove" => \$opts{remove}, "Remove dir from list - set removed date to current local date, set state to \"Removed\".",
     "m|move=s" => \$opts{move}, "Move backup to {drive}.",
@@ -82,11 +82,9 @@ sub processDir {
         }
     }
 
-    if ($opts{completed}) {
+    if (defined $opts{backupOk}) {
         $d = $dirList->{$driveLabel}{$dir} //= { Name => $dir };
-        $d->{State} = "OK";
-        $d->{'Last Backup'} = main->formatDate;
-        $opts{_dirty} = 1;
+        $self->backupOk($d);
     } else {
         if (! $d) {
             print "Unknown dir: $dir\n";
@@ -115,6 +113,13 @@ sub processDir {
         "State: ", $d->{State}//'';
 }
 
+sub backupOk {
+    my ($self, $d) = @_;
+    $d->{State} = "OK";
+    $d->{'Last Backup'} = main->formatDate;
+    $opts{_dirty} = 1;
+}
+
 sub formatDate {
     my @d = localtime;
     $d[5] -= 100 if $d[5] >= 100;
@@ -124,7 +129,17 @@ sub formatDate {
 sub processDrive {
     my ($self, $dirList, $driveLabel) = @_;
     my $dirs = $dirList->{$driveLabel};
-    if (! $dirs) {
+    if ($dirs) {
+        if (defined $opts{backupOk}) {
+            if (! $opts{backupOk}) {
+                print "Backup drive argument required\n";
+                return;
+            }
+            foreach (values %$dirs) {
+                $self->backupOk($_) if $_->{'Backup Location'} eq $opts{backupOk};
+            }
+        }
+    } else {
         print "No data for drive: $driveLabel\n";
     }
 
