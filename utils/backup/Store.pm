@@ -5,9 +5,9 @@ use warnings;
 
 use RJK::Filecheck::Config;
 
-sub retrieveDriveList {
+sub getDrives {
     my $class = shift;
-    my $file = RJK::Filecheck::Config->get('drive.list.file');
+    my $file = RJK::Filecheck::Config->get('foswiki.drives.table.file');
     my %drives;
 
     $class->_fetchTableRows($file, sub {
@@ -18,9 +18,9 @@ sub retrieveDriveList {
     return \%drives;
 }
 
-sub retrieveDirList {
+sub getBackupDirs {
     my $class = shift;
-    my $file = RJK::Filecheck::Config->get('dir.list.file');
+    my $file = RJK::Filecheck::Config->get('foswiki.backup.dirs.table.file');
     my %dirs;
 
     $class->_fetchTableRows($file, sub {
@@ -31,9 +31,9 @@ sub retrieveDirList {
     return \%dirs;
 }
 
-sub storeDirList {
+sub storeBackupDirs {
     my ($class, $list) = @_;
-    my $file = RJK::Filecheck::Config->get('dir.list.file') // die "No dir list file configured";
+    my $file = RJK::Filecheck::Config->get('foswiki.backup.dirs.table.file');
 
     open my $fh, '<', $file or die "$!: $file";
     open my $fhw, '>', "$file~" or die "$!: $file~";
