@@ -3,11 +3,11 @@ package Store;
 use strict;
 use warnings;
 
-use Filecheck;
+use RJK::Filecheck::Config;
 
 sub retrieveDriveList {
     my $class = shift;
-    my $file = Filecheck->getConfigProp('drive.list.file') // die "No drive list file configured";
+    my $file = RJK::Filecheck::Config->get('drive.list.file');
     my %drives;
 
     $class->_fetchTableRows($file, sub {
@@ -20,7 +20,7 @@ sub retrieveDriveList {
 
 sub retrieveDirList {
     my $class = shift;
-    my $file = Filecheck->getConfigProp('dir.list.file') // die "No dir list file configured";
+    my $file = RJK::Filecheck::Config->get('dir.list.file');
     my %dirs;
 
     $class->_fetchTableRows($file, sub {
@@ -33,7 +33,7 @@ sub retrieveDirList {
 
 sub storeDirList {
     my ($class, $list) = @_;
-    my $file = Filecheck->getConfigProp('dir.list.file') // die "No dir list file configured";
+    my $file = Filecheck::Config->get('dir.list.file') // die "No dir list file configured";
 
     open my $fh, '<', $file or die "$!: $file";
     open my $fhw, '>', "$file~" or die "$!: $file~";
