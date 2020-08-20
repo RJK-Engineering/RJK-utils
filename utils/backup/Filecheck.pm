@@ -3,23 +3,30 @@ package Filecheck;
 use strict;
 use warnings;
 
-use RJK::Util::Properties;
+use Module::Load;
 
-my $config;
+my $store;
+my $storeModule = "Store";
 
-sub getConfigProp {
-    my ($class, $prop) = @_;
-    $class->loadConfig() if ! $config;
-    return $config->get($prop);
+sub retrieveDriveList {
+    getStore()->retrieveDriveList();
 }
 
-sub loadConfig {
-    $config = new RJK::Util::Properties();
-    if ($ENV{FILECHECK_CONF_FILE}) {
-        $config->load($ENV{FILECHECK_CONF_FILE});
-    } else {
-        $config->load("$ENV{LOCALAPPDATA}/filecheck.properties");
+sub retrieveDirList {
+    getStore()->retrieveDirList();
+}
+
+sub storeDirList {
+    my ($class, $list) = @_;
+    getStore()->storeDirList($list);
+}
+
+sub getStore {
+    if (! $store) {
+        load $storeModule;
+        $store = $storeModule;
     }
+    return $store;
 }
 
 1;
