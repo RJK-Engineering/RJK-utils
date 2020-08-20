@@ -29,8 +29,6 @@ RJK::Options::Pod::GetOptions(
     "r|remove" => \$opts{remove}, "Remove dir from list - set removed date to current local date, set state to \"Removed\".",
     "m|move=s" => \$opts{move}, "Move backup to {drive}.",
     "u|unknown!" => \$opts{unknown}, "List unknown directories, default enabled, can be negated C<--no-unknown>.",
-    "dir-list-file" => \$opts{dirListFile}, "{Path} to directory list file.",
-    "drive-list-file" => \$opts{driveListFile}, "{Path} to drive list file.",
     "ignore-drives" => \$opts{ignoreDrives}, "Comma-separated list of drives not to include in C<--all> list.",
     ['POD'],
     RJK::Options::Pod::Options,
@@ -53,25 +51,25 @@ try {
 };
 
 sub go {
-    my $dirList = Filecheck->retrieveDirList;
+    my $backupDirs = Filecheck->getBackupDirs;
 
     if ($opts{all}) {
         $opts{ignoreDrives} = { map { $_ => 1 } split(/,/, $opts{ignoreDrives}) };
-        main->listAll($dirList);
+        main->listAll($backupDirs);
     } elsif ($opts{dir}) {
-        main->processDir($dirList, $opts{driveLabel}, $opts{dir});
+        main->processDir($backupDirs, $opts{driveLabel}, $opts{dir});
     } else {
-        main->processDrive($dirList, $opts{driveLabel});
+        main->processDrive($backupDirs, $opts{driveLabel});
     }
 
     if ($opts{_dirty}) {
-        Filecheck->storeDirList($dirList);
+        Filecheck->storeBackupDirs($backupDirs);
     }
 }
 
 sub processDir {
-    my ($self, $dirList, $driveLabel, $dir) = @_;
-    my $d = $dirList->{$driveLabel}{$dir};
+    my ($self, $backupDirs, $driveLabel, $dir) = @_;
+    my $d = $backupDirs->{$driveLabel}{$dir};
 
     if ($opts{state}) {
         if ($d->{State} eq $opts{state}) {
@@ -83,7 +81,7 @@ sub processDir {
     }
 
     if (defined $opts{backupOk}) {
-        $d = $dirList->{$driveLabel}{$dir} //= { Name => $dir };
+        $d = $backupDirs->{$driveLabel}{$dir} //= { Name => $dir };
         $self->backupOk($d);
     } else {
         if (! $d) {
@@ -98,7 +96,7 @@ sub processDir {
                 $d->{'Backup Location'} = $opts{move};
             }
         } elsif ($opts{remove}) {
-            delete $dirList->{$driveLabel}{$dir};
+            delete $backupDirs->{$driveLabel}{$dir};
             $opts{_dirty} = 1;
         }
     }
@@ -113,22 +111,9 @@ sub processDir {
         "State: ", $d->{State}//'';
 }
 
-sub backupOk {
-    my ($self, $d) = @_;
-    $d->{State} = "OK";
-    $d->{'Last Backup'} = main->formatDate;
-    $opts{_dirty} = 1;
-}
-
-sub formatDate {
-    my @d = localtime;
-    $d[5] -= 100 if $d[5] >= 100;
-    return sprintf "%02u-%02u-%02u", $d[3], $d[4]+1, $d[5];
-}
-
 sub processDrive {
-    my ($self, $dirList, $driveLabel) = @_;
-    my $dirs = $dirList->{$driveLabel};
+    my ($self, $backupDirs, $driveLabel) = @_;
+    my $dirs = $backupDirs->{$driveLabel};
     if ($dirs) {
         if (defined $opts{backupOk}) {
             if (! $opts{backupOk}) {
@@ -172,6 +157,19 @@ sub processDrive {
             $d->{'Backup Location'}//'', $d->{'Last Backup'}//'',
             $d->{Removed}//'', $d->{State}//'';
     }
+}
+
+sub backupOk {
+    my ($self, $d) = @_;
+    $d->{State} = "OK";
+    $d->{'Last Backup'} = main->formattedDate;
+    $opts{_dirty} = 1;
+}
+
+sub formattedDate {
+    my @d = localtime;
+    $d[5] -= 100 if $d[5] >= 100;
+    return sprintf "%02u-%02u-%02u", $d[3], $d[4]+1, $d[5];
 }
 
 sub listAll {
@@ -232,6 +230,6 @@ sub readDirs {
 
 sub getDriveLetter {
     my ($self, $driveLabel) = @_;
-    $opts{_drives} //= Filecheck->retrieveDriveList;
+    $opts{_drives} //= Filecheck->getDrives;
     return $opts{_drives}{$driveLabel}{Letter};
 }
