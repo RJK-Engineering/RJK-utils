@@ -152,7 +152,7 @@ Display extended help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("mpcmon.properties", (
+my %opts = RJK::LocalConf::GetOptions("mpcmon/mpcmon.properties", (
     run => 0,
     snapshotDir => '.',
     windowTitle => $0,
