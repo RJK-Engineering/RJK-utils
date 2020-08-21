@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Number::Bytes::Human;
+use Number::Bytes::Human qw(format_bytes);
 use Time::HiRes ();
 
 use RJK::File::Stats;
@@ -182,7 +182,8 @@ foreach (@dirs) {
 
 my $console = new RJK::Win32::Console();
 
-Synchronize(IndexTarget());
+my $filesInTarget = IndexTarget();
+Synchronize($filesInTarget);
 
 sub IndexTarget {
     my $lastDisplay = 0;
@@ -226,7 +227,7 @@ sub IndexTarget {
 sub Synchronize {
     my $filesInTarget = shift;
 
-    my $stats = RJK::File::Stats->createStats();
+    my $totals = RJK::File::Stats->createStats();
     my $visitor = new SyncFileVisitor($filesInTarget, \%opts);
 
     foreach my $dir (@dirs) {
@@ -243,16 +244,17 @@ sub Synchronize {
             exit;
         }
 
-        RJK::File::Stats->traverse($dir, $visitor, {}, $stats);
-        DisplayStats($stats);
+        my $stats = RJK::File::Stats->traverse($dir, $visitor, {}, $totals);
+        DisplayStats($totals);
     }
+    return $totals;
 }
 
 sub DisplayStats {
     my $stats = shift;
     $console->updateLine(
         sprintf "%s in %s files",
-            Number::Bytes::Human::format_bytes($stats->{size}),
+            format_bytes($stats->{size}),
             $stats->{visitFile}
     );
 }
