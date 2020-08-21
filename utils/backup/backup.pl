@@ -9,15 +9,16 @@ use warnings;
 
 use File::Basename;
 use lib dirname (__FILE__);
+use Number::Bytes::Human qw(format_bytes);
 use Try::Tiny;
 
 use RJK::Exception;
+use RJK::Filecheck;
+use RJK::TableRowFormatter;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::Util::JSON;
 use RJK::Win32::VolumeInfo;
-
-use Filecheck;
 
 my %opts = RJK::LocalConf::GetOptions("backup/backup.properties", (unknown => 1));
 
@@ -40,6 +41,16 @@ RJK::Options::Pod::GetOptions(
 $opts{driveLabel} = shift;
 $opts{dir} = shift;
 
+my $rowFormatter = new RJK::TableRowFormatter(
+    format => "%Name=-30 %Size=4 %Files=10 %'Backup Location'=-10 %'Last Backup'=8 %State",
+    filters => { Size => sub { $_[0] && format_bytes $_[0] } },
+    header => {
+        'Name' => 'Directory',
+        'Backup Location' => 'Backup',
+        'Last Backup' => 'Date'
+    }
+);
+
 try {
     go();
 } catch {
@@ -51,7 +62,7 @@ try {
 };
 
 sub go {
-    my $backupDirs = Filecheck->getBackupDirs;
+    my $backupDirs = RJK::Filecheck->getBackupDirs;
 
     if ($opts{all}) {
         $opts{ignoreDrives} = { map { $_ => 1 } split(/,/, $opts{ignoreDrives}) };
@@ -63,7 +74,7 @@ sub go {
     }
 
     if ($opts{_dirty}) {
-        Filecheck->storeBackupDirs($backupDirs);
+        RJK::Filecheck->storeBackupDirs($backupDirs);
     }
 }
 
@@ -120,9 +131,13 @@ sub processDrive {
                 print "Backup drive argument required\n";
                 return;
             }
-            foreach (values %$dirs) {
-                $self->backupOk($_) if $_->{'Backup Location'} eq $opts{backupOk};
+            $self->showHeader();
+            foreach (sort { $a->{Name} cmp $b->{Name} } values %$dirs) {
+                next if $_->{'Backup Location'} ne $opts{backupOk};
+                $self->backupOk($_);
+                $self->showRow($_);
             }
+            return;
         }
     } else {
         print "No data for drive: $driveLabel\n";
@@ -149,14 +164,21 @@ sub processDrive {
         }
     }
 
-    foreach (keys %$dirs) {
+    $self->showHeader() if keys %$dirs;
+    foreach (sort keys %$dirs) {
         my $d = $dirs->{$_};
         next unless $opts{unknown} || exists $d->{State};
-        printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n",
-            $d->{Name}, $d->{Files}//'', $d->{Size}//'',
-            $d->{'Backup Location'}//'', $d->{'Last Backup'}//'',
-            $d->{Removed}//'', $d->{State}//'';
+        $self->showRow($d);
     }
+}
+
+sub showHeader {
+    print $rowFormatter->header(), "\n";
+}
+
+sub showRow {
+    my ($self, $d) = @_;
+    print $rowFormatter->format($d), "\n";
 }
 
 sub backupOk {
@@ -230,6 +252,6 @@ sub readDirs {
 
 sub getDriveLetter {
     my ($self, $driveLabel) = @_;
-    $opts{_drives} //= Filecheck->getDrives;
+    $opts{_drives} //= RJK::Filecheck->getDrives;
     return $opts{_drives}{$driveLabel}{Letter};
 }
