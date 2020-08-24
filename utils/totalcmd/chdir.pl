@@ -132,7 +132,6 @@ if (@urls) {
     if (@fail) {
         print "$_\n" for @fail;
         $clip->Set(join "\n", @fail);
-        <STDIN>;
         exit 1;
     }
 } elsif (@paths == 1) {
