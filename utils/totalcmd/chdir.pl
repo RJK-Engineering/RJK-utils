@@ -123,7 +123,18 @@ foreach (@lines) {
 }
 
 if (@urls) {
-    exit system "dl \"$urls[0]\"";
+    my @fail;
+    foreach (@urls) {
+        if (system "dl \"$_\"") {
+            push @fail, $_;
+        }
+    }
+    if (@fail) {
+        print "$_\n" for @fail;
+        $clip->Set(join "\n", @fail);
+        <STDIN>;
+        exit 1;
+    }
 } elsif (@paths == 1) {
     $path = $paths[0];
 } elsif (@paths) {
