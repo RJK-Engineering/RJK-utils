@@ -212,7 +212,7 @@ $opts{snapshotBinDir} //= "$opts{snapshotDir}\\del";
 
 ###############################################################################
 
-$SIG{'INT'} = q(Interrupt);
+$SIG{INT} = 'Interrupt';
 
 my $control = new RJK::Media::MPC::MPCMonControl(\%opts);
 $control->init();
