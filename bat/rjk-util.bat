@@ -35,6 +35,7 @@ SHIFT & GOTO getarg
 :endgetarg
 
 if defined WORKSPACEENVIRONMENT (
+    set RJK_UTILS_HOME=c:\workspace\RJK-utils%
     set PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
     set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
 )
