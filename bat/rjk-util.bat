@@ -34,7 +34,10 @@ IF DEFINED args (SET args=%args% %1) ELSE (SET args=%1)
 SHIFT & GOTO getarg
 :endgetarg
 
-if defined WORKSPACEENVIRONMENT call se c:\workspace
+if defined WORKSPACEENVIRONMENT (
+    set PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
+    set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
+)
 
 perl %RJK_UTILS_HOME%\utils\%util% %args%
 
