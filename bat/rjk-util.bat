@@ -1,50 +1,41 @@
 @echo off
-
 setlocal
-if not defined RJK_UTILS_HOME FOR /F "delims=" %%P IN ("%~dp0..") DO set RJK_UTILS_HOME=%%~dpfP
 
-rem arguments: [UTIL] [OPTIONS] [ARGS]
+IF NOT DEFINED RJK_UTILS_HOME FOR /F "delims=" %%P IN ("%~dp0..") DO SET RJK_UTILS_HOME=%%~dpfP
 
-rem [UTIL] required
-IF "%~1" == "" GOTO USAGE
-SET util=%~1
-SHIFT
+rem clear vars, they are inherited from master environment
+SET debug=
+SET workspaceenvironment=
+SET nopause=
+SET pauseonexit=
 
-rem [OPTIONS]
-SET DEBUG=
-SET WORKSPACEENVIRONMENT=
-SET NOPAUSE=
-SET PAUSEONEXIT=
 :getopt
-IF "%~1" == "/d" SET DEBUG=1 & GOTO nextopt
-IF "%~1" == "/w" SET WORKSPACEENVIRONMENT=1 & GOTO nextopt
-IF "%~1" == "/n" SET NOPAUSE=1 & GOTO nextopt
-IF "%~1" == "/p" SET PAUSEONEXIT=1 & GOTO nextopt
-GOTO endgetopt
+IF "%~1"=="" GOTO endgetopt
+IF DEFINED args SET "args=%args% %1" & GOTO nextopt
+IF "%~1"=="/?" GOTO USAGE
+IF "%~1"=="/d" SET debug=1 & GOTO nextopt
+IF "%~1"=="/w" SET workspaceenvironment=1 & GOTO nextopt
+IF "%~1"=="/n" SET nopause=1 & GOTO nextopt
+IF "%~1"=="/p" SET pauseonexit=1 & GOTO nextopt
+IF NOT DEFINED util SET "util=%1" & GOTO nextopt
+SET args=%1
 :nextopt
 SHIFT & GOTO getopt
 :endgetopt
 
-rem [ARGS]
-set args=
-:getarg
-IF "%~1" == "" GOTO endgetarg
-IF "%~1" == "--" GOTO endgetarg
-IF DEFINED args (SET args=%args% %1) ELSE (SET args=%1)
-SHIFT & GOTO getarg
-:endgetarg
+IF NOT DEFINED util GOTO USAGE
 
-if defined WORKSPACEENVIRONMENT (
-    set RJK_UTILS_HOME=c:\workspace\RJK-utils%
-    set PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
-    set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
+IF DEFINED workspaceenvironment (
+    SET RJK_UTILS_HOME=c:\workspace\RJK-utils%
+    SET PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
+    SET PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
 )
 
 perl %RJK_UTILS_HOME%\utils\%util% %args%
 
-if defined NOPAUSE GOTO END
-if %errorlevel% gtr 0. pause & GOTO END
-if defined PAUSEONEXIT pause & GOTO END
+IF DEFINED nopause GOTO END
+IF %errorlevel% gtr 0. pause & GOTO END
+IF DEFINED pauseonexit pause & GOTO END
 
 GOTO END
 
