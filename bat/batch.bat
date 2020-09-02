@@ -3,49 +3,49 @@ SETLOCAL
 
 rem extended help
 IF "%~1" == "/?" GOTO HELP
-
-rem arguments: [COMMAND] [OPTIONS] [FILELISTFILE] [ARGS]
-
-rem [COMMAND] required
 IF "%~1" == "" GOTO USAGE
-SET cmd=%1
-rem use "call" for batch files
-IF "%~x1" == ".bat" SET cmd=call %1
-SHIFT
 
-rem [OPTIONS]
+rem clear vars, they are inherited from master environment
+SET display=
+SET pause=
+SET quiet=
+SET redirect=
+SET debug=
+SET filelist=
+SET cmd=
+SET args=
+
 :getopt
+IF "%~1"=="" GOTO endgetopt
+IF DEFINED args SET "args=%args% %1" & GOTO nextopt
 IF "%~1" == "/?" GOTO HELP
-IF "%~1" == "/f" SET display=%%~fF & GOTO nextopt
-IF "%~1" == "/n" SET display=%%~nxF & GOTO nextopt
-IF "%~1" == "/p" SET pause=1 & GOTO nextopt
-IF "%~1" == "/q" SET quiet=1 & GOTO nextopt
-IF "%~1" == "/r" SET redirect=1 & GOTO nextopt
-IF "%~1" == "/d" SET debug=1 & GOTO nextopt
-GOTO endgetopt
+IF "%~1" == "/f" SET "display=%%~fF" & GOTO nextopt
+IF "%~1" == "/n" SET "display=%%~nxF" & GOTO nextopt
+IF "%~1" == "/p" SET "pause=1" & GOTO nextopt
+IF "%~1" == "/q" SET "quiet=1" & GOTO nextopt
+IF "%~1" == "/r" SET "redirect=1" & GOTO nextopt
+IF "%~1" == "/d" SET "debug=1" & GOTO nextopt
+IF NOT DEFINED cmd SET "cmd=%1" & (IF "%~x1" == ".bat" SET "cmd=call %1") & GOTO nextopt
+IF NOT DEFINED filelist SET "filelist=%1" & GOTO nextopt
+SET args=%1
 :nextopt
 SHIFT & GOTO getopt
 :endgetopt
 
-rem [FILELISTFILE] required
-IF "%~1" == "" GOTO USAGE
-SET filelist=%1 & SHIFT
-
-rem [ARGS]
-:getarg
-IF "%~1" == "" GOTO endgetarg
-IF "%~1" == "--" GOTO endgetarg
-IF DEFINED args (SET args=%args% %1) ELSE (SET args=%1)
-SHIFT & GOTO getarg
-:endgetarg
-
 IF DEFINED debug (
+    ECHO *: %*
+    ECHO display: %display%
+    ECHO pause: %pause%
+    ECHO quiet: %quiet%
+    ECHO redirect: %redirect%
+    ECHO debug: %debug%
     ECHO filelist: %filelist%
     ECHO cmd: %cmd%
     ECHO args: %args%
-    ECHO display: %display%
     SET pause=1
 )
+
+IF NOT DEFINED filelist GOTO USAGE
 
 FOR /F "tokens=*" %%F IN (%filelist%) DO (
     IF DEFINED debug (
@@ -61,11 +61,10 @@ GOTO END
 :HELP
 SET help=1
 :USAGE
-ECHO USAGE: %0 [COMMAND] [OPTIONS] [FILELISTFILE] [ARGS]
+ECHO USAGE: %0 [OPTIONS] [COMMAND] [OPTIONS] [FILELIST] [OPTIONS] [ARGS]
 ECHO.
-ECHO Execute COMMAND with ARGS for every file in FILELISTFILE.
+ECHO Execute COMMAND with ARGS for every file in FILELIST.
 ECHO %%F in COMMAND or ARGS expands to the current file.
-ECHO In ARGS, arguments after a "--" will be ignored.
 ECHO.
 ECHO OPTIONS
 ECHO./?   Display extended help.
