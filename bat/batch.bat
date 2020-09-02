@@ -2,8 +2,8 @@
 SETLOCAL
 
 rem extended help
-IF "%~1" == "/?" GOTO HELP
-IF "%~1" == "" GOTO USAGE
+IF "%~1"=="/?" GOTO HELP
+IF "%~1"=="" GOTO USAGE
 
 rem clear vars, they are inherited from master environment
 SET display=
@@ -18,14 +18,14 @@ SET args=
 :getopt
 IF "%~1"=="" GOTO endgetopt
 IF DEFINED args SET "args=%args% %1" & GOTO nextopt
-IF "%~1" == "/?" GOTO HELP
-IF "%~1" == "/f" SET "display=%%~fF" & GOTO nextopt
-IF "%~1" == "/n" SET "display=%%~nxF" & GOTO nextopt
-IF "%~1" == "/p" SET "pause=1" & GOTO nextopt
-IF "%~1" == "/q" SET "quiet=1" & GOTO nextopt
-IF "%~1" == "/r" SET "redirect=1" & GOTO nextopt
-IF "%~1" == "/d" SET "debug=1" & GOTO nextopt
-IF NOT DEFINED cmd SET "cmd=%1" & (IF "%~x1" == ".bat" SET "cmd=call %1") & GOTO nextopt
+IF "%~1"=="/?" GOTO HELP
+IF "%~1"=="/f" SET "display=%%~fF" & GOTO nextopt
+IF "%~1"=="/n" SET "display=%%~nxF" & GOTO nextopt
+IF "%~1"=="/p" SET "pause=1" & GOTO nextopt
+IF "%~1"=="/q" SET "quiet=1" & GOTO nextopt
+IF "%~1"=="/r" SET "redirect=1" & GOTO nextopt
+IF "%~1"=="/d" SET "debug=1" & GOTO nextopt
+IF NOT DEFINED cmd SET "cmd=%1" & (IF "%~x1"==".bat" SET "cmd=call %1") & GOTO nextopt
 IF NOT DEFINED filelist SET "filelist=%1" & GOTO nextopt
 SET args=%1
 :nextopt
