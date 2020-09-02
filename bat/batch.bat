@@ -1,8 +1,6 @@
 @ECHO OFF
 SETLOCAL
 
-rem extended help
-IF "%~1"=="/?" GOTO HELP
 IF "%~1"=="" GOTO USAGE
 
 rem clear vars, they are inherited from master environment
