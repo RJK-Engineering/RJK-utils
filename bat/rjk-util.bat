@@ -8,6 +8,7 @@ SET debug=
 SET workspaceenvironment=
 SET nopause=
 SET pauseonexit=
+SET args=
 
 :getopt
 IF "%~1"=="" GOTO endgetopt
