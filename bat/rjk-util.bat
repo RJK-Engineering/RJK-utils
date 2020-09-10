@@ -12,13 +12,13 @@ SET args=
 
 :getopt
 IF "%~1"=="" GOTO endgetopt
-IF DEFINED args SET "args=%args% %1" & GOTO nextopt
+IF DEFINED args SET args=%args% %1& GOTO nextopt
 IF "%~1"=="/?" GOTO USAGE
-IF "%~1"=="/d" SET debug=1 & GOTO nextopt
-IF "%~1"=="/w" SET workspaceenvironment=1 & GOTO nextopt
-IF "%~1"=="/n" SET nopause=1 & GOTO nextopt
-IF "%~1"=="/p" SET pauseonexit=1 & GOTO nextopt
-IF NOT DEFINED util SET "util=%1" & GOTO nextopt
+IF "%~1"=="/d" SET debug=1& GOTO nextopt
+IF "%~1"=="/w" SET workspaceenvironment=1& GOTO nextopt
+IF "%~1"=="/n" SET nopause=1& GOTO nextopt
+IF "%~1"=="/p" SET pauseonexit=1& GOTO nextopt
+IF NOT DEFINED util SET util=%1& GOTO nextopt
 SET args=%1
 :nextopt
 SHIFT & GOTO getopt
@@ -32,7 +32,11 @@ IF DEFINED workspaceenvironment (
     SET PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
 )
 
-perl %RJK_UTILS_HOME%\utils\%util% %args%
+IF DEFINED debug (
+    echo perl %RJK_UTILS_HOME%\utils\%util% %args%
+) else (
+    perl %RJK_UTILS_HOME%\utils\%util% %args%
+)
 
 IF DEFINED nopause GOTO END
 IF %errorlevel% gtr 0. pause & GOTO END
