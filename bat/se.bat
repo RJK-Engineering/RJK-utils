@@ -22,10 +22,10 @@ FOR /F "tokens=1-10 delims=\ " %%i in ("%cd%") do (
 if not exist "%_environment%" echo Environment does not exist & goto END
 
 if "%_environment%"=="c:\workspace" (
-    set PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
+    set PATH=%PATH:c:\scripts\RJK-utils\bat;c:\scripts\RJK-utils\utils\bat;c:\scripts\RJK-utils\utils\totalcmd\bat=c:\workspace\RJK-utils\bat;c:\workspace\RJK-utils\utils\bat;c:\workspace\RJK-utils\utils\totalcmd\bat%
     set PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
 ) else if "%_environment%"=="c:\scripts" (
-    set PATH=%PATH:c:\workspace\RJK-utils\bat=c:\scripts\RJK-utils\bat%
+    set PATH=%PATH:c:\workspace\RJK-utils\bat;c:\workspace\RJK-utils\utils\bat;c:\workspace\RJK-utils\utils\totalcmd\bat=c:\scripts\RJK-utils\bat;c:\scripts\RJK-utils\utils\bat;c:\scripts\RJK-utils\utils\totalcmd\bat%
     set PERL5LIB=%PERL5LIB:c:\workspace\RJK-perl5lib\lib=c:\scripts\RJK-perl5lib\lib%
 ) else if defined _environment (
     echo Invalid environment & goto END
