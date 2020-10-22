@@ -31,9 +31,9 @@ SHIFT & GOTO getopt
 IF NOT DEFINED util GOTO USAGE
 
 IF DEFINED workspaceenvironment (
-    SET RJK_UTILS_HOME=c:\workspace\RJK-utils%
-    SET PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%
-    SET PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%
+    SET "RJK_UTILS_HOME=c:\workspace\RJK-utils%"
+    SET "PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%"
+    SET "PERL5LIB=%PERL5LIB:c:\scripts\RJK-perl5lib\lib=c:\workspace\RJK-perl5lib\lib%"
 )
 
 SET cmd=
