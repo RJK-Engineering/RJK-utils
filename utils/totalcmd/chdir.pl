@@ -130,10 +130,11 @@ if (@urls) {
         }
     }
     if (@fail) {
-        print "$_\n" for @fail;
+        print "FAILED: $_\n" for @fail;
         $clip->Set(join "\n", @fail);
         exit 1;
     }
+    exit;
 } elsif (@paths == 1) {
     $path = $paths[0];
 } elsif (@paths) {
