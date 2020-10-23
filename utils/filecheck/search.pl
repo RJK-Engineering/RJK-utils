@@ -464,14 +464,7 @@ my %opts = RJK::LocalConf::GetOptions("search/search.properties", (
     delimiters => ",;:.'\\|/[]",
 ));
 
-my $flags = $opts{flags} = {
-    archive => 2,
-    readonly => 2,
-    hidden => 2,
-    system => 2,
-    compressed => 2,
-    encrypted => 2,
-};
+my $flags = $opts{flags} = {};
 
 my @searchOpts = (
     ['General'],
@@ -480,7 +473,7 @@ my @searchOpts = (
         "Case insensitive search (default). Can be negated: C<--no-i>.",
 
     'e|regex' => \$flags->{regex}, "Search For: Regex.",
-    'selected' => \$flags->{selected}, "Only search in selected.",
+    #~ 'selected' => \$flags->{selected}, "Only search in selected.",
     'archives' => \$flags->{archives}, "Search archives.",
     'depth=i' => \$flags->{depth}, "Search depth.",
     #~ 'mindepth=i' => \$opts{mindepth}, "TODO Minimum search depth.",
@@ -546,7 +539,8 @@ my @searchOpts = (
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'n=i' => \$opts{numberOfResults}, "Stop after C<n> results.",
-    'l|list' => \$opts{list}, "Show list of saved searches.",
+    'searches' => \$opts{listSearches}, "Show list of saved searches.",
+    'l|list-dir-contents' => \$opts{listDirContents}, "Search for directories and list their contents.",
 
     'a|all-partitions' => \$opts{allPartitions},
         "Search all partitions. If no C<-a> or C<-p> is specified,\n".
@@ -615,14 +609,9 @@ try {
 };
 
 sub go {
-    return TotalCmdSearches->listSearches() if $opts{list};
+    return TotalCmdSearches->listSearches() if $opts{listSearches};
 
     my $tcSearch = TotalCmdSearches->getSearch(\%opts);
-    if ($tcSearch->{name}) {
-        $opts{searchDirs} //= $tcSearch->{flags}{directory};
-        $opts{searchFiles} //= $tcSearch->{flags}{directory} == 0;
-    }
-
     my $view = new UnicodeConsoleView();
     my @partitions = getPartitions() unless $opts{allPartitions};
 
