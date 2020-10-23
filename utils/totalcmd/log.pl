@@ -5,7 +5,7 @@ use Exception::Class;
 use File::Copy ();
 use File::Spec::Functions qw(splitpath);
 
-use RJK::HashToStringFormatter;
+use RJK::TableRowFormatter;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::TotalCmd::Log;
@@ -207,7 +207,7 @@ RJK::Options::Pod::GetOptions(
     RJK::Options::Pod::HelpOptions(['help|?'])
 );
 
-$opts{head} ||= defined $opts{head} ? 10 : 0;
+$opts{head} ||= defined $opts{head} ? 10 : -1;
 $opts{tail} ||= defined $opts{tail} ? 10 : 0;
 
 @ARGV ||
@@ -245,7 +245,7 @@ if ($opts{startDate}) {
 
 my @results;
 foreach (@logFiles) {
-    last if processLogfile($_, \@results);
+    processLogfile($_, \@results);
 }
 
 if ($opts{tail}) {
@@ -292,7 +292,7 @@ sub processLogfile {
         visitEntry => sub {
             if (match($_)) {
                 push @$results, $_;
-                return 1 if @$results == $opts{head};
+                return @$results == $opts{head};
             }
         },
         visitFailed => sub {
@@ -348,12 +348,14 @@ sub GetTerms {
 
 sub displayResults {
     my $results = shift;
-    my $formatter = new RJK::HashToStringFormatter($opts{format});
+    my $rowFormatter = new RJK::TableRowFormatter(
+        format => $opts{format},
+    );
 
     if (defined $opts{fields}) {
         if (@fields) {
             foreach my $r (@$results) {
-                print $formatter->format($r, @fields), "\n";
+                print $rowFormatter->format($r, @fields), "\n";
             }
         } else {
             print "@RJK::TotalCmd::Log::fields\n";
