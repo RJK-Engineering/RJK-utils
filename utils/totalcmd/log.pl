@@ -5,7 +5,6 @@ use Exception::Class;
 use File::Copy ();
 use File::Spec::Functions qw(splitpath);
 
-use RJK::TableRowFormatter;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::TotalCmd::Log;
@@ -190,16 +189,8 @@ RJK::Options::Pod::GetOptions(
     'archive-dir=s' => \$opts{archiveDir},
         "TODO",
 
-    ['FORMATTING'],
-    'f|fields:s' => \$opts{fields},
-        "Comma separated list of fields to show. Shows available fields if no [{names}] are specified.",
-    's|format:s' => \$opts{format},
-        "Use formatting. Shows formatting help if no [{format}] is specified.",
-
     'h|head:i' => \$opts{head},
         "Show first [{n}] results.",
-    't|tail:i' => \$opts{tail},
-        "Show last [{n}] results.",
 
     ['POD'],
     RJK::Options::Pod::Options,
@@ -208,13 +199,9 @@ RJK::Options::Pod::GetOptions(
 );
 
 $opts{head} ||= defined $opts{head} ? 10 : -1;
-$opts{tail} ||= defined $opts{tail} ? 10 : 0;
 
 @ARGV ||
-defined $opts{fields} ||
-$opts{list} ||
-$opts{head} ||
-$opts{tail} || RJK::Options::Pod::pod2usage(
+$opts{list} || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 
@@ -227,8 +214,6 @@ if (@ARGV) {
         throw Exception("Invalid search terms");
     }
 }
-
-my @fields = split /,/, $opts{fields} if $opts{fields};
 
 ###############################################################################
 
@@ -243,25 +228,18 @@ if ($opts{startDate}) {
     $opts{startDate} -= 10000; # subtract one year
 }
 
-my @results;
+my $results = 0;
 foreach (@logFiles) {
-    processLogfile($_, \@results);
+    processLogfile($_);
+    last if $results == $opts{head};
 }
 
-if ($opts{tail}) {
-    my $first = @results - $opts{tail};
-    if ($first >= 0) {
-        @results = @results[$first .. @results-1];
-    }
-}
-
-displayResults(\@results);
 logRotate();
 
 ###############################################################################
 
 sub processLogfile {
-    my ($logfile, $results) = @_;
+    my ($logfile) = @_;
 
     my (undef, undef, $file) = splitpath($logfile);
     if (! $opts{all} && $opts{startDate}) {
@@ -291,8 +269,8 @@ sub processLogfile {
         file => $logfile,
         visitEntry => sub {
             if (match($_)) {
-                push @$results, $_;
-                return @$results == $opts{head};
+                displayResult($_);
+                return ++$results == $opts{head};
             }
         },
         visitFailed => sub {
@@ -300,6 +278,14 @@ sub processLogfile {
             return 0;
         },
     );
+}
+
+sub displayResult {
+    my $entry = shift;
+    print "$entry->{operation} $entry->{source}\n";
+    if ($entry->{destination}) {
+        print "  -> $entry->{destination}\n";
+    }
 }
 
 sub match {
@@ -346,56 +332,28 @@ sub GetTerms {
     return wantarray ? @searchTerms : \@searchTerms;
 }
 
-sub displayResults {
-    my $results = shift;
-    my $rowFormatter = new RJK::TableRowFormatter(
-        format => $opts{format},
-    );
-
-    if (defined $opts{fields}) {
-        if (@fields) {
-            foreach my $r (@$results) {
-                print $rowFormatter->format($r, @fields), "\n";
-            }
-        } else {
-            print "@RJK::TotalCmd::Log::fields\n";
-        }
-    } else {
-        foreach (@$results) {
-            print "$_->{operation} $_->{source}\n";
-            if ($_->{destination}) {
-                print "  -> $_->{destination}\n";
-            }
-        }
-    }
-}
-
 sub logRotate {
     my $logSize = (-s $opts{logFile}) || 0;
-    if ($opts{archiveSize} && $logSize > $opts{archiveSize} * 1024**2) {
-        if (! -e $opts{archiveDir}) {
-            mkdir $opts{archiveDir} or throw Exception("$!: $opts{archiveDir}");
-        }
-        if (! -r $opts{archiveDir}) {
-            throw Exception("$!: $opts{archiveDir}");
-        }
+    return if ! $opts{archiveSize} || $logSize < $opts{archiveSize} * 1024**2;
 
-        my (undef, undef, $file) = splitpath($opts{logFile});
-        my @d = localtime;
-        my $d = sprintf "%04d%02d%02d", $d[5]+1900, $d[4]+1, $d[3];
-        $file =~ s/\.log$/-$d.log/;
-        $file = "$opts{archiveDir}\\$file";
+    if (! -e $opts{archiveDir}) {
+        mkdir $opts{archiveDir} or throw Exception("$!: $opts{archiveDir}");
+    }
+    throw Exception("$!: $opts{archiveDir}") if ! -r $opts{archiveDir};
 
-        if (-e $file) {
-            throw Exception("File exists: $file");
-        } else {
-            File::Copy::move($opts{logFile}, $file) or throw Exception("$!: $file");
-            if (open my $fh, '>', $opts{logFile}) {
-                close $fh;
-            } else {
-                warn "$!: $opts{logFile}";
-            }
-        }
+    my (undef, undef, $file) = splitpath($opts{logFile});
+    my @d = localtime;
+    my $d = sprintf "%04d%02d%02d", $d[5]+1900, $d[4]+1, $d[3];
+    $file =~ s/\.log$/-$d.log/;
+    $file = "$opts{archiveDir}\\$file";
+
+    throw Exception("File exists: $file") if -e $file;
+
+    File::Copy::move($opts{logFile}, $file) or throw Exception("$!: $file");
+    if (open my $fh, '>', $opts{logFile}) {
+        close $fh;
+    } else {
+        warn "$!: $opts{logFile}";
     }
 }
 
