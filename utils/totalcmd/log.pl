@@ -28,79 +28,61 @@ log.pl -h
 
 =over 4
 
-=item B<-a -all>
+=item B<-a --all>
 
 Search all available archives.
 
-=item B<-S -search-source>
+=item B<-S --search-source>
 
 Only search sources (search sources and destinations by default).
 
-=item B<-D -search-destination>
+=item B<-D --search-destination>
 
 Only search destinations (search sources and destinations by default).
 
-=item B<-l -list>
+=item B<-l --list>
 
 List log files.
 
-=item B<-m -archive-size [n]>
+=item B<-m --archive-size [n]>
 
 Move log to archive when exceeding [n] mb.
 
-=item B<-f -search-files>
+=item B<-f --search-files>
 
 TODO
 
-=item B<-g -search-directories>
+=item B<-g --search-directories>
 
 TODO
 
-=item B<-d -start-date [date]>
+=item B<-d --start-date [date]>
 
 Search start date. YYYYMMDD formatted number, does numeric comparison, zero padded on right-hand-side, e.g. for "201": 20100000 < 20100101
 
-=item B<-e -regex>
+=item B<-e --regex>
 
 Use regular expression.
 
-=item B<-o -operation [string]>
+=item B<-o --operation [string]>
 
 Filter by operation matching start of operation name, i.e. 'm' for 'Move'.
 
-=item B<-p -plugin-op>
+=item B<-p --plugin-op>
 
 TODO
 
-=item B<-log-file [string]>
+=item B<--log-file [string]>
 
 Path to Total Commander log file.
 
-=item B<-archive-dir [string]>
+=item B<--archive-dir [string]>
 
 TODO
 
-=back
-
-=head1 FORMATTING
-
-=over 4
-
-=item B<-f -fields [names]>
-
-Comma separated list of fields to show. Shows available fields if no [names] are specified.
-
-=item B<-s -format [format]>
-
-Use formatting. Shows formatting help if no [format] is specified.
-
-=item B<-h -head [n]>
+=item B<-h --head [n]>
 
 Show first [n] results.
-
-=item B<-t -tail [n]>
-
-Show last [n] results.
 
 =back
 
@@ -108,21 +90,21 @@ Show last [n] results.
 
 =over 4
 
-=item B<-podcheck>
+=item B<--podcheck>
 
 Run podchecker.
 
-=item B<-pod2html -html [path]>
+=item B<--pod2html --html [path]>
 
 Run pod2html. Writes to [path] if specified. Writes to
 F<[path]/{scriptname}.html> if [path] is a directory.
 E.g. C<--html .> writes to F<./{scriptname}.html>.
 
-=item B<-genpod>
+=item B<--genpod>
 
 Generate POD for options.
 
-=item B<-writepod>
+=item B<--writepod>
 
 Write generated POD to script file.
 The POD text will be inserted between C<=for options start> and
@@ -138,13 +120,13 @@ A backup is created.
 
 =over 4
 
-=item B<-help -?>
+=item B<--help -?>
 
 Display extended help.
 
-=item B<-help-all>
+=item B<--help-all>
 
-Display complete help.
+Display all help.
 
 =back
 
