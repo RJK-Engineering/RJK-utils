@@ -58,7 +58,7 @@ sub showPartitionSearchDone {
     $c->Attr($FG_WHITE);
     $c->Write("╰╴");
     $c->Attr($ATTR_NORMAL);
-    $c->Write(format_bytes($self->{results}{part}{size}) . "\n");
+    $c->Write(format_bytes($self->{results}{part}{size}||0) . "\n");
 }
 
 sub showDirSearchStart {
@@ -109,7 +109,7 @@ sub showResult {
         $c->Attr($FG_WHITE);
         $c->Write("││");
         $c->Attr($ATTR_NORMAL);
-        $c->Write(sprintf " %4.4s ", format_bytes $stat->{size});
+        $c->Write(sprintf "%5.5s ", format_bytes $stat->{size});
         $c->Write("$file->{path}\n");
     }
 
