@@ -18,6 +18,7 @@ sub execute {
 
     my $lstDir = new RJK::IO::File($ddfLstDir);
     my @files = getDdfFiles($lstDir, $partitions);
+
     my $traverseStats = new RJK::File::TraverseStats();
     my $visitor = new FileSearchVisitor($view, $tcSearch, $opts, $traverseStats);
     my $visitorWithStats = new RJK::FileVisitor::StatsWrapper($visitor, $traverseStats);
