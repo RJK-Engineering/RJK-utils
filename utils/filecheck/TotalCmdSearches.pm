@@ -28,18 +28,30 @@ sub getSearch {
     $search->{SearchIn} = $opts->{searchIn};
     $search->{SearchText} = $opts->{searchText};
 
+    my $flags = $search->{flags};
+    my %flags = %{$opts->{flags}};
+
+    foreach (keys %flags) {
+        $flags->{$_} = $flags{$_} if defined $flags{$_};
+    }
+
+    $flags->{directory} = 1 if $opts->{searchDirs};
+    $flags->{directory} = 0 if $opts->{searchFiles};
+
     addNameRules($search, $opts);
     addPerlRules($search, $opts);
+
     return $search;
 }
 
 sub addNameRules {
     my ($search, $opts) = @_;
+    my $flags = $search->{flags};
 
     my $op;
     if ($opts->{exact}) {
         $op = $opts->{ignoreCase} ? '=' : '=(case)';
-    } elsif ($opts->{regex}) {
+    } elsif ($flags->{regex}) {
         $op = $opts->{ignoreCase} ? 'regex' : 're.(case)';
     } else {
         $op = $opts->{ignoreCase} ? 'contains' : 'cont.(case)';
