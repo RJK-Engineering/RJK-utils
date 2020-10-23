@@ -22,8 +22,6 @@ use RJK::TreeVisitResult;
    * =$search= - =RJK::TotalCmd::Search= object.
    * =%opts= - option hash.
       * =$opts{numberOfResults}= - Stop searching after n results.
-      * =$opts{searchDirs}= - Search for dirs.
-      * =$opts{searchFiles}= - Search for files.
    * =$stats= - =RJK::File::TraverseStats= object.
    * =$fileSearchVisitor= - New =FileSearchVisitor= object.
 
@@ -45,7 +43,7 @@ sub new {
 
 sub visitFile {
     my ($self, $file, $stat) = @_;
-    return if $self->{opts}{searchDirs};
+    return if $self->{search}{flags}{directory} == 1;
     return $self->_match($file, $stat);
 }
 
@@ -53,7 +51,7 @@ sub preVisitFiles {
     my ($self, $dir, $stat, $files, $dirs) = @_;
     $self->{view}->showDirSearchStart($dir, $stat);
     $self->{results}{dir} = {};
-    return if $self->{opts}{searchFiles};
+    return if $self->{search}{flags}{directory} == 0;
     return $self->_match($dir, $stat);
 }
 
