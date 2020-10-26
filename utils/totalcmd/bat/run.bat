@@ -7,6 +7,7 @@ rem clear vars, they are inherited from master environment
 SET pause=
 SET nopause=
 SET quiet=
+SET noerror=
 SET redirect=
 SET debug=
 SET cmd=
@@ -18,8 +19,9 @@ IF DEFINED args SET "args=%args% %1" & GOTO nextopt
 IF "%~1"=="/?" GOTO HELP
 IF "%~1"=="/p" SET "pause=1" & GOTO nextopt
 IF "%~1"=="/-p" SET "nopause=1" & GOTO nextopt
-IF "%~1"=="/q" SET "quiet=1" & GOTO nextopt
-IF "%~1"=="/r" SET "redirect=1" & GOTO nextopt
+IF "%~1"=="/q" SET "quiet=>NUL" & GOTO nextopt
+IF "%~1"=="/-e" SET "noerror=2>NUL" & GOTO nextopt
+IF "%~1"=="/r" SET "redirect=2>&1" & GOTO nextopt
 IF "%~1"=="/d" SET "debug=1" & GOTO nextopt
 IF NOT DEFINED cmd SET "cmd=%1" & (IF "%~x1"==".bat" SET "cmd=call %1") & GOTO nextopt
 SET args=%1
@@ -32,6 +34,7 @@ IF DEFINED debug (
     ECHO pause: %pause%
     ECHO nopause: %nopause%
     ECHO quiet: %quiet%
+    ECHO noerror: %noerror%
     ECHO redirect: %redirect%
     ECHO debug: %debug%
     ECHO cmd: %cmd%
@@ -41,19 +44,7 @@ IF DEFINED debug (
 
 IF NOT DEFINED cmd GOTO USAGE
 
-IF DEFINED debug (
-    ECHO %cmd% %args%
-) ELSE IF DEFINED quiet (
-    IF DEFINED redirect (
-        %cmd% %args% >NUL 2>&1
-    ) ELSE (
-        %cmd% %args% >NUL
-    )
-) ELSE IF DEFINED redirect (
-    %cmd% %args% 2>&1
-) ELSE (
-    %cmd% %args%
-)
+%cmd% %args% %quiet% %noerror% %redirect%
 GOTO END
 
 :HELP
@@ -66,6 +57,7 @@ ECHO./?   Display extended help.
 ECHO./p   Pause before exit (only pauses on error by default, overrides /-p).
 ECHO./-p  No pause before exit (pauses on error by default).
 ECHO./q   Be quiet (suppress standard output).
+ECHO./-e  No error output (suppress standard error).
 ECHO./r   Redirect standard error output to standard output.
 ECHO./d   Debug mode.
 IF NOT DEFINED help GOTO END
