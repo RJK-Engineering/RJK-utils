@@ -6,6 +6,7 @@ IF "%~1"=="" GOTO USAGE
 rem clear vars, they are inherited from master environment
 SET display=
 SET pause=
+SET nopause=
 SET quiet=
 SET redirect=
 SET debug=
