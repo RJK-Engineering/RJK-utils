@@ -8,6 +8,7 @@ SET display=
 SET pause=
 SET nopause=
 SET quiet=
+SET noerror=
 SET redirect=
 SET debug=
 SET filelist=
@@ -22,8 +23,9 @@ IF "%~1"=="/f" SET "display=%%~fF" & GOTO nextopt
 IF "%~1"=="/n" SET "display=%%~nxF" & GOTO nextopt
 IF "%~1"=="/p" SET "pause=1" & GOTO nextopt
 IF "%~1"=="/-p" SET "nopause=1" & GOTO nextopt
-IF "%~1"=="/q" SET "quiet=1" & GOTO nextopt
-IF "%~1"=="/r" SET "redirect=1" & GOTO nextopt
+IF "%~1"=="/q" SET "quiet=>NUL" & GOTO nextopt
+IF "%~1"=="/-e" SET "noerror=2>NUL" & GOTO nextopt
+IF "%~1"=="/r" SET "redirect=2>&1" & GOTO nextopt
 IF "%~1"=="/d" SET "debug=1" & GOTO nextopt
 IF NOT DEFINED cmd SET "cmd=%1" & (IF "%~x1"==".bat" SET "cmd=call %1") & GOTO nextopt
 IF NOT DEFINED filelist SET "filelist=%1" & GOTO nextopt
@@ -38,6 +40,7 @@ IF DEFINED debug (
     ECHO pause: %pause%
     ECHO nopause: %nopause%
     ECHO quiet: %quiet%
+    ECHO noerror: %noerror%
     ECHO redirect: %redirect%
     ECHO debug: %debug%
     ECHO filelist: %filelist%
@@ -54,17 +57,7 @@ FOR /F "tokens=*" %%F IN (%filelist%) DO (
         ECHO %cmd% %args%
     ) ELSE (
         IF DEFINED display ECHO %display%
-        IF DEFINED quiet (
-            IF DEFINED redirect (
-                %cmd% %args% >NUL 2>&1
-            ) ELSE (
-                %cmd% %args% >NUL
-            )
-        ) ELSE IF DEFINED redirect (
-            %cmd% %args% 2>&1
-        ) ELSE (
-            %cmd% %args%
-        )
+        %cmd% %args% %quiet% %noerror% %redirect%
     )
 )
 GOTO END
@@ -84,6 +77,7 @@ ECHO./n   Display file name before each execution.
 ECHO./p   Pause before exit (only pauses on error by default, overrides /-p).
 ECHO./-p  No pause before exit (pauses on error by default).
 ECHO./q   Be quiet (suppress standard output).
+ECHO./-e  No error output (suppress standard error).
 ECHO./r   Redirect standard error output to standard output.
 ECHO./d   Debug mode.
 IF NOT DEFINED help GOTO END
