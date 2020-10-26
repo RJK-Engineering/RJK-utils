@@ -20,6 +20,7 @@ IF "%~1"=="/?" GOTO HELP
 IF "%~1"=="/f" SET "display=%%~fF" & GOTO nextopt
 IF "%~1"=="/n" SET "display=%%~nxF" & GOTO nextopt
 IF "%~1"=="/p" SET "pause=1" & GOTO nextopt
+IF "%~1"=="/-p" SET "nopause=1" & GOTO nextopt
 IF "%~1"=="/q" SET "quiet=1" & GOTO nextopt
 IF "%~1"=="/r" SET "redirect=1" & GOTO nextopt
 IF "%~1"=="/d" SET "debug=1" & GOTO nextopt
@@ -34,6 +35,7 @@ IF DEFINED debug (
     ECHO *: %*
     ECHO display: %display%
     ECHO pause: %pause%
+    ECHO nopause: %nopause%
     ECHO quiet: %quiet%
     ECHO redirect: %redirect%
     ECHO debug: %debug%
@@ -51,7 +53,17 @@ FOR /F "tokens=*" %%F IN (%filelist%) DO (
         ECHO %cmd% %args%
     ) ELSE (
         IF DEFINED display ECHO %display%
-        IF DEFINED quiet (%cmd% %args% >NUL) ELSE IF DEFINED redirect (%cmd% %args% 2>&1) ELSE (%cmd% %args%)
+        IF DEFINED quiet (
+            IF DEFINED redirect (
+                %cmd% %args% >NUL 2>&1
+            ) ELSE (
+                %cmd% %args% >NUL
+            )
+        ) ELSE IF DEFINED redirect (
+            %cmd% %args% 2>&1
+        ) ELSE (
+            %cmd% %args%
+        )
     )
 )
 GOTO END
@@ -68,8 +80,10 @@ ECHO OPTIONS
 ECHO./?   Display extended help.
 ECHO./f   Display fully qualified path name before each execution.
 ECHO./n   Display file name before each execution.
-ECHO./p   Pause before exit.
+ECHO./p   Pause before exit (only pauses on error by default, overrides /-p).
+ECHO./-p  No pause before exit (pauses on error by default).
 ECHO./q   Be quiet (suppress standard output).
+ECHO./r   Redirect standard error output to standard output.
 ECHO./d   Debug mode.
 IF NOT DEFINED help GOTO END
 
@@ -105,6 +119,6 @@ ECHO (source: http://www.microsoft.com/resources/documentation/windows/xp/all/pr
 :END
 IF %errorlevel% GTR 0 (
     ECHO Error level %errorlevel%
-    SET pause=1
+    IF NOT DEFINED nopause SET pause=1
 )
 IF DEFINED pause pause
