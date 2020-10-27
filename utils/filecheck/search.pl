@@ -619,7 +619,7 @@ sub go {
 }
 
 sub getPartitions {
-    my $status = RJK::Util::JSON->read($opts{statusFile});
+    my $status = RJK::Util::JSON->read($opts{statusFile} =~ s/%(\w+)%/$ENV{$1}/gr);
     my @partitions;
     if ($opts{partitions}) {
         @partitions = split /[\Q$opts{delimiters}\E]/, $opts{partitions};
