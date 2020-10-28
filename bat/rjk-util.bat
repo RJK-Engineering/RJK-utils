@@ -7,7 +7,7 @@ rem clear vars, they are inherited from master environment
 SET debug=
 SET workspaceenvironment=
 SET nopause=
-SET pauseonexit=
+SET pause=
 SET clip=
 SET args=
 
@@ -18,7 +18,8 @@ IF "%~1"=="/?" GOTO USAGE
 IF "%~1"=="/d" SET "debug=1" & GOTO nextopt
 IF "%~1"=="/w" SET "workspaceenvironment=1" & GOTO nextopt
 IF "%~1"=="/n" SET "nopause=1" & GOTO nextopt
-IF "%~1"=="/p" SET "pauseonexit=1" & GOTO nextopt
+IF "%~1"=="/p" SET "pause=1" & GOTO nextopt
+IF "%~1"=="/-p" SET "nopause=1" & GOTO nextopt
 IF "%~1"=="/c" SET "clip=|CLIP" & GOTO nextopt
 IF NOT DEFINED util (
     SET util=%1
@@ -47,14 +48,14 @@ IF DEFINED debug (
 ) else (
     %cmd% %RJK_UTILS_HOME%\utils\%util% %args% %clip%
 )
-
-IF DEFINED nopause GOTO END
-IF %errorlevel% gtr 0. pause & GOTO END
-IF DEFINED pauseonexit pause & GOTO END
-
 GOTO END
 
 :USAGE
 ECHO USAGE: %0 [UTIL] [OPTIONS] [ARGS]
 
 :END
+IF %errorlevel% GTR 0 (
+    ECHO Error level %errorlevel%
+    IF NOT DEFINED nopause SET pause=1
+)
+IF DEFINED pause pause
