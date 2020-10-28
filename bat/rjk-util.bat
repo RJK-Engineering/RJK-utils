@@ -8,16 +8,18 @@ SET debug=
 SET workspaceenvironment=
 SET nopause=
 SET pauseonexit=
+SET clip=
 SET args=
 
 :getopt
 IF "%~1"=="" GOTO endgetopt
-IF DEFINED args SET args=%args% %1& GOTO nextopt
+IF DEFINED args SET "args=%args% %1" & GOTO nextopt
 IF "%~1"=="/?" GOTO USAGE
-IF "%~1"=="/d" SET debug=1& GOTO nextopt
-IF "%~1"=="/w" SET workspaceenvironment=1& GOTO nextopt
-IF "%~1"=="/n" SET nopause=1& GOTO nextopt
-IF "%~1"=="/p" SET pauseonexit=1& GOTO nextopt
+IF "%~1"=="/d" SET "debug=1" & GOTO nextopt
+IF "%~1"=="/w" SET "workspaceenvironment=1" & GOTO nextopt
+IF "%~1"=="/n" SET "nopause=1" & GOTO nextopt
+IF "%~1"=="/p" SET "pauseonexit=1" & GOTO nextopt
+IF "%~1"=="/c" SET "clip=|CLIP" & GOTO nextopt
 IF NOT DEFINED util (
     SET util=%1
     SET extension=%~x1
@@ -43,7 +45,7 @@ IF "%extension%"==".bat" SET cmd=call
 IF DEFINED debug (
     echo %cmd% %RJK_UTILS_HOME%\utils\%util% %args%
 ) else (
-    %cmd% %RJK_UTILS_HOME%\utils\%util% %args%
+    %cmd% %RJK_UTILS_HOME%\utils\%util% %args% %clip%
 )
 
 IF DEFINED nopause GOTO END
