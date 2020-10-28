@@ -1,1 +1,1 @@
-@call rjk-util /-p timecalc.pl %*
+@call rjk-util /-p /c timecalc.pl %*
