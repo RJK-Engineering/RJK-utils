@@ -66,7 +66,13 @@ if (! $site || $opts{best}) {
     download();
     exit;
 }
-if ($site->{preferredResolution}) {
+if ($site->{preferredFormat}) {
+    if (my $f = $site->{formats}{$site->{preferredFormat}}) {
+        $opts{format} = $f;
+    } else {
+        $opts{format} = $site->{preferredFormat};
+    }
+} elsif ($site->{preferredResolution}) {
     dd $formats->{resolutions};
     my @resolutions = sort { $b <=> $a } keys %{$formats->{resolutions}};
     dd \@resolutions;
