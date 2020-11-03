@@ -86,7 +86,11 @@ download();
 
 sub getSite {
     if ($opts{url} =~ /^http/) {
-        return RJK::Sites->get($opts{url});
+        my $site = RJK::Sites->get($opts{url});
+        if ($site && $site->{downloadUrlCleanup}) {
+            $opts{url} =~ s/$site->{downloadUrlCleanup}//;
+        }
+        return $site;
     } else {
         my $site = RJK::Sites->getForId($opts{url}) || die "No site";
         $opts{url} = $site->getDownloadUrl($opts{url});
