@@ -139,5 +139,5 @@ sub download {
 
     my $cmd = join " ", @cmd;
     print "$cmd\n";
-    #~ system($cmd);
+    system($cmd);
 }
