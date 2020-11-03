@@ -9,6 +9,8 @@ SET workspaceenvironment=
 SET nopause=
 SET pause=
 SET clip=
+SET util=
+SET extension=
 SET args=
 
 :getopt
