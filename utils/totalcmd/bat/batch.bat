@@ -35,17 +35,12 @@ SHIFT & GOTO getopt
 :endgetopt
 
 IF DEFINED debug (
-    ECHO *: %*
-    ECHO display: %display%
-    ECHO pause: %pause%
-    ECHO nopause: %nopause%
-    ECHO quiet: %quiet%
-    ECHO noerror: %noerror%
-    ECHO redirect: %redirect%
-    ECHO debug: %debug%
-    ECHO filelist: %filelist%
-    ECHO cmd: %cmd%
-    ECHO args: %args%
+    ECHO *=%*
+    ECHO display=%display% pause=%pause% nopause=%nopause%
+    ECHO quiet="%quiet%" noerror="%noerror%" redirect="%redirect%"
+    ECHO filelist=%filelist%
+    ECHO cmd=%cmd%
+    ECHO args=%args%
     SET pause=1
 )
 
