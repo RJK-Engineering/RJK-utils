@@ -1,12 +1,11 @@
 use strict;
 use warnings;
 
-
 use DateTime;
 use DateTime::Format::Strptime;
 use Try::Tiny;
 
-use RJK::Media::TimeFormat;
+use RJK::TimeFormatter;
 use RJK::Media::Humax::Hmt;
 use RJK::Options::Pod;
 
@@ -201,7 +200,7 @@ sub ProcessFile {
     if ($display{bookmarks}) {
         printf $fh "Bookmarks: %s\n",
             join " ",
-                map { RJK::Media::TimeFormat::humanReadableFormat($_) }
+                map { RJK::TimeFormatter->format($_, 0) }
                 @{$info->{bookmarks}}
                      if @{$info->{bookmarks}};
     }
