@@ -15,12 +15,18 @@ if ($op) {
         exit;
     } elsif ($op =~ /^e$/) {
         exit system "edit", $dlistfile;
+    } elsif ($op =~ /^l$/) {
+        $dlist->read($dlistfile);
+        foreach (@{$dlist->list}) {
+            print "$_\n";
+        }
+        exit;
     }
 }
 
 if (!$to) {
     print "USAGE: $0 [op] [from] [to]\n";
-    print "[op] = clear | c(opy) | m(ove) | e(dit)\n";
+    print "[op] = clear | c(opy) | m(ove) | e(dit) | l(ist)\n";
     exit 1;
 }
 
