@@ -21,12 +21,26 @@ if ($op) {
             print "$_\n";
         }
         exit;
+    } elsif ($op =~ /^r$/) {
+        my $dlistOkRemoved = new RJK::TotalCmd::DownloadList();
+        $dlist->read($dlistfile);
+        foreach (@{$dlist->list}) {
+            if (/^OK-/) {
+                print "$_\n";
+                next;
+            }
+            push @{$dlistOkRemoved->{list}}, $_;
+        }
+        $dlistOkRemoved->write($dlistfile);
+        exit;
     }
 }
 
 if (!$to) {
-    print "USAGE: $0 [op] [from] [to]\n";
-    print "[op] = clear | c(opy) | m(ove) | e(dit) | l(ist)\n";
+    print "USAGE: $0 [op]\n";
+    print "       $0 [op2] [from] [to]\n";
+    print "[op]  := l(ist) | e(dit) | r(emove-ok) | clear\n";
+    print "[op2] := c(opy) | m(ove)\n";
     exit 1;
 }
 
