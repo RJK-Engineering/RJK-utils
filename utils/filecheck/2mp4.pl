@@ -9,13 +9,14 @@ use RJK::File::Path::Util;
 use RJK::File::Stats;
 
 my %opts = (
-    sourceDir =>'c:\download\2',
-    targetDir => 'c:\temp\tdsst',
     keepNotOk => 1,
     copyNotOk => 0,
     dryRun => 1,
     sizePercentage => .99
 );
+
+$opts{sourceDir} = shift;
+$opts{targetDir} = shift;
 
 my (@failed, @bigger, @toosmall);
 
@@ -52,10 +53,10 @@ my $visitor = new RJK::SimpleFileVisitor(
         my $ok = 0;
         if (! -e $targetFile) {
             push @failed, $sourceFile;
-        } elsif (-s $targetFile > -s $sourceFile) {
+        } elsif ((-s $targetFile) > (-s $sourceFile)) {
             push @bigger, [ $sourceFile, $targetFile ];
             unlink $targetFile unless $opts{keepNotOk} || $opts{dryRun};
-        } elsif (-s $targetFile / -s $sourceFile < $opts{sizePercentage}) {
+        } elsif ((-s $targetFile) / (-s $sourceFile) < $opts{sizePercentage}) {
             push @toosmall, [ $sourceFile, $targetFile ];
             unlink $targetFile unless $opts{keepNotOk} || $opts{dryRun};
         } else {
@@ -65,7 +66,9 @@ my $visitor = new RJK::SimpleFileVisitor(
     }
 );
 
-chdir $opts{sourceDir};
+$opts{sourceDir} || die "No source directory specified";
+$opts{targetDir} || die "No target directory specified";
+chdir $opts{sourceDir} || die "$!: $opts{sourceDir}";
 my $stats = RJK::File::Stats->traverse(".", $visitor);
 
 print "failed\n" if @failed;
