@@ -6,12 +6,11 @@ use File::Copy ();
 use RJK::Files;
 use RJK::SimpleFileVisitor;
 use RJK::File::Path::Util;
-use RJK::File::Stats;
 
 my %opts = (
+    dryRun => 0,
     keepNotOk => 1,
     copyNotOk => 0,
-    dryRun => 1,
     sizePercentage => .99
 );
 
@@ -69,7 +68,7 @@ my $visitor = new RJK::SimpleFileVisitor(
 $opts{sourceDir} || die "No source directory specified";
 $opts{targetDir} || die "No target directory specified";
 chdir $opts{sourceDir} || die "$!: $opts{sourceDir}";
-my $stats = RJK::File::Stats->traverse(".", $visitor);
+RJK::Files->traverse(".", $visitor);
 
 print "failed\n" if @failed;
 foreach (@failed) {
