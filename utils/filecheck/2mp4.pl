@@ -34,7 +34,8 @@ my $visitor = new RJK::SimpleFileVisitor(
         return if $file->{name} !~ /\.(mp4|flv)$/i;
 
         my $sourceFile = "$opts{sourceDir}\\$file->{path}";
-        my $targetFile = "$opts{targetDir}\\$file->{directories}$file->{basename}.mp4";
+        my $targetDir = "$opts{targetDir}\\$file->{directories}";
+        my $targetFile = "$targetDir$file->{basename}.mp4";
 
         my @cmd = (
             "avidemux_cli", "--force-alt-h264",
@@ -59,9 +60,17 @@ my $visitor = new RJK::SimpleFileVisitor(
             push @toosmall, [ $sourceFile, $targetFile ];
             unlink $targetFile unless $opts{keepNotOk} || $opts{dryRun};
         } else {
+            # copy modified time
+            if (my @stat = stat $sourceFile) {
+                my $atime = time;
+                my $mtime = $stat[9];
+                utime $atime, $mtime, $targetFile or warn "$!: $atime, $mtime, $targetFile";
+            } else {
+                warn "$!: $sourceFile";
+            }
             $ok = 1;
         }
-        File::Copy::copy $sourceFile, $targetFile if !$ok && $opts{copyNotOk} && !$opts{dryRun};
+        File::Copy::copy $sourceFile, $targetDir if !$ok && $opts{copyNotOk} && !$opts{dryRun};
     }
 );
 
