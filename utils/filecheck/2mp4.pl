@@ -51,11 +51,19 @@ sub getVisitor {
         },
         visitFile => sub {
             my ($file, $stat) = @_;
-            return if $file->{name} !~ /\.(mp4|flv)$/i;
+            return if $file->{name} !~ /\.(mp4|flv)$/;
 
+            my $ext = $1;
             my $source = "$opts{sourceDir}\\$file->{path}";
-            my $target = "$opts{targetDir}\\$file->{directories}$file->{basename}.mp4";
+            my $mp4    = "$file->{directories}$file->{basename}.mp4";
+            my $target = "$opts{targetDir}\\$mp4";
             my $copy   = "$opts{targetDir}\\$file->{path}";
+
+            if ($ext eq 'flv' && -e "$opts{sourceDir}\\$mp4") {
+                print "Mp4 exists in source: $mp4\n";
+                copyFile($source, $copy);
+                return;
+            }
 
             if (-e $copy) {
                 print "Copy exists: $copy\n";
