@@ -25,9 +25,10 @@ my $visitor = new RJK::SimpleFileVisitor(
         print "$error: $file->{path}\n";
     },
     preVisitDir => sub {
-        my ($file, $stat) = @_;
-        my $targetDir = "$opts{targetDir}\\$file->{path}";
-        checkdir($targetDir);
+        my ($dir, $stat) = @_;
+        my $targetDir = "$opts{targetDir}\\$dir->{path}";
+        print "$targetDir\n";
+        RJK::File::Path::Util::checkdir($targetDir) unless $opts{dryRun};
     },
     visitFile => sub {
         my ($file, $stat) = @_;
@@ -61,13 +62,9 @@ my $visitor = new RJK::SimpleFileVisitor(
             unlink $targetFile unless $opts{keepNotOk} || $opts{dryRun};
         } else {
             # copy modified time
-            if (my @stat = stat $sourceFile) {
-                my $atime = time;
-                my $mtime = $stat[9];
-                utime $atime, $mtime, $targetFile or warn "$!: $atime, $mtime, $targetFile";
-            } else {
-                warn "$!: $sourceFile";
-            }
+            my $atime = time;
+            my $mtime = $stat->{modified};
+            utime $atime, $mtime, $targetFile or warn "$!: $atime, $mtime, $targetFile";
             $ok = 1;
         }
         File::Copy::copy $sourceFile, $targetDir if !$ok && $opts{copyNotOk} && !$opts{dryRun};
@@ -92,10 +89,4 @@ print "toosmall\n" if @toosmall;
 foreach (@toosmall) {
     print "$_->[0]\n";
     print "$_->[1]\n";
-}
-
-sub checkdir {
-    my $dir = shift;
-    print "checkdir $dir\n";
-    RJK::File::Path::Util::checkdir($dir) unless $opts{dryRun};
 }
