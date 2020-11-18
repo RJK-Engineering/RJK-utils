@@ -9,6 +9,7 @@ use RJK::File::Path::Util;
 
 my %opts = (
     dryRun => 0,
+    overwrite => 0,
     keepNotOk => 1,
     copyNotOk => 0,
     sizePercentage => .99
@@ -46,6 +47,12 @@ my $visitor = new RJK::SimpleFileVisitor(
             "--quit", ">NUL"
         );
 
+        if (! $opts{overwrite} && -e $targetFile) {
+            print "Exists: $targetFile\n";
+            copyModifiedTime($targetFile, $stat);
+            return;
+        }
+
         print "@cmd\n";
         # can't suppress stdout using system() (>NUL doesn't work)
         # avidemux doesn't return an exit code :/$@#%$%@!&*^%!
@@ -61,10 +68,7 @@ my $visitor = new RJK::SimpleFileVisitor(
             push @toosmall, [ $sourceFile, $targetFile ];
             unlink $targetFile unless $opts{keepNotOk} || $opts{dryRun};
         } else {
-            # copy modified time
-            my $atime = time;
-            my $mtime = $stat->{modified};
-            utime $atime, $mtime, $targetFile or warn "$!: $atime, $mtime, $targetFile";
+            copyModifiedTime($targetFile, $stat);
             $ok = 1;
         }
         File::Copy::copy $sourceFile, $targetDir if !$ok && $opts{copyNotOk} && !$opts{dryRun};
@@ -89,4 +93,11 @@ print "toosmall\n" if @toosmall;
 foreach (@toosmall) {
     print "$_->[0]\n";
     print "$_->[1]\n";
+}
+
+sub copyModifiedTime {
+    my ($targetFile, $stat) = @_;
+    my $atime = time;
+    my $mtime = $stat->{modified};
+    utime $atime, $mtime, $targetFile or warn "$!: $atime, $mtime, $targetFile";
 }
