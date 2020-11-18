@@ -10,9 +10,9 @@ use RJK::File::Path::Util;
 my %opts = (
     dryRun => 0,
     overwrite => 0,
-    keepNotOk => 1,
-    copyNotOk => 0,
-    sizePercentage => .99
+    keepBigger => 0,
+    copyNotOk => 1,
+    sizePercentage => .98
 );
 
 $opts{sourceDir} = shift;
@@ -58,20 +58,22 @@ my $visitor = new RJK::SimpleFileVisitor(
         # avidemux doesn't return an exit code :/$@#%$%@!&*^%!
         `@cmd` unless $opts{dryRun};
 
-        my $ok = 0;
+        my $copy;
         if (! -e $targetFile) {
             push @failed, $sourceFile;
+            $copy = 1;
         } elsif ((-s $targetFile) > (-s $sourceFile)) {
             push @bigger, [ $sourceFile, $targetFile ];
-            unlink $targetFile unless $opts{keepNotOk} || $opts{dryRun};
+            if (! $opts{keepBigger}) {
+                unlink $targetFile unless $opts{keepBigger} || $opts{dryRun};
+                $copy = 1;
+            }
         } elsif ((-s $targetFile) / (-s $sourceFile) < $opts{sizePercentage}) {
             push @toosmall, [ $sourceFile, $targetFile ];
-            unlink $targetFile unless $opts{keepNotOk} || $opts{dryRun};
         } else {
             copyModifiedTime($targetFile, $stat);
-            $ok = 1;
         }
-        File::Copy::copy $sourceFile, $targetDir if !$ok && $opts{copyNotOk} && !$opts{dryRun};
+        File::Copy::copy $sourceFile, $targetDir if $copy && $opts{copyNotOk} && !$opts{dryRun};
     }
 );
 
