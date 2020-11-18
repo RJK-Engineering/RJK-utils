@@ -12,75 +12,15 @@ my %opts = (
     overwrite => 0,
     keepBigger => 0,
     copyNotOk => 1,
-    sizePercentage => .98
+    sizePercentage => .96
 );
 
-$opts{sourceDir} = shift;
-$opts{targetDir} = shift;
+$opts{sourceDir} = shift || die "No source directory specified";
+$opts{targetDir} = shift || die "No target directory specified";
 
 my (@failed, @bigger, @toosmall);
-
-my $visitor = new RJK::SimpleFileVisitor(
-    visitFileFailed => sub {
-        my ($file, $error) = @_;
-        print "$error: $file->{path}\n";
-    },
-    preVisitDir => sub {
-        my ($dir, $stat) = @_;
-        my $targetDir = "$opts{targetDir}\\$dir->{path}";
-        print "$targetDir\n";
-        RJK::File::Path::Util::checkdir($targetDir) unless $opts{dryRun};
-    },
-    visitFile => sub {
-        my ($file, $stat) = @_;
-        return if $file->{name} !~ /\.(mp4|flv)$/i;
-
-        my $sourceFile = "$opts{sourceDir}\\$file->{path}";
-        my $targetDir = "$opts{targetDir}\\$file->{directories}";
-        my $targetFile = "$targetDir$file->{basename}.mp4";
-
-        my @cmd = (
-            "avidemux_cli", "--force-alt-h264",
-            "--load", "\"$sourceFile\"",
-            "--output-format", "MP4v2",
-            "--save", "\"$targetFile\"",
-            "--quit", ">NUL"
-        );
-
-        if (! $opts{overwrite} && -e $targetFile) {
-            print "Exists: $targetFile\n";
-            copyModifiedTime($targetFile, $stat);
-            return;
-        }
-
-        print "@cmd\n";
-        # can't suppress stdout using system() (>NUL doesn't work)
-        # avidemux doesn't return an exit code :/$@#%$%@!&*^%!
-        `@cmd` unless $opts{dryRun};
-
-        my $copy;
-        if (! -e $targetFile) {
-            push @failed, $sourceFile;
-            $copy = 1;
-        } elsif ((-s $targetFile) > (-s $sourceFile)) {
-            push @bigger, [ $sourceFile, $targetFile ];
-            if (! $opts{keepBigger}) {
-                unlink $targetFile unless $opts{keepBigger} || $opts{dryRun};
-                $copy = 1;
-            }
-        } elsif ((-s $targetFile) / (-s $sourceFile) < $opts{sizePercentage}) {
-            push @toosmall, [ $sourceFile, $targetFile ];
-        } else {
-            copyModifiedTime($targetFile, $stat);
-        }
-        File::Copy::copy $sourceFile, $targetDir if $copy && $opts{copyNotOk} && !$opts{dryRun};
-    }
-);
-
-$opts{sourceDir} || die "No source directory specified";
-$opts{targetDir} || die "No target directory specified";
 chdir $opts{sourceDir} || die "$!: $opts{sourceDir}";
-RJK::Files->traverse(".", $visitor);
+RJK::Files->traverse(".", getVisitor());
 
 print "failed\n" if @failed;
 foreach (@failed) {
@@ -95,6 +35,87 @@ print "toosmall\n" if @toosmall;
 foreach (@toosmall) {
     print "$_->[0]\n";
     print "$_->[1]\n";
+}
+
+sub getVisitor {
+    return new RJK::SimpleFileVisitor(
+        visitFileFailed => sub {
+            my ($file, $error) = @_;
+            print "$error: $file->{path}\n";
+        },
+        preVisitDir => sub {
+            my ($dir, $stat) = @_;
+            my $targetDir = "$opts{targetDir}\\$dir->{path}";
+            print "$targetDir\n";
+            RJK::File::Path::Util::checkdir($targetDir) unless $opts{dryRun};
+        },
+        visitFile => sub {
+            my ($file, $stat) = @_;
+            return if $file->{name} !~ /\.(mp4|flv)$/i;
+
+            my $source = "$opts{sourceDir}\\$file->{path}";
+            my $target = "$opts{targetDir}\\$file->{directories}$file->{basename}.mp4";
+            my $copy   = "$opts{targetDir}\\$file->{path}";
+
+            if (-e $copy) {
+                print "Copy exists: $copy\n";
+            } elsif (! $opts{overwrite} && -e $target) {
+                print "Target exists: $target\n";
+                checkTargetFile($source, $target, $copy, $stat);
+            } else {
+                createTargetFile($source, $target, $copy, $stat);
+            }
+        }
+    );
+}
+
+sub createTargetFile {
+    my ($source, $target, $copy, $sourceStat) = @_;
+    my @cmd = (
+        "avidemux_cli", "--force-alt-h264",
+        "--load", "\"$source\"",
+        "--output-format", "MP4v2",
+        "--save", "\"$target\"",
+        "--quit", ">NUL"
+    );
+    print "@cmd\n";
+
+    # can't suppress stdout using system() (>NUL doesn't work)
+    # avidemux doesn't return an exit code :/$@#%$%@!&*^%!
+    `@cmd` unless $opts{dryRun};
+
+    if (-e $target) {
+        checkTargetFile($source, $target, $copy, $sourceStat);
+    } else {
+        push @failed, $source;
+        copyFile($source, $copy);
+    }
+}
+
+sub checkTargetFile {
+    my ($source, $target, $copy, $sourceStat) = @_;
+
+    if ((-s $target) > (-s $source)) {
+        push @bigger, [ $source, $target ];
+        if (! $opts{keepBigger}) {
+            unlink $target unless $opts{keepBigger} || $opts{dryRun};
+            copyFile($source, $copy);
+        }
+    } elsif ((my $pct = (-s $target) / (-s $source)) < $opts{sizePercentage}) {
+        print "Too small: $pct\n";
+        push @toosmall, [ $source, $target ];
+    } else {
+        copyModifiedTime($target, $sourceStat);
+    }
+}
+
+sub copyFile {
+    my ($source, $target) = @_;
+    if (-e $target) {
+        print "Exists: $target\n";
+    } else {
+        File::Copy::copy $source, $target if $opts{copyNotOk} && !$opts{dryRun};
+    }
 }
 
 sub copyModifiedTime {
