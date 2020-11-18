@@ -5,13 +5,13 @@ use RJK::Files;
 use RJK::SimpleFileVisitor;
 
 my %opts = (
-    verbose => 1
+    #~ verbose => 1
 );
 
 $opts{sourceDir} = shift;
 
 my $formats;
-my (@exist, @failed);
+my (@exist, @failed, $renamedExt);
 
 my $visitor = new RJK::SimpleFileVisitor(
     visitFileFailed => sub {
@@ -46,9 +46,12 @@ my $visitor = new RJK::SimpleFileVisitor(
         }
         return if $file->{name} =~ /\.$ext/;
 
-        my $newName = $path =~ s/\.\w+$/.$ext/r;
+        my $newName = $path =~ s/(?:\.(\w+))?$/.$ext/r;
+        print "No extension: $path\n" if ! $1;
+        $renamedExt->{$1}{$ext} //= 1;
+
         #~ print "$path\n";
-        print "rename $path, $newName\n";
+        print "Rename $path -> $newName\n";
         if (-e $newName) {
             print "File exists: $newName\n";
             push @exist, $path;
@@ -63,6 +66,7 @@ RJK::Files->traverse($opts{sourceDir}, $visitor);
 
 use Data::Dump;
 dd $formats;
+dd $renamedExt;
 
 print "failed\n" if @failed;
 foreach (@failed) {
