@@ -15,14 +15,14 @@ SET args=
 
 :getopt
 IF "%~1"=="" GOTO endgetopt
-IF DEFINED args SET "args=%args% %1" & GOTO nextopt
+IF DEFINED args SET args=%args% %1& GOTO nextopt
 IF "%~1"=="/?" GOTO USAGE
-IF "%~1"=="/d" SET "debug=1" & GOTO nextopt
-IF "%~1"=="/w" SET "workspaceenvironment=1" & GOTO nextopt
-IF "%~1"=="/n" SET "nopause=1" & GOTO nextopt
-IF "%~1"=="/p" SET "pause=1" & GOTO nextopt
-IF "%~1"=="/-p" SET "nopause=1" & GOTO nextopt
-IF "%~1"=="/c" SET "clip=|CLIP" & GOTO nextopt
+IF "%~1"=="/d" SET debug=1& GOTO nextopt
+IF "%~1"=="/w" SET workspaceenvironment=1& GOTO nextopt
+IF "%~1"=="/n" SET nopause=1& GOTO nextopt
+IF "%~1"=="/p" SET pause=1& GOTO nextopt
+IF "%~1"=="/-p" SET nopause=1& GOTO nextopt
+IF "%~1"=="/c" SET "clip=|CLIP"& GOTO nextopt
 IF NOT DEFINED util (
     SET util=%1
     SET extension=%~x1
