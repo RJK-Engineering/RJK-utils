@@ -44,28 +44,21 @@ RJK::Options::Pod::GetOptions(
     RJK::Options::Pod::HelpOptions
 );
 
-#~  || RJK::Options::Pod::pod2usage(
-#~     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP"
-#~ );
-
-# quiet!
-#~ $opts{verbose} = 0 if $opts{quiet};
-
 ###############################################################################
 
 $opts{url} = $ARGV[0] || die;
 
 my $site = getSite();
-my $formats = getFormats();
-
-if ($opts{listFormats}) {
-    exit;
-}
-
 if (! $site || $opts{best}) {
     download();
     exit;
 }
+
+my $formats = getFormats();
+if ($opts{listFormats}) {
+    exit;
+}
+
 if ($site->{preferredFormat}) {
     if (my $f = $site->{formats}{$site->{preferredFormat}}) {
         $opts{format} = $f;
