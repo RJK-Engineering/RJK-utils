@@ -212,10 +212,20 @@ $opts{snapshotBinDir} //= "$opts{snapshotDir}\\del";
 
 ###############################################################################
 
-$SIG{INT} = 'Interrupt';
-
 my $control = new RJK::Media::MPC::MPCMonControl(\%opts);
 $control->init();
+
+if ($opts{status}) {
+    $control->showStatus;
+    my $status = $control->getStatus;
+    use Data::Dump;
+    dd $status;
+
+    print (($status->{position}/1000) * 30);
+    exit;
+}
+
+$SIG{INT} = 'Interrupt';
 $control->start();
 
 ###############################################################################
