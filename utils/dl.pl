@@ -25,6 +25,7 @@ use RJK::Site;
 use RJK::Sites;
 
 my %opts = (
+    #~ best => 1,
     #~ listFormats => 1,
     #~ noHistory => 1,
     #~ preferredRequired => 1,
@@ -49,13 +50,14 @@ RJK::Options::Pod::GetOptions(
 $opts{url} = $ARGV[0] || die;
 
 my $site = getSite();
-if (! $site || $opts{best}) {
-    download();
+my $formats = getFormats() || exit;
+
+if ($opts{listFormats}) {
     exit;
 }
 
-my $formats = getFormats();
-if ($opts{listFormats}) {
+if (! $site || $opts{best}) {
+    download();
     exit;
 }
 
@@ -99,16 +101,23 @@ sub getSite {
 
 sub getFormats {
     my $formats = {};
-    my $cmd = "youtube-dl -F $opts{url}";
+    my $cmd = "youtube-dl -F $opts{url} 2>&1";
     my @lines = `$cmd`;
 
     my $parse = 0;
     foreach (@lines) {
+        if (/ERROR.*is locked/) {
+            print;
+            return;
+        }
         if (/^format\s+code/) {
             $parse = 1;
             next;
         }
-        next if ! $parse;
+        if (! $parse) {
+            print;
+            next;
+        }
         chomp;
         if (/(.*?)\s+(.*?)\s+(.*?)\s+(.*)/) {
             print "$1\t$2\t$3\t$4\n";
