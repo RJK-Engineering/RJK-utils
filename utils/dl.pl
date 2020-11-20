@@ -106,7 +106,7 @@ sub getFormats {
 
     my $parse = 0;
     foreach (@lines) {
-        if (/ERROR.*is locked/) {
+        if (/ERROR.*is (locked|private)/) {
             print;
             return;
         }
