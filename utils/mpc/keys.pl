@@ -253,22 +253,16 @@ foreach my $b (qw(Left Middle Right X1 X2 Wheel)) {
 
 ###############################################################################
 
-my %mods = MPC::GetCommandMods($opts{mpchcIni});
-my $ids = MPC::GetIds($opts{resourceHeader});
-my @commands = MPC::GetCommands($opts{appSettingsCpp}, $ids);
-
-my %virtualKeys = MPC::GetVirtualKeys($opts{virtkeyDescr});
-#~ foreach
+my @shortcuts = values %shortcuts;
 
 if ($opts{set} || $opts{update}) {
     Set();
 } elsif ($opts{stats}) {
-    printf "%s user defined keys\n", scalar keys %mods;
-    printf "%s commands\n", scalar @commands;
-    %descr = MPC::GetDescriptions($opts{mpchcRc});
-    printf "%s command descriptions\n", scalar keys %descr;
-    printf "%s virtual keys\n", scalar keys %virtualKeys;
-    printf "\nIni file: %s\n", MPC::IniPath();
+    #~ printf "%s user defined keys\n", scalar keys %mods;
+    printf "%s shortcuts\n", scalar @shortcuts;
+    printf "%s command descriptions\n", scalar keys %descriptions;
+    printf "%s virtual keys\n", scalar keys %$vkeynames;
+    printf "\nIni file: %s\n", $mpc->getMpcIni->file;
 } else {
     List();
 }
@@ -285,11 +279,11 @@ sub List {
             qw(ID KEY MOUSE_WINDOWED MOUSE_FULLSCREEN DESCRIPTION);
     }
 
-    %descr = MPC::GetDescriptions($opts{mpchcRc});
+    %descriptions = MPC::GetDescriptions($opts{mpchcRc});
     #~ %virtualKeys = MPC::GetVirtualKeys($opts{virtkeyDescr});
     %virtualKeyNames = MPC::GetVirtualKeyNames($opts{virtkeyDescr});
 
-    foreach (@commands) {
+    foreach (@shortcuts) {
         DisplayCommand($_);
     }
 }
@@ -317,7 +311,7 @@ sub DisplayCommand {
     my $name = $cmd->{name};
 
     # user defined keys
-    my $user = $mods{$id} // {};
+    #~ my $user = $mods{$id} // {};
     my $mouseWind = $user->{mouseWindowed} // 0;
     my $mouseFull = $user->{mouseFullscreen} // 0;
 
@@ -336,7 +330,7 @@ sub DisplayCommand {
             $id, $key, $defaultKey, $f2,
             $mouseButtons[$mouseWind],
             $mouseButtons[$mouseFull],
-            $name, $descr{$name};
+            $name, $descriptions{$name};
     } else {
         if ($opts{default} && ! $opts{user}) {
             # show default keys only
@@ -353,7 +347,7 @@ sub DisplayCommand {
             $id, $key,
             $mouseButtons[$mouseWind],
             $mouseButtons[$mouseFull],
-            $descr{$name};
+            $descriptions{$name};
     }
 }
 
@@ -452,9 +446,9 @@ sub Set {
 
     my @cmds;
 
-    foreach my $cmd (@commands) {
+    foreach my $cmd (@shortcuts) {
         my $id = $cmd->{id};
-        my $user = $mods{$id};
+        #~ my $user = $mods{$id};
 
         my $input;
         if ($input = delete $cmds{$id}) {
@@ -496,7 +490,7 @@ sub Set {
         print "Unknown id: $_\n";
     }
 
-    MPC::SetCommandMods($opts{mpchcIni}, \@cmds);
+    #~ MPC::SetCommandMods($opts{mpchcIni}, \@cmds);
 }
 
 sub getModifCode {
