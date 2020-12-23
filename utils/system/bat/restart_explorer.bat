@@ -1,2 +1,2 @@
 taskkill /f /im explorer.exe
-explorer.exe
+c:\Windows\explorer.exe
