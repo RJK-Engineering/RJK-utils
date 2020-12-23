@@ -57,6 +57,7 @@ if ($opts{listFormats}) {
 }
 
 if (! $site || $opts{best}) {
+    print "No site found\n";
     download();
     exit;
 }
