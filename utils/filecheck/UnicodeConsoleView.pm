@@ -3,7 +3,7 @@ package UnicodeConsoleView;
 use strict;
 use warnings;
 
-use Number::Bytes::Human qw(format_bytes);
+use RJK::HumanReadable::Size;
 use Win32::Console;
 Win32::Console::OutputCP(65001);
 
@@ -58,7 +58,7 @@ sub showPartitionSearchDone {
     $c->Attr($FG_WHITE);
     $c->Write("╰╴");
     $c->Attr($ATTR_NORMAL);
-    $c->Write(format_bytes($self->{results}{part}{size}||0) . "\n");
+    $c->Write(RJK::HumanReadable::Size->get($self->{results}{part}{size}||0) . "\n");
 }
 
 sub showDirSearchStart {
@@ -79,11 +79,9 @@ sub showDirSearchDone {
 
     if ($self->{shownDirHeader}) {
         $c->Attr($FG_WHITE);
-        $c->Write("│╰");
-        my $s = format_bytes $self->{results}{dir}{size};
-        $c->Write("─"x(4 - length $s) . "╴");
+        $c->Write("│╰╴");
         $c->Attr($ATTR_NORMAL);
-        $c->Write("$s\n");
+        $c->Write(RJK::HumanReadable::Size->get($self->{results}{dir}{size}) . "\n");
     }
 
     if ($message) {
@@ -109,7 +107,7 @@ sub showResult {
         $c->Attr($FG_WHITE);
         $c->Write("││");
         $c->Attr($ATTR_NORMAL);
-        $c->Write(sprintf "%5.5s ", format_bytes $stat->{size});
+        $c->Write(sprintf "%5.5s ", RJK::HumanReadable::Size->get($stat->{size}));
         $c->Write("$file->{path}\n");
     }
 
