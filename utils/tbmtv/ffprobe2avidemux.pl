@@ -7,10 +7,10 @@ my $csv = shift;
 my %opts = @ARGV;
 
 my $script = getScript();
-my $video = getVideo();
+open my $fhScript, '>', $script or die "$!: $script";
 
 open my $fhCsv, '<', $csv or die "$!: $csv";
-open my $fhScript, '>', $script or die "$!: $script";
+my $video = getVideo();
 writeScriptStart();
 
 my ($frameNr, $currFrame, $prevFrame, $inSegm, $startTime, $total);
@@ -29,7 +29,6 @@ stopSegm() if $inSegm;
 
 writeScriptEnd();
 close $fhScript;
-
 print "\nTotal: $total\n";
 
 sub getScript {
