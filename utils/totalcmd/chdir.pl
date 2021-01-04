@@ -169,7 +169,7 @@ if (! -e $path) {
         $path =~ s/[^\x20-\xFF]/?/gr;
 }
 
-RJK::TotalCmd::Utils::setSourcePath($path);
+RJK::TotalCmd::Utils->setSourcePath($path);
 
 sub Exit {
     print shift, "\n";
