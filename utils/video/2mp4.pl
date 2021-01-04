@@ -55,7 +55,7 @@ sub getVisitor {
 
             my $ext = $1;
             my $source = "$opts{sourceDir}\\$file->{path}";
-            my $mp4    = "$file->{directories}$file->{basename}.mp4";
+            my $mp4    = "$file->{directories}\\$file->{basename}.mp4";
             my $target = "$opts{targetDir}\\$mp4";
             my $copy   = "$opts{targetDir}\\$file->{path}";
 
