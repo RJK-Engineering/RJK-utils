@@ -12,6 +12,7 @@ my %opts = (
 );
 
 $opts{sourceDir} = shift;
+$opts{position} = shift // 30;
 
 my $visitor = new RJK::SimpleFileVisitor(
     visitFileFailed => sub {
@@ -85,8 +86,8 @@ sub createSnapshots {
         }
     });
     if (! $existing) {
-        my $snapshot = "$path->{dir}$path->{basename}_30s.jpg";
-        createSnapshot($path, 30, $snapshot);
+        my $snapshot = "$path->{parent}\\$path->{basename}_$opts{position}s.jpg";
+        createSnapshot($path, $opts{position}, $snapshot);
     }
 }
 
