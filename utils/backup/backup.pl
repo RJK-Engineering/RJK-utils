@@ -1,55 +1,65 @@
 =pod
 
-backup.pl [drive] [directory]
+backup.pl [options] [volume] [directory]
 
 =cut
 
 use strict;
 use warnings;
 
-use File::Basename;
-use lib dirname (__FILE__);
 use Number::Bytes::Human qw(format_bytes);
 use Try::Tiny;
 
 use RJK::Exception;
+use RJK::File::Stats;
 use RJK::Filecheck;
-use RJK::TableRowFormatter;
 use RJK::LocalConf;
 use RJK::Options::Pod;
+use RJK::TableRowFormatter;
 use RJK::Util::JSON;
 use RJK::Win32::VolumeInfo;
 
-my %opts = RJK::LocalConf::GetOptions("backup/backup.properties", (unknown => 1));
+my %opts = RJK::LocalConf::GetOptions("backup/backup.properties");
+@ARGV || RJK::Options::Pod::ShortHelp;
 
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
-    "a|all" => \$opts{all}, "List all directories on all accessible drives.",
-    "b|backup-ok|ok:s" => \$opts{backupOk}, "Mark backup ok - set date to current local date, set state to \"OK\".",
-    "s|state=s" => \$opts{state}, "Set backup {state} - state should be set to \"Incomplete\" if dir changes.",
-    "r|remove" => \$opts{remove}, "Remove dir from list - set removed date to current local date, set state to \"Removed\".",
-    "m|move=s" => \$opts{move}, "Move backup to {drive}.",
-    "u|unknown!" => \$opts{unknown}, "List unknown directories, default enabled, can be negated C<--no-unknown>.",
-    "ignore-drives" => \$opts{ignoreDrives}, "Comma-separated list of drives not to include in C<--all> list.",
+    "volumes" => \$opts{procVolumes}, "",
+    "d|backup-dirs" => \$opts{procBackupDirs}, "",
+    "b|backup-ok|ok=s" => \$opts{backupOk}, "Mark backup to {volume} as completed.",
+    "location=s" => \$opts{location}, "",
+
+    "ignore-drives" => \$opts{ignoreDrives}, "Comma-separated list of drives to ignore.",
+
+    "c|create" => \$opts{create}, "",
+    "u|update" => \$opts{update}, "",
+
     ['POD'],
     RJK::Options::Pod::Options,
     ['Help'],
     RJK::Options::Pod::HelpOptions
 );
 
-@ARGV || $opts{all} || RJK::Options::Pod::ShortHelp;
-$opts{driveLabel} = shift;
+$opts{volume} = shift;
 $opts{dir} = shift;
 
-my $rowFormatter = new RJK::TableRowFormatter(
-    format => "%Name=-30 %Size=4 %Files=10 %'Backup Location'=-10 %'Last Backup'=8 %State",
-    filters => { Size => sub { $_[0] && format_bytes $_[0] } },
+my $sizeFormatter = sub { $_[0] && format_bytes $_[0] };
+my $backupDirRow = new RJK::TableRowFormatter(
+    format => "%volume=-10 %name=-30 %size=4 %files=10 %backupLocation=-10 %lastBackup=8 %state",
+    filters => { size => $sizeFormatter },
     header => {
-        'Name' => 'Directory',
-        'Backup Location' => 'Backup',
-        'Last Backup' => 'Date'
+        name => 'Directory',
+        backupLocation => 'Backup',
+        lastBackup => 'Date'
     }
 );
+my $volumeRow = new RJK::TableRowFormatter(
+    format => "%serial=-9 %label=-12 %size=5 %used=5 %free=5",
+    filters => { serial => sub { $_[0] && sprintf "0x%x", $_[0] },
+        size => $sizeFormatter, used => $sizeFormatter, free => $sizeFormatter }
+);
+
+$opts{ignoreDrives} = { map { $_ => 1 } split(/\W+/, $opts{ignoreDrives}) };
 
 try {
     go();
@@ -62,130 +72,155 @@ try {
 };
 
 sub go {
-    my $backupDirs = RJK::Filecheck->getBackupDirs;
-
-    if ($opts{all}) {
-        $opts{ignoreDrives} = { map { $_ => 1 } split(/,/, $opts{ignoreDrives}) };
-        main->listAll($backupDirs);
-    } elsif ($opts{dir}) {
-        main->processDir($backupDirs, $opts{driveLabel}, $opts{dir});
-    } else {
-        main->processDrive($backupDirs, $opts{driveLabel});
-    }
-
-    if ($opts{_dirty}) {
-        RJK::Filecheck->storeBackupDirs($backupDirs);
-    }
-}
-
-sub processDir {
-    my ($self, $backupDirs, $driveLabel, $dir) = @_;
-    my $d = $backupDirs->{$driveLabel}{$dir};
-
-    if ($opts{state}) {
-        if ($d->{State} eq $opts{state}) {
-            print "State already set to \"$opts{state}\"\n";
+    if ($opts{procVolumes}) {
+        main->procVolumes();
+    } elsif ($opts{procBackupDirs}) {
+        main->procBackupDirs();
+    } elsif (defined $opts{backupOk}) {
+        if ($opts{volume} && $opts{backupOk}) {
+            main->backupOk();
         } else {
-            $d->{State} = $opts{state};
-            $opts{_dirty} = 1;
+            print "Volume label and backup location required\n";
         }
     }
-
-    if (defined $opts{backupOk}) {
-        $d = $backupDirs->{$driveLabel}{$dir} //= { Name => $dir };
-        $self->backupOk($d);
-    } else {
-        if (! $d) {
-            print "Unknown dir: $dir\n";
-            return;
-        } elsif ($opts{move}) {
-            if ($d->{'Backup Location'} eq $opts{move}) {
-                print "Location already set to $opts{move}\n";
-                return;
-            } else {
-                printf "Previous location: %s, New location: %s\n", $d->{'Backup Location'}, $opts{move};
-                $d->{'Backup Location'} = $opts{move};
-            }
-        } elsif ($opts{remove}) {
-            delete $backupDirs->{$driveLabel}{$dir};
-            $opts{_dirty} = 1;
-        }
-    }
-
-    printf "%s%s\n%s%s\n%s%s\n%s%s\n%s%s\n%s%s\n%s%s\n",
-        "Name: ", $d->{Name},
-        "Files: ", $d->{Files}//'',
-        "Size: ", $d->{Size}//'',
-        "Backup location: ", $d->{'Backup Location'}//'',
-        "Last backup: ", $d->{'Last Backup'}//'',
-        "Removed: ", $d->{Removed}//'',
-        "State: ", $d->{State}//'';
+    getStore()->commit();
 }
 
-sub processDrive {
-    my ($self, $backupDirs, $driveLabel) = @_;
-    my $dirs = $backupDirs->{$driveLabel};
-    if ($dirs) {
-        if (defined $opts{backupOk}) {
-            if (! $opts{backupOk}) {
-                print "Backup drive argument required\n";
-                return;
-            }
-            $self->showHeader();
-            foreach (sort { $a->{Name} cmp $b->{Name} } values %$dirs) {
-                next if $_->{'Backup Location'} ne $opts{backupOk};
-                $self->backupOk($_);
-                $self->showRow($_);
-            }
-            return;
+sub procVolumes {
+    my ($self) = @_;
+    if ($opts{create}) {
+        if ($opts{volume}) {
+            $self->createVolume();
+        } else {
+            print "Drive letter required\n";
         }
     } else {
-        print "No data for drive: $driveLabel\n";
-    }
-
-    try {
-        my @dirs = main->readDirs($driveLabel);
-        foreach (@dirs) {
-            next if $dirs->{$_->{name}};
-            $dirs->{$_->{name}} = {
-                Volume => $driveLabel,
-                Name => $_->{name}
-            };
-        }
-    } catch {
-        print "$_";
-    };
-
-    if ($opts{state}) {
-        foreach (values %$dirs) {
-            next if $opts{state} eq $_->{State};
-            $_->{State} = $opts{state};
-            $opts{_dirty} = 1;
-        }
-    }
-
-    $self->showHeader() if keys %$dirs;
-    foreach (sort keys %$dirs) {
-        my $d = $dirs->{$_};
-        next unless $opts{unknown} || exists $d->{State};
-        $self->showRow($d);
+        $self->listVolumes();
     }
 }
 
-sub showHeader {
-    print $rowFormatter->header(), "\n";
-}
-
-sub showRow {
-    my ($self, $d) = @_;
-    print $rowFormatter->format($d), "\n";
+sub procBackupDirs {
+    my ($self) = @_;
+    if ($opts{create}) {
+        if ($opts{volume} && defined $opts{dir}) {
+            $self->createBackupDir();
+        } else {
+            print "Drive letter and directory name required\n";
+        }
+    } else {
+        $self->listBackupDirs();
+    }
 }
 
 sub backupOk {
-    my ($self, $d) = @_;
-    $d->{State} = "OK";
-    $d->{'Last Backup'} = main->formattedDate;
-    $opts{_dirty} = 1;
+    my ($self) = @_;
+    my $dirs = getStore()->getBackupDirs({
+        volume => $opts{volume}
+    });
+
+    print $backupDirRow->header;
+    foreach my $dir (@$dirs) {
+        next if ! grep { /^$opts{backupOk}$/i } split /\s*,\s*/, $dir->{backupLocation};
+        $dir->{state} = "OK";
+        $dir->{lastBackup} = $self->formattedDate;
+        getStore()->updateBackupDir($dir);
+        print $backupDirRow->format($dir);
+    }
+}
+
+sub createVolume {
+    my ($self) = @_;
+    my $activeVol = $self->getActiveVolumes->{$opts{volume}};
+    if (! $activeVol) {
+        print "Active volume required\n";
+        return;
+    }
+    my $vol = {
+        serial => $activeVol->{serial},
+        letter => $opts{volume},
+        label => $opts{dir},
+    };
+    $self->updateVolume($vol);
+    getStore()->addVolume($vol);
+    print $volumeRow->format($vol);
+}
+
+sub listVolumes {
+    my ($self) = @_;
+    my @volumes = sort {
+        lc $a->{label} cmp lc $b->{label}
+    } @{getStore()->getVolumes};
+
+    print $volumeRow->header;
+    foreach my $vol (@volumes) {
+        next if $opts{volume} && $vol->{label} ne $opts{volume};
+        $self->updateVolume($vol) if $vol->{letter};
+        print $volumeRow->format($vol);
+        getStore()->updateVolume($vol) if $opts{update};
+    }
+}
+
+sub updateVolume {
+    my ($self, $vol) = @_;
+    my $activeVol = $self->getActiveVolumes->{$vol->{letter}};
+    return if !$activeVol;
+
+    $vol->{label} = $activeVol->{label};
+    $vol->{serial} = $activeVol->{serial};
+
+    my ($free, $total) = RJK::Win32::VolumeInfo->getUsage($vol->{letter});
+    $vol->{size} = $total;
+    $vol->{used} = $total - $free;
+    $vol->{free} = $free;
+}
+
+sub createBackupDir {
+    my ($self) = @_;
+    my $dir = {
+        volume => $opts{volume},
+        name => $opts{dir},
+    };
+    $self->updateBackupDir($dir);
+    if (! $dir->{exists}) {
+        print "Directory does not exist\n";
+        return;
+    }
+    getStore()->addBackupDir($dir);
+    print $backupDirRow->format($dir);
+}
+
+sub listBackupDirs {
+    my ($self) = @_;
+    my @dirs = sort {
+        lc $a->{volume} cmp lc $b->{volume} or
+        lc $a->{name} cmp lc $b->{name}
+    } @{getStore()->getBackupDirs};
+
+    print $backupDirRow->header;
+    foreach my $dir (@dirs) {
+        next if $opts{volume} && $dir->{volume} ne $opts{volume};
+        next if $opts{location} && ($dir->{backupLocation}//"") ne $opts{location};
+        $self->updateBackupDir($dir);
+        print $backupDirRow->format($dir);
+        getStore()->updateBackupDir($dir) if $opts{update};
+    }
+}
+
+sub updateBackupDir {
+    my ($self, $dir) = @_;
+    $dir->{path} = "$dir->{volume}:\\$dir->{name}" if $dir->{volume} && defined $dir->{name};
+    return if ! $dir->{path} || !-e $dir->{path};
+
+    $dir->{exists} = 1;
+    my $stats = RJK::File::Stats->traverse($dir->{path});
+    $dir->{files} = $stats->{files};
+    $dir->{size} = $stats->{size};
+}
+
+my $activeVolumes;
+sub getActiveVolumes {
+    my ($self) = @_;
+    return $activeVolumes //= RJK::Win32::VolumeInfo->getVolumes;
 }
 
 sub formattedDate {
@@ -194,64 +229,6 @@ sub formattedDate {
     return sprintf "%02u-%02u-%02u", $d[3], $d[4]+1, $d[5];
 }
 
-sub listAll {
-    my ($self, $dirs) = @_;
-    my $volumes = RJK::Win32::VolumeInfo->getVolumes();
-
-    foreach my $vol (keys %$volumes) {
-        next if $opts{ignoreDrives}{$vol};
-        my $drive = $dirs->{$vol};
-        my @dirs = main->readDirs($vol);
-
-        foreach (@dirs) {
-            my $dir = $drive->{$_->{name}};
-            if ($dir) {
-                if ($dir->{'Last Backup'}) {
-                    printf "Last backup: %s\n", $dir->{'Last Backup'};
-                } elsif (! $dir->{'Backup Location'}) {
-                    printf "No backup location for %s\n", $_->{path};
-                } else {
-                    printf "No last backup: %s => %s\n", $_->{path}, $dir->{'Backup Location'};
-                }
-                $dir->{_exists} = 1;
-            } elsif ($opts{unknown}) {
-                print "Unknown: $_->{path}\n";
-            }
-        }
-
-        foreach (values %$drive) {
-            if (! $_->{_exists}) {
-                printf "Dir no longer exists: %s => %s\n",
-                    $_->{Name}, $_->{'Backup Location'}||'(no backup location)';
-            }
-        }
-    }
-}
-
-sub readDirs {
-    my ($self, $driveLabel) = @_;
-
-    my $driveLetter = main->getDriveLetter($driveLabel) || $driveLabel;
-    my $dir = "$driveLetter:\\";
-    my @dirs;
-
-    opendir my $dh, $dir or die "$!: $dir";
-    while (readdir $dh) {
-        my $path = "$dir$_";
-        next if !-d $path;
-        if (! -x $path) {
-            warn "Not accessible: $path";
-            next;
-        }
-        push @dirs, { driveLetter => $driveLetter, dir => $dir, name => $_, path => $path };
-    }
-    closedir $dh;
-
-    return @dirs;
-}
-
-sub getDriveLetter {
-    my ($self, $driveLabel) = @_;
-    $opts{_drives} //= RJK::Filecheck->getDrives;
-    return $opts{_drives}{$driveLabel}{Letter};
+sub getStore {
+    return RJK::Filecheck->getStore('RJK::Filecheck::Store::Foswiki');
 }
