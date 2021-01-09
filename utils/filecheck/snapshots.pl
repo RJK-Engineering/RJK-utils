@@ -82,18 +82,19 @@ sub createSnapshots {
                 createSnapshot($path, $time, $snapshot);
             }
         } elsif ($sidecar =~ /\.\w+_snapshot_(?:(\d\d)\.)?(\d\d)\.(\d\d)_\[\d{4}\.\d\d\.\d\d_\d\d\.\d\d\.\d\d\]\.jpg$/i) {
-            print "< $sidecar\n";
+            my $sidecarPath = "$dir\\$sidecar";
+            print "< $sidecarPath\n";
             my $h = int $1 if $1;
             my $m = int $2;
             my $s = int $3;
             my $timeStr = !$h && !$m ? $s."s" : $h ? sprintf("%u.%02u.%02u", $h, $m, $s) : sprintf("%u.%02u", $m, $s);
             my $newName = "$dir\\${nameStart}_$timeStr.jpg";
             if (-e $newName) {
-                print "- $sidecar\n";
-                unlink $sidecar;
+                print "- $sidecarPath\n";
+                unlink $sidecarPath;
             } else {
                 print "> $newName\n";
-                rename $sidecar, $newName;
+                rename $sidecarPath, $newName;
             }
         } else {
             print "! $sidecar\n";
