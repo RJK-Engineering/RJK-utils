@@ -63,6 +63,7 @@ sub createSnapshots {
 
         print "+ $path\n+ $name\n" if $first;
         $first = 0;
+        my $sidecarPath = "$dir\\$sidecar";
 
         if ($sidecar =~ /_(\d\d?s|\d\d?\.\d\d)\.jpg$/i) {
             my $timeStr = $1;
@@ -70,7 +71,6 @@ sub createSnapshots {
             $existing = 1;
             print "> $sidecar\n";
 
-            my $sidecarPath = "$dir\\$sidecar";
             my $info = getImageInfo($sidecarPath);
             print "Comment: $info->{comment}\n" if $opts{verbose} && $info->{comment};
 
@@ -82,7 +82,6 @@ sub createSnapshots {
                 createSnapshot($path, $time, $snapshot);
             }
         } elsif ($sidecar =~ /\.\w+_snapshot_(?:(\d\d)\.)?(\d\d)\.(\d\d)_\[\d{4}\.\d\d\.\d\d_\d\d\.\d\d\.\d\d\]\.jpg$/i) {
-            my $sidecarPath = "$dir\\$sidecar";
             print "< $sidecarPath\n";
             my $h = int $1 if $1;
             my $m = int $2;
