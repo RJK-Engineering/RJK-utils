@@ -101,6 +101,7 @@ sub createSnapshots {
     });
     if (! $existing) {
         my $timeStr = $opts{position} =~ s/:/./gr;
+        $timeStr .= "s" if $timeStr !~ /\./;
         my $snapshot = "$path->{parent}\\$path->{basename}_$timeStr.jpg";
         createSnapshot($path, $opts{position} =~ s/\./:/gr, $snapshot);
     }
