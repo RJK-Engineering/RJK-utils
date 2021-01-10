@@ -25,11 +25,12 @@ my %opts = RJK::LocalConf::GetOptions("backup/backup.properties");
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     "volumes" => \$opts{procVolumes}, "",
-    "d|backup-dirs" => \$opts{procBackupDirs}, "",
+    "a|all-backup-dirs" => \$opts{allBackupDirs}, "",
     "b|backup-ok|ok=s" => \$opts{backupOk}, "Mark backup to {volume} as completed.",
     "location=s" => \$opts{location}, "",
 
     "ignore-drives" => \$opts{ignoreDrives}, "Comma-separated list of drives to ignore.",
+    "s|calculate-usage" => \$opts{calculateUsage}, "Traverse directories and calculate size.",
 
     "c|create" => \$opts{create}, "",
     "u|update" => \$opts{update}, "",
@@ -74,14 +75,14 @@ try {
 sub go {
     if ($opts{procVolumes}) {
         main->procVolumes();
-    } elsif ($opts{procBackupDirs}) {
-        main->procBackupDirs();
     } elsif (defined $opts{backupOk}) {
         if ($opts{volume} && $opts{backupOk}) {
             main->backupOk();
         } else {
             print "Volume label and backup location required\n";
         }
+    } else {
+        main->procBackupDirs();
     }
     getStore()->commit();
 }
@@ -108,7 +109,7 @@ sub procBackupDirs {
             print "Drive letter and directory name required\n";
         }
     } else {
-        $self->listBackupDirs();
+        $self->listBackupDirs() if $opts{allBackupDirs} || $opts{volume};
     }
 }
 
@@ -212,6 +213,8 @@ sub updateBackupDir {
     return if ! $dir->{path} || !-e $dir->{path};
 
     $dir->{exists} = 1;
+    return unless $opts{calculateUsage};
+
     my $stats = RJK::File::Stats->traverse($dir->{path});
     $dir->{files} = $stats->{files};
     $dir->{size} = $stats->{size};
