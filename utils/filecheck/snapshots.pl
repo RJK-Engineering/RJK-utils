@@ -100,8 +100,9 @@ sub createSnapshots {
         }
     });
     if (! $existing) {
-        my $snapshot = "$path->{parent}\\$path->{basename}_$opts{position}s.jpg";
-        createSnapshot($path, $opts{position}, $snapshot);
+        my $timeStr = $opts{position} =~ s/:/./gr;
+        my $snapshot = "$path->{parent}\\$path->{basename}_$timeStr.jpg";
+        createSnapshot($path, $opts{position} =~ s/\./:/gr, $snapshot);
     }
 }
 
