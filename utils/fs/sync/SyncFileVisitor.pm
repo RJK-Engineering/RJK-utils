@@ -138,15 +138,15 @@ sub moveFile {
     my ($self, $inTarget, $target, $sourceName) = @_;
 
     if ($self->{opts}{dryRun}) {
-        -e $target->{dir} or print "Target directory does not exist: $target->{dir}\n";
+        -e $target->{parent} or print "Target directory does not exist: $target->{parent}\n";
     } else {
-        if (! -e $target->{dir}) {
-            File::Path::make_path($target->{dir}) or die "$!: $target->{dir}";
+        if (! -e $target->{parent}) {
+            File::Path::make_path($target->{parent}) or die "$!: $target->{parent}";
         }
-        -e $target->{dir} or die "Target directory does not exist: $target->{dir}";
+        -e $target->{parent} or die "Target directory does not exist: $target->{parent}";
     }
 
-    my $targetPath = $sourceName eq $inTarget->{name} ? $target->{dir} : $target->{path};
+    my $targetPath = $sourceName eq $inTarget->{name} ? $target->{parent} : $target->{path};
 
     print "<$inTarget->{path}\n";
     print ">$targetPath\n";
