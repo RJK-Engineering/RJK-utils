@@ -3,10 +3,10 @@ use warnings;
 
 use RJK::File::Path;
 use RJK::File::Sidecar;
+use RJK::File::TreeVisitResult;
 use RJK::Filecheck::Dirs;
 use RJK::Files;
 use RJK::SimpleFileVisitor;
-use RJK::File::TreeVisitResult;
 
 my %opts = (
     verbose => 1,
@@ -31,7 +31,6 @@ my $visitor = new RJK::SimpleFileVisitor(
         my ($file, $stat) = @_;
         return if ! isVideo($file);
         print "$file\n" if $opts{verbose};
-
         createSnapshots($file);
     }
 );
@@ -39,75 +38,76 @@ my $visitor = new RJK::SimpleFileVisitor(
 $opts{sourceDir} || die "No source directory specified";
 RJK::Files->traverse($opts{sourceDir}, $visitor);
 
-sub createSnapshot {
-    my ($video, $time, $output) = @_;
-    my @cmd = (
-        ffmpeg => '-n',
-        -i => "\"$video\"",
-        -ss => $time,
-        -vf => "\"scale=-1:$opts{imageHeight}\"",
-        -vframes => 1,
-        "\"$output\""
-    );
-    print "@cmd\n" if $opts{verbose};
-    `@cmd 2>&1 >NUL`;
-}
-
-sub isVideo {
-    return $_[0] =~ /\.(mp4|wmv|mpe?g|avi|rm|mkv|webm|flv|rmvb|asf|m4v|divx|mov)$/i;
-}
-
 sub createSnapshots {
-    my $path = shift;
+    my $videoFile = shift;
     my $first = 1;
-    my $existing = 0;
-    RJK::File::Sidecar->getSidecarFiles($path, sub {
-        return if ! /\.jpg$/i;
-        my ($sidecar, $dir, $name, $nameStart) = @_;
+    my $existingSnapshots = 0;
 
-        print "+ $path\n+ $name\n" if $first;
+    RJK::File::Sidecar->getSidecarFiles($videoFile, sub {
+        print "+ $videoFile\n" if $first;
         $first = 0;
-        my $sidecarPath = "$dir\\$sidecar";
-
-        if ($sidecar =~ /_(\d\d?s|\d\d?\.\d\d)\.jpg$/i) {
-            my $timeStr = $1;
-            my $time = $1 =~ s/\./:/r;
-            $existing = 1;
-            print "> $sidecar\n";
-
-            my $info = getImageInfo($sidecarPath);
-            print "Comment: $info->{comment}\n" if $opts{verbose} && $info->{comment};
-
-            if ($info->{height} == $opts{imageHeight}) {
-                print "OK!\n";
-            } else {
-                unlink $sidecarPath or die "$!: $sidecarPath";
-                my $snapshot = "$dir\\${nameStart}_$timeStr.jpg";
-                createSnapshot($path, $time, $snapshot);
-            }
-        } elsif ($sidecar =~ /\.\w+_snapshot_(?:(\d\d)\.)?(\d\d)\.(\d\d)_\[\d{4}\.\d\d\.\d\d_\d\d\.\d\d\.\d\d\]\.jpg$/i) {
-            print "< $sidecarPath\n";
-            my $h = int $1 if $1;
-            my $m = int $2;
-            my $s = int $3;
-            my $timeStr = !$h && !$m ? $s."s" : $h ? sprintf("%u.%02u.%02u", $h, $m, $s) : sprintf("%u.%02u", $m, $s);
-            my $newName = "$dir\\${nameStart}_$timeStr.jpg";
-            if (-e $newName) {
-                print "- $sidecarPath\n";
-                unlink $sidecarPath;
-            } else {
-                print "> $newName\n";
-                rename $sidecarPath, $newName;
-            }
-        } else {
-            print "! $sidecar\n";
-        }
+        $existingSnapshots ||= handleSidecarFile($videoFile, @_);
     });
-    if (! $existing) {
+
+    if (! $existingSnapshots) {
         my $timeStr = $opts{position} =~ s/:/./gr;
         $timeStr .= "s" if $timeStr !~ /\./;
-        my $snapshot = "$path->{parent}\\$path->{basename}_$timeStr.jpg";
-        createSnapshot($path, $opts{position} =~ s/\./:/gr, $snapshot);
+        my $snapshot = "$videoFile->{parent}\\$videoFile->{basename}_$timeStr.jpg";
+        createSnapshot($videoFile, $opts{position} =~ s/\./:/gr, $snapshot);
+    }
+}
+
+sub handleSidecarFile {
+    return if ! /\.jpg$/i;
+    my ($videoFile, $sidecar, $dir, $name, $nameStart) = @_;
+    my $existingSnapshot;
+    my $sidecarPath = "$dir\\$sidecar";
+
+    if ($sidecar =~ /_(\d\d?s|\d\d?\.\d\d)\.jpg$/i) {
+        print "> $sidecar\n";
+        handleExistingSnapshot($videoFile, $sidecarPath, $dir, $nameStart, $1);
+        $existingSnapshot = 1;
+    } elsif ($sidecar =~ /\.\w+_snapshot_(?:(\d\d)\.)?(\d\d)\.(\d\d)_\[\d{4}\.\d\d\.\d\d_\d\d\.\d\d\.\d\d\]\.jpg$/i) {
+        print "< $sidecarPath\n";
+        handleMpcSnapshot($sidecarPath, $dir, $nameStart, $1, $2, $3);
+    } else {
+        print "! $sidecar\n";
+    }
+    return $existingSnapshot;
+}
+
+sub handleExistingSnapshot {
+    my ($videoFile, $sidecarPath, $dir, $nameStart, $time) = @_;
+    my $timeStr = $time;
+    $time =~ s/\./:/g;
+
+    my $info = getImageInfo($sidecarPath);
+    print "Comment: $info->{comment}\n" if $opts{verbose} && $info->{comment};
+
+    if ($info->{height} == $opts{imageHeight}) {
+        print "OK!\n";
+    } else {
+        unlink $sidecarPath or die "$!: $sidecarPath";
+        my $snapshot = "$dir\\${nameStart}_$timeStr.jpg";
+        createSnapshot($videoFile, $time, $snapshot);
+    }
+}
+
+sub handleMpcSnapshot {
+    my ($sidecarPath, $dir, $nameStart, $h, $m, $s) = @_;
+    $h = int $h if $h;
+    $m = int $m;
+    $s = int $s;
+
+    my $timeStr = !$h && !$m ? $s."s" : $h ? sprintf("%u.%02u.%02u", $h, $m, $s) : sprintf("%u.%02u", $m, $s);
+    my $newName = "$dir\\${nameStart}_$timeStr.jpg";
+
+    if (-e $newName) {
+        print "- $sidecarPath\n";
+        unlink $sidecarPath;
+    } else {
+        print "> $newName\n";
+        rename $sidecarPath, $newName;
     }
 }
 
@@ -135,4 +135,22 @@ sub getImageInfo {
     }
     close $fh;
     return \%info;
+}
+
+sub isVideo {
+    return $_[0] =~ /\.(mp4|wmv|mpe?g|avi|rm|mkv|webm|flv|rmvb|asf|m4v|divx|mov)$/i;
+}
+
+sub createSnapshot {
+    my ($videoFilePath, $time, $output) = @_;
+    my @cmd = (
+        ffmpeg => '-n',
+        -i => "\"$videoFilePath\"",
+        -ss => $time,
+        -vf => "\"scale=-1:$opts{imageHeight}\"",
+        -vframes => 1,
+        "\"$output\""
+    );
+    print "@cmd\n" if $opts{verbose};
+    `@cmd 2>&1 >NUL`;
 }
