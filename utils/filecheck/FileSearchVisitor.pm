@@ -48,7 +48,7 @@ sub visitFile {
 }
 
 sub preVisitFiles {
-    my ($self, $dir, $stat, $files, $dirs) = @_;
+    my ($self, $dir, $stat) = @_;
     $self->{view}->showDirSearchStart($dir, $stat);
     $self->{results}{dir} = {};
     return if $self->{search}{flags}{directory} == 0;
@@ -56,7 +56,7 @@ sub preVisitFiles {
 }
 
 sub postVisitFiles {
-    my ($self, $dir, $error, $files, $dirs) = @_;
+    my ($self, $dir, $error) = @_;
     $self->{view}->showDirSearchDone($dir);
 }
 
