@@ -44,70 +44,71 @@ sub createSnapshots {
     my $existingSnapshotsForFile = 0;
 
     RJK::File::Sidecar->getSidecarFiles($videoFile, sub {
-        print "+ $videoFile\n" if $first;
+        print "$videoFile\n" if $first;
         $first = 0;
-        $existingSnapshotsForFile ||= handleSidecarFile($videoFile, @_);
+        $existingSnapshotsForFile = 1 if handleSidecarFile($videoFile, @_);
     });
 
     return if $existingSnapshotsForFile;
 
-    my $timeStr = $opts{position} =~ s/:/./gr;
-    $timeStr .= "s" if $timeStr !~ /\./;
-    my $snapshot = "$videoFile->{parent}\\$videoFile->{basename}_$timeStr.jpg";
+    my $time = $opts{position} =~ s/:/./gr;
+    $time .= "s" if $time !~ /\./;
+    my $snapshot = "$videoFile->{parent}\\$videoFile->{basename}_$time.jpg";
     createSnapshot($videoFile, $opts{position} =~ s/\./:/gr, $snapshot);
 }
 
 sub handleSidecarFile {
     return if ! /\.jpg$/i;
     my ($videoFile, $sidecar, $dir, $name, $nameStart) = @_;
-    my $existingSnapshot;
+    my $existingSnapshot = 1;
     my $sidecarPath = "$dir\\$sidecar";
 
     if ($sidecar =~ /_(\d\d?s|\d\d?\.\d\d)\.jpg$/i) {
         print "> $sidecar\n";
         handleExistingSnapshot($videoFile, $sidecarPath, $dir, $nameStart, $1);
-        $existingSnapshot = 1;
     } elsif ($sidecar =~ /\.\w+_snapshot_(?:(\d\d)\.)?(\d\d)\.(\d\d)_\[\d{4}\.\d\d\.\d\d_\d\d\.\d\d\.\d\d\]\.jpg$/i) {
-        print "< $sidecarPath\n";
-        handleMpcSnapshot($sidecarPath, $dir, $nameStart, $1, $2, $3);
+        print "> $sidecar\n";
+        handleMpcSnapshot($videoFile, $sidecarPath, $dir, $nameStart, $1, $2, $3);
     } else {
         print "! $sidecar\n";
+        $existingSnapshot = 0;
     }
     return $existingSnapshot;
 }
 
 sub handleExistingSnapshot {
     my ($videoFile, $sidecarPath, $dir, $nameStart, $time) = @_;
-    my $timeStr = $time;
-    $time =~ s/\./:/g;
-
     my $info = getImageInfo($sidecarPath);
     print "Comment: $info->{comment}\n" if $opts{verbose} && $info->{comment};
 
     if ($info->{height} == $opts{imageHeight}) {
         print "OK!\n";
     } else {
+        print "- $sidecarPath\n";
         unlink $sidecarPath or die "$!: $sidecarPath";
-        my $snapshot = "$dir\\${nameStart}_$timeStr.jpg";
-        createSnapshot($videoFile, $time, $snapshot);
+        my $snapshot = "$dir\\${nameStart}_$time.jpg";
+        print "+ $snapshot\n";
+        createSnapshot($videoFile, $time =~ s/\./:/gr, $snapshot);
     }
 }
 
 sub handleMpcSnapshot {
-    my ($sidecarPath, $dir, $nameStart, $h, $m, $s) = @_;
+    my ($videoFile, $sidecarPath, $dir, $nameStart, $h, $m, $s) = @_;
     $h = int $h if $h;
     $m = int $m;
     $s = int $s;
 
-    my $timeStr = !$h && !$m ? $s."s" : $h ? sprintf("%u.%02u.%02u", $h, $m, $s) : sprintf("%u.%02u", $m, $s);
-    my $newName = "$dir\\${nameStart}_$timeStr.jpg";
+    my $time = !$h && !$m ? $s."s" : $h ? sprintf("%u.%02u.%02u", $h, $m, $s) : sprintf("%u.%02u", $m, $s);
+    my $newName = "$dir\\${nameStart}_$time.jpg";
 
     if (-e $newName) {
         print "- $sidecarPath\n";
         unlink $sidecarPath;
     } else {
+        print "< $sidecarPath\n";
         print "> $newName\n";
         rename $sidecarPath, $newName;
+        handleExistingSnapshot($videoFile, $newName, $dir, $nameStart, $time);
     }
 }
 
