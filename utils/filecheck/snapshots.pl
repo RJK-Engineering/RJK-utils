@@ -41,20 +41,20 @@ RJK::Files->traverse($opts{sourceDir}, $visitor);
 sub createSnapshots {
     my $videoFile = shift;
     my $first = 1;
-    my $existingSnapshots = 0;
+    my $existingSnapshotsForFile = 0;
 
     RJK::File::Sidecar->getSidecarFiles($videoFile, sub {
         print "+ $videoFile\n" if $first;
         $first = 0;
-        $existingSnapshots ||= handleSidecarFile($videoFile, @_);
+        $existingSnapshotsForFile ||= handleSidecarFile($videoFile, @_);
     });
 
-    if (! $existingSnapshots) {
-        my $timeStr = $opts{position} =~ s/:/./gr;
-        $timeStr .= "s" if $timeStr !~ /\./;
-        my $snapshot = "$videoFile->{parent}\\$videoFile->{basename}_$timeStr.jpg";
-        createSnapshot($videoFile, $opts{position} =~ s/\./:/gr, $snapshot);
-    }
+    return if $existingSnapshotsForFile;
+
+    my $timeStr = $opts{position} =~ s/:/./gr;
+    $timeStr .= "s" if $timeStr !~ /\./;
+    my $snapshot = "$videoFile->{parent}\\$videoFile->{basename}_$timeStr.jpg";
+    createSnapshot($videoFile, $opts{position} =~ s/\./:/gr, $snapshot);
 }
 
 sub handleSidecarFile {
