@@ -3,8 +3,10 @@ use warnings;
 
 use RJK::File::Path;
 use RJK::File::Sidecar;
+use RJK::Filecheck::Dirs;
 use RJK::Files;
 use RJK::SimpleFileVisitor;
+use RJK::File::TreeVisitResult;
 
 my %opts = (
     verbose => 1,
@@ -22,6 +24,8 @@ my $visitor = new RJK::SimpleFileVisitor(
     preVisitDir => sub {
         my ($dir, $stat) = @_;
         print "=> $dir->{path}\n";
+        my $p = RJK::Filecheck::Dirs->getProperties($dir->{path});
+        return SKIP_FILES if $p->get('no.snapshots');
     },
     visitFile => sub {
         my ($file, $stat) = @_;
