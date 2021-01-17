@@ -9,6 +9,7 @@ use warnings;
 use File::Copy ();
 use File::Path ();
 
+use RJK::File::Path;
 use RJK::File::Paths;
 use RJK::File::Stat;
 
@@ -137,16 +138,17 @@ sub findRenamed {
 sub moveFile {
     my ($self, $inTarget, $target, $sourceName) = @_;
 
+    my $parent = $target->parent;
     if ($self->{opts}{dryRun}) {
-        -e $target->{parent} or print "Target directory does not exist: $target->{parent}\n";
+        -e $parent or print "Target directory does not exist: $parent\n";
     } else {
-        if (! -e $target->{parent}) {
-            File::Path::make_path($target->{parent}) or die "$!: $target->{parent}";
+        if (! -e $parent) {
+            File::Path::make_path($parent) or die "$!: $parent";
         }
-        -e $target->{parent} or die "Target directory does not exist: $target->{parent}";
+        -e $parent or die "Target directory does not exist: $parent";
     }
 
-    my $targetPath = $sourceName eq $inTarget->{name} ? $target->{parent} : $target->{path};
+    my $targetPath = $sourceName eq $inTarget->{name} ? $parent : $target->{path};
 
     print "<$inTarget->{path}\n";
     print ">$targetPath\n";
