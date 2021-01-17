@@ -32,4 +32,4 @@ my $tp = new RJK::TemplateProcessor($sites);
 #~ my $url = $tp->getString($site, [$pkg]);
 my $url = $tp->getString($site, { pkg => $pkg });
 print "$url\n" unless $opts{quiet};
-RJK::Win32::Browser::OpenUrl($url) unless $opts{noOpen};
+RJK::Win32::Browser->openUrl($url) unless $opts{noOpen};
