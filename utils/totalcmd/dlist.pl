@@ -39,8 +39,10 @@ if ($op) {
 if (!$to) {
     print "USAGE: $0 [op]\n";
     print "       $0 [op2] [from] [to]\n";
+    print "       $0 [op3] [file]\n";
     print "[op]  := l(ist) | e(dit) | r(emove-ok) | clear\n";
     print "[op2] := c(opy) | m(ove)\n";
+    print "[op3] := d(elete) | n(ew-directory)\n";
     exit 1;
 }
 
