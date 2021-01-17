@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use RJK::File::Paths;
+use RJK::Paths;
 use RJK::TotalCmd::DownloadList;
 
 my ($op, $from, $to) = @ARGV;
@@ -55,7 +55,7 @@ if ($op =~ /^m/) {
 }
 
 if ($to =~ /\\$/) {
-    my $path = RJK::File::Paths->get($from);
+    my $path = RJK::Paths->get($from);
     $to .= $path->{name};
 }
 

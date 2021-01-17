@@ -10,7 +10,7 @@ use File::Copy ();
 use File::Path ();
 
 use RJK::File::Path;
-use RJK::File::Paths;
+use RJK::Paths;
 use RJK::File::Stat;
 
 sub new {
@@ -26,7 +26,7 @@ sub new {
 sub visitFile {
     my ($self, $source, $sourceStat) = @_;
 
-    my $target = RJK::File::Paths::get($self->{opts}{targetDir}, $source->{directories}, $source->{name});
+    my $target = RJK::Paths->get($self->{opts}{targetDir}, $source->{directories}, $source->{name});
 
     if ($self->{filesInSource}{$source->{name}}) {
         warn "Skipping duplicate: $source->{name}";
