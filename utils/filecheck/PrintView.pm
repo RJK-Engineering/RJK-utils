@@ -78,18 +78,18 @@ sub showDirSearchDone {
 sub showResult {
     my ($self, $file, $stat, $message) = @_;
 
-    if ($stat->{isDir}) {
+    if ($stat->isDir) {
         print "|";
         print "$file->{path}\n";
     } else {
         $self->_showDirHeader if ! $self->{shownDirHeader};
         print "||";
-        print sprintf " %4.4s ", format_bytes $stat->{size};
+        print sprintf " %4.4s ", format_bytes $stat->size;
         print "$file->{path}\n";
     }
 
     if ($message) {
-        print "|" if ! $stat->{isDir};
+        print "|" if ! $stat->isDir;
         print "|> ";
         $self->_writeMessage($message);
     }

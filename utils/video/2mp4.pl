@@ -131,6 +131,6 @@ sub copyFile {
 sub copyModifiedTime {
     my ($targetFile, $stat) = @_;
     my $atime = time;
-    my $mtime = $stat->{modified};
+    my $mtime = $stat->modified;
     utime $atime, $mtime, $targetFile or warn "$!: $atime, $mtime, $targetFile";
 }

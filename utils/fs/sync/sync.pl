@@ -207,7 +207,7 @@ sub indexTarget {
             }
             $file->{stat} = $stat;
             push @{$filesInTarget->{name}{$file->{name}}}, $file;
-            push @{$filesInTarget->{size}{$stat->{size}}}, $file;
+            push @{$filesInTarget->{size}{$stat->size}}, $file;
         },
         visitFileFailed => sub {
             my ($file, $error) = @_;

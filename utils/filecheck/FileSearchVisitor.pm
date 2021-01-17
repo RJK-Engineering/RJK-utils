@@ -71,9 +71,9 @@ sub _match {
     my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
     return if ! $result->{matched};
 
-    $self->{results}{size} += $stat->{size} || 0;
-    $self->{results}{dir}{size} += $stat->{size} || 0;
-    $self->{results}{part}{size} += $stat->{size} || 0;
+    $self->{results}{size} += $stat->size || 0;
+    $self->{results}{dir}{size} += $stat->size || 0;
+    $self->{results}{part}{size} += $stat->size || 0;
 
     push @{$self->{matched}}, $file->{path};
     $self->{view}->showResult($file, $stat);

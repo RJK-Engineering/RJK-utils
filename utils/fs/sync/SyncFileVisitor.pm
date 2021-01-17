@@ -56,8 +56,8 @@ sub visitFile {
 sub checkTarget {
     my ($self, $sourceStat, $targetPath) = @_;
     my $targetStat = RJK::Stat->get($targetPath);
-    if ($sourceStat->{size} != $targetStat->{size}) {
-        warn "Size mismatch, $sourceStat->{size} != $targetStat->{size}: $targetPath";
+    if ($sourceStat->size != $targetStat->size) {
+        warn "Size mismatch, " . $sourceStat->size . " != " . $targetStat->size . ": $targetPath";
         push @{$self->{modified}}, $targetPath;
     }
     if (! $self->checkDates($sourceStat, $targetStat)) {
@@ -68,7 +68,7 @@ sub checkTarget {
 
 sub checkDates {
     my ($self, $sourceStat, $targetStat) = @_;
-    return abs($sourceStat->{modified} - $targetStat->{modified}) < 3;
+    return abs($sourceStat->modified - $targetStat->modified) < 3;
 }
 
 # files in diffent directory (same name, size and modified date)
@@ -87,7 +87,7 @@ sub findMoved {
 
     my @same;
     foreach my $target (@$inTarget) {
-        if ($sourceStat->{size} != $target->{stat}{size}) {
+        if ($sourceStat->size != $target->{stat}{size}) {
             print "Same name, different size: $target->{path}\n";
         } elsif (! $self->checkDates($sourceStat, $target->{stat})) {
             print "Same name, same size, diffent dates: $target->{path}\n";
@@ -108,7 +108,7 @@ sub findMoved {
 # files with same size and modified date (can be in different directory)
 sub findRenamed {
     my ($self, $sourceStat) = @_;
-    my $inTarget = $self->{filesInTarget}{size}{$sourceStat->{size}};
+    my $inTarget = $self->{filesInTarget}{size}{$sourceStat->size};
 
     if (! $inTarget) {
         return;
@@ -116,7 +116,7 @@ sub findRenamed {
 
     if (@$inTarget > 1) {
         printf "%u files with same size: %u\n",
-            scalar @$inTarget, $sourceStat->{size};
+            scalar @$inTarget, $sourceStat->size;
     }
 
     my @same;
@@ -165,7 +165,7 @@ sub removeFromIndex {
     my $it = $self->{filesInTarget}{name}{$source->{name}};
     @$it = grep { $_ != $inTarget } @$it;
 
-    $it = $self->{filesInTarget}{size}{$sourceStat->{size}};
+    $it = $self->{filesInTarget}{size}{$sourceStat->size};
     @$it = grep { $_ != $inTarget } @$it;
 }
 

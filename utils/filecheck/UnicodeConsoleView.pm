@@ -96,7 +96,7 @@ sub showResult {
     my ($self, $file, $stat, $message) = @_;
     my $c = $self->{console};
 
-    if ($stat->{isDir}) {
+    if ($stat->isDir) {
         $c->Attr($FG_WHITE);
         $c->Write("│ ");
         $c->Attr($FG_BLUE);
@@ -107,13 +107,13 @@ sub showResult {
         $c->Attr($FG_WHITE);
         $c->Write("││");
         $c->Attr($ATTR_NORMAL);
-        $c->Write(sprintf "%5.5s ", RJK::HumanReadable::Size->get($stat->{size}));
+        $c->Write(sprintf "%5.5s ", RJK::HumanReadable::Size->get($stat->size));
         $c->Write("$file->{path}\n");
     }
 
     if ($message) {
         $c->Attr($FG_WHITE);
-        $c->Write("│") if ! $stat->{isDir};
+        $c->Write("│") if ! $stat->isDir;
         $c->Write("╞> ");
         $c->Attr($ATTR_NORMAL);
         $self->_writeMessage($message);
