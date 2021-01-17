@@ -4,7 +4,7 @@ use warnings;
 use Number::Bytes::Human qw(format_bytes);
 use Time::HiRes ();
 
-use RJK::File::Stats;
+use RJK::Stats;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::SimpleFileVisitor;
@@ -193,7 +193,7 @@ sub IndexTarget {
         size => {},
     };
 
-    my $stats = RJK::File::Stats->createStats();
+    my $stats = RJK::Stats->createStats();
     my $visitor = new RJK::SimpleFileVisitor(
         visitFile => sub {
             my ($file, $stat) = @_;
@@ -216,7 +216,7 @@ sub IndexTarget {
         my $path = "$opts{targetDir}\\$_";
         $console->updateLine("Indexing $path ...\n");
         DisplayStats($stats);
-        RJK::File::Stats->traverse($path, $visitor, {}, $stats);
+        RJK::Stats->traverse($path, $visitor, {}, $stats);
     }
     DisplayStats($stats);
     $console->newline;
@@ -227,7 +227,7 @@ sub IndexTarget {
 sub Synchronize {
     my $filesInTarget = shift;
 
-    my $totals = RJK::File::Stats->createStats();
+    my $totals = RJK::Stats->createStats();
     my $visitor = new SyncFileVisitor($filesInTarget, \%opts);
 
     foreach my $dir (@dirs) {
@@ -244,7 +244,7 @@ sub Synchronize {
             exit;
         }
 
-        my $stats = RJK::File::Stats->traverse($dir, $visitor, {}, $totals);
+        my $stats = RJK::Stats->traverse($dir, $visitor, {}, $totals);
         DisplayStats($totals);
     }
     return $totals;
