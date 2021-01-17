@@ -4,8 +4,8 @@ use warnings;
 use Data::Dump;
 use File::Copy ();
 
-use RJK::File::Path::Util;
 use RJK::Path;
+use RJK::Path::Util;
 use RJK::Files;
 use RJK::SimpleFileVisitor;
 
@@ -49,7 +49,7 @@ sub getVisitor {
             my ($dir, $stat) = @_;
             my $targetDir = "$opts{targetDir}\\$dir->{path}";
             print "$targetDir\n";
-            RJK::File::Path::Util::checkdir($targetDir) unless $opts{dryRun};
+            RJK::Path::Util->checkdir($targetDir) unless $opts{dryRun};
         },
         visitFile => sub {
             my ($file, $stat) = @_;
