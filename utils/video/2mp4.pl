@@ -3,9 +3,11 @@ use warnings;
 
 use Data::Dump;
 use File::Copy ();
+
+use RJK::File::Path;
+use RJK::File::Path::Util;
 use RJK::Files;
 use RJK::SimpleFileVisitor;
-use RJK::File::Path::Util;
 
 my %opts = (
     dryRun => 0,
@@ -55,7 +57,7 @@ sub getVisitor {
 
             my $ext = $1;
             my $source = "$opts{sourceDir}\\$file->{path}";
-            my $mp4    = "$file->{directories}\\$file->{basename}.mp4";
+            my $mp4    = "$file->{directories}\\" . $file->basename . ".mp4";
             my $target = "$opts{targetDir}\\$mp4";
             my $copy   = "$opts{targetDir}\\$file->{path}";
 
