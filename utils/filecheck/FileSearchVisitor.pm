@@ -17,7 +17,7 @@ use RJK::TreeVisitResult;
 ###############################################################################
 =pod
 
----+++ FileSearchVisitor::new($view, $search, \%opts) -> $fileSearchVisitor
+---+++ FileSearchVisitor->new($view, $search, \%opts) -> $fileSearchVisitor
    * =$view= - =View= object.
    * =$search= - =RJK::TotalCmd::Search= object.
    * =%opts= - option hash.
