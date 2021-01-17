@@ -1,18 +1,11 @@
 use strict;
 use warnings;
 
-use Number::Bytes::Human qw(format_bytes);
-use Time::HiRes ();
-
-use RJK::Stats;
-use RJK::LocalConf;
-use RJK::Options::Pod;
-use RJK::SimpleFileVisitor;
-use RJK::Win32::Console;
-
 use File::Basename;
 use lib dirname (__FILE__);
-use SyncFileVisitor;
+
+use RJK::LocalConf;
+use RJK::Options::Pod;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -167,9 +160,18 @@ if (! -e $opts{targetDir}) {
 
 ###############################################################################
 
-sub Ignore { 0 }
+use Time::HiRes ();
+
+use RJK::HumanReadable::Size;
+use RJK::SimpleFileVisitor;
+use RJK::Files;
+use RJK::Win32::Console;
+
+use SyncFileVisitor;
+
+sub ignore { 0 }
 opendir my $dh, $opts{targetDir} or die "$!";
-my @dirs = grep { -d "$opts{targetDir}\\$_" && ! /^\./ && ! Ignore($_) } readdir $dh;
+my @dirs = grep { -d "$opts{targetDir}\\$_" && ! /^\./ && ! ignore($_) } readdir $dh;
 closedir $dh;
 
 if (! @dirs) {
@@ -181,11 +183,12 @@ foreach (@dirs) {
 }
 
 my $console = new RJK::Win32::Console();
+my $sizeFormatter = 'RJK::HumanReadable::Size';
 
-my $filesInTarget = IndexTarget();
-Synchronize($filesInTarget);
+my $filesInTarget = indexTarget();
+synchronize($filesInTarget);
 
-sub IndexTarget {
+sub indexTarget {
     my $lastDisplay = 0;
 
     my $filesInTarget = {
@@ -193,7 +196,7 @@ sub IndexTarget {
         size => {},
     };
 
-    my $stats = RJK::Stats->createStats();
+    my $stats = RJK::Files->createStats();
     my $visitor = new RJK::SimpleFileVisitor(
         visitFile => sub {
             my ($file, $stat) = @_;
@@ -216,7 +219,7 @@ sub IndexTarget {
         my $path = "$opts{targetDir}\\$_";
         $console->updateLine("Indexing $path ...\n");
         DisplayStats($stats);
-        RJK::Stats->traverse($path, $visitor, {}, $stats);
+        RJK::Files->traverse($path, $visitor, {}, $stats);
     }
     DisplayStats($stats);
     $console->newline;
@@ -224,10 +227,10 @@ sub IndexTarget {
     return $filesInTarget;
 }
 
-sub Synchronize {
+sub synchronize {
     my $filesInTarget = shift;
 
-    my $totals = RJK::Stats->createStats();
+    my $totals = RJK::Files->createStats();
     my $visitor = new SyncFileVisitor($filesInTarget, \%opts);
 
     foreach my $dir (@dirs) {
@@ -244,7 +247,8 @@ sub Synchronize {
             exit;
         }
 
-        my $stats = RJK::Stats->traverse($dir, $visitor, {}, $totals);
+        my $stats = RJK::Files->traverseWithStats($dir, $visitor);
+        $totals->update($stats);
         DisplayStats($totals);
     }
     return $totals;
@@ -254,7 +258,7 @@ sub DisplayStats {
     my $stats = shift;
     $console->updateLine(
         sprintf "%s in %s files",
-            format_bytes($stats->{size}),
+            $sizeFormatter->get($stats->{size}),
             $stats->{visitFile}
     );
 }
