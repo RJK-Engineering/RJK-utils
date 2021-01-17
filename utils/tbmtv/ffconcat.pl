@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use RJK::File::Path;
+use RJK::Path;
 use RJK::Paths;
 
 # https://trac.ffmpeg.org/wiki/Concatenate

@@ -4,8 +4,8 @@ use warnings;
 use Data::Dump;
 use File::Copy ();
 
-use RJK::File::Path;
 use RJK::File::Path::Util;
+use RJK::Path;
 use RJK::Files;
 use RJK::SimpleFileVisitor;
 

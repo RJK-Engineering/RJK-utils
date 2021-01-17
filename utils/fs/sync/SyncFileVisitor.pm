@@ -9,7 +9,7 @@ use warnings;
 use File::Copy ();
 use File::Path ();
 
-use RJK::File::Path;
+use RJK::Path;
 use RJK::Paths;
 use RJK::Stat;
 
