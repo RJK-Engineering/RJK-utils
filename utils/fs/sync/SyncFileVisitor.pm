@@ -11,7 +11,7 @@ use File::Path ();
 
 use RJK::File::Path;
 use RJK::Paths;
-use RJK::File::Stat;
+use RJK::Stat;
 
 sub new {
     my $self = bless {}, shift;
@@ -55,7 +55,7 @@ sub visitFile {
 
 sub checkTarget {
     my ($self, $sourceStat, $targetPath) = @_;
-    my $targetStat = RJK::File::Stat::get($targetPath);
+    my $targetStat = RJK::Stat->get($targetPath);
     if ($sourceStat->{size} != $targetStat->{size}) {
         warn "Size mismatch, $sourceStat->{size} != $targetStat->{size}: $targetPath";
         push @{$self->{modified}}, $targetPath;

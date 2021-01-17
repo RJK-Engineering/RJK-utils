@@ -11,7 +11,7 @@ use Number::Bytes::Human qw(format_bytes);
 use Try::Tiny;
 
 use RJK::Exception;
-use RJK::File::Stats;
+use RJK::Stats;
 use RJK::Filecheck;
 use RJK::LocalConf;
 use RJK::Options::Pod;
@@ -215,7 +215,7 @@ sub updateBackupDir {
     $dir->{exists} = 1;
     return unless $opts{calculateUsage};
 
-    my $stats = RJK::File::Stats->traverse($dir->{path});
+    my $stats = RJK::Stats->traverse($dir->{path});
     $dir->{files} = $stats->{files};
     $dir->{size} = $stats->{size};
 }
