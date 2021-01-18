@@ -159,8 +159,8 @@ sub ProcessFile {
     try {
         $info = RJK::Media::Humax::Hmt::GetInfo($file);
     } catch {
-        if ( $_->isa('Exception') ) {
-            printf "%s: %s\n", ref $_, $_->error;
+        if ( ref && $_->isa('Exception') ) {
+            printf "%s: %s\n", ref, $_->error;
         } else {
             die "$!";
         }
