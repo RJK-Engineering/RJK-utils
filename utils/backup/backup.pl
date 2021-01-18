@@ -10,7 +10,7 @@ use warnings;
 use Number::Bytes::Human qw(format_bytes);
 use Try::Tiny;
 
-use RJK::Exception;
+use RJK::Exceptions;
 use RJK::Files;
 use RJK::Filecheck;
 use RJK::LocalConf;
@@ -66,9 +66,9 @@ try {
     go();
 } catch {
     if ($opts{verbose}) {
-        RJK::Exception->verbosePrintAndExit;
+        RJK::Exceptions->handleVerbose;
     } else {
-        RJK::Exception->printAndExit;
+        RJK::Exceptions->handle;
     }
 };
 
