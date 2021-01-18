@@ -655,7 +655,7 @@ sub _GetIcon {
 sub HasIcon {
     my $file = shift;
 
-    my ($fh, $path) = RJK::TotalCmd::Utils::TempFile("ico");
+    my ($fh, $path) = RJK::TotalCmd::Utils->tempFile("ico");
     close $fh;
     debug $path;
 
