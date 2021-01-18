@@ -21,16 +21,12 @@ sub setStats {
 
 sub info {
     my ($self, $message) = @_;
-    $console->newline;
-    $console->updateLine($message);
-    $console->newline;
+    $console->printLine($message);
 }
 
 sub warn {
     my ($self, $message) = @_;
-    $console->newline;
-    $console->updateLine($message);
-    $console->newline;
+    $console->printLine($message);
 }
 
 sub stats {
