@@ -436,7 +436,7 @@ BEGIN {
 
 ###############################################################################
 
-my $tcmd = new RJK::TotalCmd::Settings();
+my $tc = new RJK::TotalCmd::Settings();
 my $results;
 
 try {
@@ -477,77 +477,77 @@ sub GetResults {
     if (defined $opts{startMenu} || defined $opts{dirMenu}) {
         my $menu = defined $opts{startMenu} ? "user" : "DirMenu";
         if ($opts{startMenu}) {
-            @cmds = $tcmd->getMenuItem($menu, $opts{startMenu});
+            @cmds = $tc->getMenuItem($menu, $opts{startMenu});
         } elsif (defined $opts{menuItems}) {
             if ($opts{menuItems}) {
-                @cmds = $tcmd->getMenuItems($menu, $opts{menuItems});
+                @cmds = $tc->getMenuItems($menu, $opts{menuItems});
             } else {
-                @cmds = $tcmd->getMenuItems($menu, 0);
+                @cmds = $tc->getMenuItems($menu, 0);
             }
         } elsif ($opts{submenus}) {
-            @cmds = $tcmd->getSubmenus($menu);
+            @cmds = $tc->getSubmenus($menu);
         } else {
-            @cmds = $tcmd->getMenuItems($menu);
+            @cmds = $tc->getMenuItems($menu);
         }
     } elsif (defined $opts{user}) {
         if ($opts{user}) {
-            @cmds = $tcmd->getUserCommand($opts{user});
+            @cmds = $tc->getUserCommand($opts{user});
         } elsif ($opts{name}) {
             $opts{name} =~ s/^(em_)?/em_/;
-            @cmds = $tcmd->getCommand($opts{name});
+            @cmds = $tc->getCommand($opts{name});
         } else {
-            @cmds = $tcmd->getUserCommands();
+            @cmds = $tc->getUserCommands();
         }
     } elsif (defined $opts{internal}) {
         if ($opts{internal}) {
-            @cmds = $tcmd->getInternalCommand($opts{internal});
+            @cmds = $tc->getInternalCommand($opts{internal});
         } elsif ($opts{name}) {
             $opts{name} =~ s/^(cm_)?/cm_/;
-            @cmds = $tcmd->getCommand($opts{name});
+            @cmds = $tc->getCommand($opts{name});
         } else {
-            @cmds = $tcmd->getInternalCommands();
+            @cmds = $tc->getInternalCommands();
         }
     } elsif (defined $opts{buttonBar}) {
         if ($opts{buttonBar}) {
             my ($bar, $nr) = split /,/, $opts{buttonBar};
             if ($nr) {
-                @cmds = $tcmd->getButton($bar, $nr);
+                @cmds = $tc->getButton($bar, $nr);
             } else {
-                @cmds = $tcmd->getButtons($bar);
+                @cmds = $tc->getButtons($bar);
             }
         } else {
-            my @bars = $tcmd->getButtonBars();
+            my @bars = $tc->getButtonBars();
             foreach my $bar (@bars) {
-                my @buttons = $tcmd->getButtons($bar);
+                my @buttons = $tc->getButtons($bar);
                 info "%s$opts{delimiter}%s", $bar, scalar @buttons;
             }
             exit;
         }
     } elsif ($opts{allButtons}) {
-        @cmds = $tcmd->getAllButtons();
+        @cmds = $tc->getAllButtons();
     } elsif (defined $opts{catName} || defined $opts{catNumber}) {
         if ($opts{catName}) {
-            @cmds = $tcmd->getInternalCommands($opts{catName});
+            @cmds = $tc->getInternalCommands($opts{catName});
         } elsif ($opts{catNumber}) {
-            my $catName = $tcmd->getCategoryName($opts{catNumber});
+            my $catName = $tc->getCategoryName($opts{catNumber});
             info "Category: $catName";
-            @cmds = $tcmd->getInternalCommands($catName);
+            @cmds = $tc->getInternalCommands($catName);
         } else {
             my $i = 1;
-            foreach my $cat ($tcmd->getCommandCategories) {
+            foreach my $cat ($tc->getCommandCategories) {
                 info "%s$opts{delimiter}%s", $i++, $cat;
             }
             exit;
         }
     } elsif (defined $opts{all}) {
-        @cmds = $tcmd->getAllCommands();
+        @cmds = $tc->getAllCommands();
     } elsif (defined $opts{name}) {
-        @cmds = $tcmd->getCommand($opts{name});
+        @cmds = $tc->getCommand($opts{name});
     } elsif ($opts{keys}) {
         DisplayShortcutKeys();
         exit;
     } elsif (defined $opts{find}) {
-        @cmds = $tcmd->getCustomCommands();
+        @cmds = $tc->getCustomCommands();
     } else {
         RJK::Options::Pod::pod2usage(
             -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
@@ -583,7 +583,7 @@ sub GetResults {
     }
 
     # get shortcut keys
-    my %keys = $tcmd->getCommandKeys();
+    my %keys = $tc->getCommandKeys();
     foreach my $cmd (@$results) {
         next if !$cmd->{name};
         my $sc = $keys{ $cmd->{name} };
@@ -607,7 +607,7 @@ sub GetResults {
 }
 
 sub CreateButtonBar {
-    my $bar = $tcmd->getButtonBar;
+    my $bar = $tc->getButtonBar;
     foreach my $cmd (@$results) {
         $cmd->{button} //= GetIcon($cmd) // $opts{defaultIcon};
         $bar->addButton($cmd);
@@ -618,9 +618,9 @@ sub CreateButtonBar {
 sub SaveToMenu {
     my $menu = shift;
     my $title = $opts{buttonBar} // "saved by tc.pl";
-    my $items = $tcmd->getMenuItems($menu);
+    my $items = $tc->getMenuItems($menu);
     push @$items, {menu=>"-[ $title ]"}, @$results, {menu=>"--"};
-    $tcmd->saveMenu($menu, $items);
+    $tc->saveMenu($menu, $items);
 }
 
 sub GetIcon {
@@ -803,11 +803,11 @@ sub Execute {
 
 sub DisplayShortcutKeys {
     my @commands;
-    my $shortcuts = $tcmd->getShortcuts()
+    my $shortcuts = $tc->getShortcuts()
         or die "Section not found";
 
     while (my ($cmdKeys, $cmdName) = each %$shortcuts) {
-        my $cmd = $tcmd->getCommand($cmdName);
+        my $cmd = $tc->getCommand($cmdName);
         $cmd->{shortcuts} = $cmdKeys;
 
         # determine modifier keys
