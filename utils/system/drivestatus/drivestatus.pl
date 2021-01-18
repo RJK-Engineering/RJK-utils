@@ -1,14 +1,11 @@
 use strict;
 use warnings;
 
-use Time::HiRes qw( gettimeofday tv_interval );
-use Try::Tiny;
+use File::Basename;
+use lib dirname (__FILE__);
 
-use RJK::Win32::Console;
-use RJK::Win32::DriveStatus;
 use RJK::LocalConf;
 use RJK::Options::Pod;
-use RJK::Util::JSON;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -161,254 +158,20 @@ $opts{statusFile} || RJK::Options::Pod::pod2usage(
     -message => "Path to status file required."
 );
 
+$opts{statusFile} =~ s/%(.+)%/$ENV{$1}/g;
+
 my @ignore = split /\s+/, $opts{ignore};
 $opts{ignore} = { map { $_ => 1 } @ignore };
 
 ###############################################################################
 
-my $status;
+use DriveStatus;
+use RJK::Exceptions;
+use Try::Tiny;
+
 try {
-    $status = new RJK::Win32::DriveStatus(
-        ignore => $opts{ignore},
-        status => RJK::Util::JSON->read($opts{statusFile}),
-    );
-    UpdateStatus();
+    DriveStatus->start(\%opts);
 } catch {
-    if ( $_->isa('Exception') ) {
-        printf "%s: %s\n", ref, $_->error;
-    } else {
-        die "$_";
-    }
+    RJK::Exceptions->handle();
     exit 1;
 };
-
-if ($opts{list}) {
-    my @cols = qw(type online path label);
-    printf "%s\t%s\t%s\t%s\n", @cols;
-    $cols[0] = "typeFlag";
-    foreach my $drive ($status->all) {
-        printf "%s\t%s\t%s\t%s\n", map { $drive->{$_} } @cols;
-    }
-    exit;
-}
-
-my $console = new RJK::Win32::Console();
-
-my $actions = {
-    '?' => \&Help,
-    '`' => \&Summary,
-    1 => sub {
-        UpdateStatus();
-        my $c = 0;
-        foreach ($status->all) {
-            my $status =
-                ! $_->{online} && "offline" ||
-                  $_->{active} && "active"  ||
-                                  "inactive";
-            $console->updateLine(sprintf "%-3.3s %-10.10s %s\n", $_->{driveLetter}, $status, $_->{label});
-            $c++;
-        }
-        Summary();
-    },
-    2 => sub {
-        my $c = 0;
-        foreach ($status->inactive) {
-            $console->updateLine(sprintf "%-3.3s %s\n", $_->{driveLetter}, $_->{label});
-            $c++;
-        }
-        $console->updateLine("$c drive(s) inactive\n");
-    },
-    3 => sub {
-        my $c = 0;
-        foreach ($status->online) {
-            $console->updateLine(sprintf "%-3.3s %s\n", $_->{driveLetter}, $_->{label});
-            $c++;
-        }
-        $console->updateLine("$c drive(s) online\n");
-    },
-    4 => sub {
-        my $c = 0;
-        foreach ($status->active) {
-            $console->updateLine(sprintf "%-3.3s %s\n", $_->{driveLetter}, $_->{label});
-            $c++;
-        }
-        $console->updateLine("$c drive(s) active\n");
-    },
-    toggle => sub {
-        my $driveLetter = shift;
-        UpdateStatus();
-        if ($status->toggleActive($driveLetter)) {
-            $console->updateLine("$driveLetter now active\n");
-        } else {
-            $console->updateLine("$driveLetter now inactive\n");
-        }
-        updateWindowTitle();
-        writeStatusFile();
-    },
-};
-
-###############################################################################
-
-my @online = $status->online;
-unless (@online) {
-    print "No online drives\n";
-    #~ exit;
-}
-
-my @volumes = map { $_->{driveLetter} } $status->active;
-@volumes = '(none)' unless @volumes;
-print "Active: @volumes\n";
-
-$console->title("$opts{windowTitle} | @volumes");
-
-if ($opts{verbose}) {
-    @volumes = map { $_->{driveLetter} } $status->inactive;
-    @volumes = '(none)' unless @volumes;
-    print "Inactive: @volumes\n";
-
-    my @volumes = map { $_->{driveLetter} } $status->online;
-    @volumes = '(none)' unless @volumes;
-    print "Online: @volumes\n";
-
-    @volumes = map { $_->{driveLetter} } $status->offline;
-    @volumes = '(none)' unless @volumes;
-    print "Offline: @volumes\n";
-
-    print "Ignore: @ignore\n";
-}
-
-Help() unless $opts{quiet};
-
-###############################################################################
-
-my $pokeTimer = $opts{pokeInterval};
-while (1) {
-    $console->updateLine($pokeTimer) if $opts{verbose};
-    unless ($pokeTimer--) {
-        UpdateStatus();
-        PreventSleep(! $opts{verbose});
-        $pokeTimer = $opts{pokeInterval};
-    }
-    UserInput();
-    sleep 1;
-}
-
-###############################################################################
-
-sub Summary {
-    my @volumes = map {
-        $_->{active} ? "($_->{driveLetter})" : $_->{driveLetter}
-    } $status->online;
-    @volumes = '(none)' unless @volumes;
-    #~ $console->updateLine("Active: @volumes, ");
-
-    #~ @volumes = map { $_->{driveLetter} } $status->online;
-    #~ @volumes = '(none)' unless @volumes;
-    $console->write("Online: @volumes\n");
-}
-
-sub Help {
-    $console->updateLine("Poke interval: $opts{pokeInterval} seconds\n");
-    RJK::Options::Pod::pod2usage(
-        -exitstatus => 'NOEXIT',
-        -sections => "USAGE/Keys",
-        -width => $console->columns - 1,
-        -indent => 0,
-    );
-    $console->lineUp();
-}
-
-sub Quit {
-    $console->printLine("Bye") unless $opts{quiet};
-    exit;
-}
-
-sub UserInput {
-    while ($console->getEvents) {
-        my @event = $console->input();
-        if (@event && $event[0] == 1 and $event[1]) {
-            #~ print "@event\n";
-            if ($event[5]) {                    # ASCII
-                if ($event[5] == 9) {           # Tab
-                    PreventSleep();
-                } elsif ($event[5] == 27) {     # Esc
-                    Quit();
-                } else {
-                    my $key = lc chr $event[5];
-                    if ($actions->{$key}) {     # action key
-                        $actions->{$key}->();
-                    } else {                    # drive letter
-                        $actions->{toggle}->(uc $key);
-                    }
-                }
-            } elsif ($event[3] == 112) {        # F1
-                Help();
-            } else {
-                next;
-            }
-            last;
-        }
-    }
-    # empty buffer
-    $console->flush();
-}
-
-sub PreventSleep {
-    my $quiet = shift;
-
-    my @volumes = $status->active;
-    my $poked = 0;
-
-    foreach my $vol (@volumes) {
-        $console->updateLine("Poke") unless $poked;
-        $poked++;
-        $console->write(" $vol->{driveLetter}");
-
-        my $t = [gettimeofday];
-
-        my $file = "$vol->{path}\\nosleep";
-        if (open my $fh, '>', $file) {
-            #~ print $fh rand(2**32);
-            close $fh;
-            unlink $file;
-        } else {
-            $console->write("($!)");
-        }
-
-        my $d = int tv_interval $t, [gettimeofday];
-        $console->write("($d)") if $d;
-    }
-    if ($poked) {
-        $console->write("\n");
-    } else {
-        $console->updateLine("No drives active\n") unless $quiet;
-    }
-    return $poked;
-}
-
-sub UpdateStatus {
-    try {
-        if ($status->update) {
-            writeStatusFile();
-        }
-    } catch {
-        if ( $_->isa('Exception') ) {
-            $console->updateLine(sprintf "%s: %s\n", ref, $_->error);
-        } else {
-            die "$!";
-        }
-    };
-}
-
-###############################################################################
-
-sub writeStatusFile {
-    RJK::Util::JSON->write($opts{statusFile}, $status->{status});
-}
-
-sub updateWindowTitle {
-    my $self = shift;
-    my @volumes = map { $_->{driveLetter} } $status->active;
-    @volumes = '(none)' unless @volumes;
-    $console->title("$opts{windowTitle} | @volumes");
-}
