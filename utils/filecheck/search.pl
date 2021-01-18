@@ -5,7 +5,7 @@ use File::Basename;
 use lib dirname (__FILE__);
 use Try::Tiny;
 
-use RJK::Exception;
+use RJK::Exceptions;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 use RJK::Util::JSON;
@@ -602,9 +602,9 @@ try {
     go();
 } catch {
     if ($opts{verbose}) {
-        RJK::Exception->verbosePrintAndExit;
+        RJK::Exceptions->handleVerbose;
     } else {
-        RJK::Exception->printAndExit;
+        RJK::Exceptions->handle;
     }
 };
 
