@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use RJK::Exception;
+use RJK::Exceptions;
 use RJK::Options::Pod;
 use RJK::TotalCmd::Command;
 use RJK::TotalCmd::Settings;
@@ -465,11 +465,7 @@ try {
         warn "No results";
     }
 } catch {
-    if ( $_->isa('RJK::TotalCmd::NotFoundException') ) {
-        warn $_->error();
-    } else {
-        RJK::Exception::GeneralCatch();
-    }
+    RJK::Exceptions->handle;
 };
 
 ###############################################################################
@@ -785,7 +781,9 @@ sub Execute {
             }
         );
     } catch {
-        if ( $_->isa('RJK::TotalCmd::Command::UnsupportedParameterException') ) {
+        if (! ref) {
+            die $_;
+        } elsif ( $_->isa('RJK::TotalCmd::Command::UnsupportedParameterException') ) {
             error "Unsupported parameter: %s", $_->parameter();
         } elsif ( $_->isa('RJK::TotalCmd::Command::ListFileException') ) {
             warn "%s: %s", $_->error, $_->path();
