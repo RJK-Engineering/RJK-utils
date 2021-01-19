@@ -76,10 +76,7 @@ sub preventSleep {
         $console->write("($d)") if $d;
     }
 
-    if ($console->getCurrentLine() eq $console->getPreviousLine()) {
-        $console->clearCurrentLine();
-        $console->lineUp();
-    }
+    $console->removeDupeLine();
 }
 
 sub updateStatus {
