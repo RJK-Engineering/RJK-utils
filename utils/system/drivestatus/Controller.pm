@@ -24,7 +24,7 @@ sub userInput {
                     $actions->quit();
                 } else {
                     my $key = chr $event[5];
-                    if ($actions->can($key)) {     # action key
+                    if ($actions->can($key)) {  # action key
                         $actions->do($key);
                     } else {                    # drive letter
                         $actions->do('toggle', [uc $key]);
@@ -38,8 +38,7 @@ sub userInput {
             last;
         }
     }
-    # empty buffer
-    $console->flush();
+    $console->flush();  # empty buffer
 }
 
 1;
