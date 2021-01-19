@@ -56,7 +56,6 @@ sub preventSleep {
     my $quiet = shift;
     my @volumes = $status->active;
 
-    $console->newLine();
     $console->write(@volumes ? "Poke" : "No drives active");
 
     foreach my $vol (@volumes) {
@@ -77,6 +76,7 @@ sub preventSleep {
     }
 
     $console->removeDupeLine();
+    $console->newLine();
 }
 
 sub updateStatus {
