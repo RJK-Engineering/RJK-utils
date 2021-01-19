@@ -69,7 +69,7 @@ sub preventSleep {
 
         my $file = "$vol->{path}\\nosleep";
         if (open my $fh, '>', $file) {
-            #~ print $fh rand(2**32);
+            print $fh rand(2**32) if $opts->{writeRandomNumber};
             close $fh;
             unlink $file;
         } else {
