@@ -118,7 +118,7 @@ Type a drive letter to toggle between active/inactive.
 
 =head2 Keys
 
-[`]=Summary [1]=List [Tab]=Poke [F1]=[?]=Help [Esc]=Quit
+[`]=Summary [1]=All [2]=Online [Tab]=Poke [?]=Help [Esc]=Quit
 
 =cut
 ###############################################################################
@@ -147,10 +147,6 @@ RJK::Options::Pod::GetOptions(
 
     ['Help'],
     RJK::Options::Pod::HelpOptions
-);
-
-$opts{start} || $opts{list} || RJK::Options::Pod::pod2usage(
-    -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
 
 $opts{statusFile} || RJK::Options::Pod::pod2usage(
