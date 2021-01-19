@@ -54,20 +54,16 @@ sub do {
 
 sub preventSleep {
     my $quiet = shift;
-
     my @volumes = $status->active;
-    my $poked = 0;
 
     $console->newLine();
+    $console->write(@volumes ? "Poke" : "No drives active");
 
     foreach my $vol (@volumes) {
-        $console->write("Poke") unless $poked;
-        $poked++;
         $console->write(" $vol->{letter}");
-
         my $t = [gettimeofday];
-
         my $file = "$vol->{path}\\nosleep";
+
         if (open my $fh, '>', $file) {
             print $fh rand(2**32) if $opts->{writeRandomNumber};
             close $fh;
@@ -80,8 +76,10 @@ sub preventSleep {
         $console->write("($d)") if $d;
     }
 
-    $console->printLine("No drives active") unless $quiet || $poked;
-    return $poked;
+    if ($console->getCurrentLine() eq $console->getPreviousLine()) {
+        $console->clearCurrentLine();
+        $console->lineUp();
+    }
 }
 
 sub updateStatus {
