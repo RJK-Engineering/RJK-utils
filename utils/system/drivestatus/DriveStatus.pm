@@ -2,7 +2,6 @@ package DriveStatus;
 
 use RJK::Win32::Console;
 use RJK::Win32::DriveStatus;
-use RJK::Util::JSON;
 
 use Actions;
 use Controller;
@@ -42,10 +41,7 @@ sub start {
 }
 
 sub init {
-    $status = new RJK::Win32::DriveStatus(
-        ignore => $opts->{ignore},
-        status => RJK::Util::JSON->read($opts->{statusFile}),
-    );
+    $status = new RJK::Win32::DriveStatus($opts);
     $actions = new Actions($console, $status, $opts);
     $controller = new Controller($console, $actions);
     $actions->updateStatus();
