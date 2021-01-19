@@ -16,19 +16,13 @@ sub start {
     my $self = shift;
     $opts = shift;
     &init;
+    &list if $opts->{list};
 
-    if ($opts->{list}) {
-        &list;
-        exit;
-    }
-
-    my @volumes = map { $_->{letter} } $status->active;
-    @volumes = '(none)' unless @volumes;
-    $console->printLine("Active: @volumes");
-    $console->title("$opts->{windowTitle} | @volumes");
+    $actions->updateWindowTitle();
+    $actions->summary();
     $actions->help() unless $opts->{quiet};
-
     my $pokeTimer = $opts->{pokeInterval};
+
     while (1) {
         unless ($pokeTimer--) {
             $actions->updateStatus();
@@ -54,6 +48,7 @@ sub list {
     foreach my $drive ($status->all) {
         $console->printLine(sprintf "%s\t%s\t%s\t%s", map { $drive->{$_} } @cols);
     }
+    exit;
 }
 
 1;
