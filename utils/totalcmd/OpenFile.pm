@@ -6,7 +6,7 @@ use warnings;
 use Cwd ();
 
 use RJK::Util::JSON;
-use RJK::Filecheck::NameParser;
+use RJK::Filecheck::Builder::NameParser;
 use RJK::Filecheck::Site;
 use RJK::Win32::ProcessList;
 
@@ -17,7 +17,7 @@ my $browser;
 sub execute {
     my $self = shift;
     $opts = shift;
-    my $nameParser = getNameParser();
+    my $nameParser = RJK::Filecheck::Builder::NameParser->create($opts->{filenamesConfDir});
     $sites //= RJK::Util::JSON->read($opts->{sitesConf} =~ s/%(.+)%/$ENV{$1}/gr);
 
     foreach my $filename (@{$opts->{args}}) {
@@ -26,21 +26,6 @@ sub execute {
         print "@$cmd\n" unless $opts->{quiet};
         runCommand($cmd) if @$cmd;
     }
-}
-
-sub getNameParser {
-    my $nameParser = new RJK::Filecheck::NameParser();
-
-    $opts->{filenamesConfDir} || die "Not defined: filenames.conf.dir";
-    opendir my $dh, $opts->{filenamesConfDir} or die "$!: $opts->{filenamesConfDir}";
-    while (readdir $dh) {
-        next unless /\.json$/;
-        my $conf = RJK::Util::JSON->read("$opts->{filenamesConfDir}/$_");
-        $nameParser->addConf($conf);
-    }
-    closedir $dh;
-
-    return $nameParser;
 }
 
 sub getCommand {
