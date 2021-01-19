@@ -72,6 +72,7 @@ try {
     } else {
         RJK::Exceptions->handle;
     }
+    exit 1;
 };
 
 sub go {
