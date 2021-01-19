@@ -15,51 +15,24 @@ my $actions = {
     '`' => \&summary,
     1 => sub {
         &updateStatus;
-        my $c = 0;
         foreach ($status->all) {
-            my $status =
-                ! $_->{online} && "offline" ||
-                  $_->{active} && "active"  ||
-                                  "inactive";
-            $console->printLine(sprintf "%-3.3s %-10.10s %s", $_->{letter}, $status, $_->{label});
-            $c++;
+            $console->printLine(sprintf "%-3.3s %-10.10s %s", $_->{letter}, $status->str, $_->{label});
         }
-        summary();
     },
     2 => sub {
-        my $c = 0;
-        foreach ($status->inactive) {
-            $console->printLine(sprintf "%-3.3s %s", $_->{letter}, $_->{label});
-            $c++;
-        }
-        $console->printLine("$c drive(s) inactive");
-    },
-    3 => sub {
-        my $c = 0;
+        &updateStatus;
         foreach ($status->online) {
-            $console->printLine(sprintf "%-3.3s %s", $_->{letter}, $_->{label});
-            $c++;
+            $console->printLine(sprintf "%-3.3s %-10.10s %s", $_->{letter}, $status->str, $_->{label});
         }
-        $console->printLine("$c drive(s) online");
-    },
-    4 => sub {
-        my $c = 0;
-        foreach ($status->active) {
-            $console->printLine(sprintf "%-3.3s %s", $_->{letter}, $_->{label});
-            $c++;
-        }
-        $console->printLine("$c drive(s) active");
     },
     toggle => sub {
         my $driveLetter = shift;
-        &updateStatus;
         if ($status->toggleActive($driveLetter)) {
             $console->printLine("$driveLetter now active");
         } else {
             $console->printLine("$driveLetter now inactive");
         }
         updateWindowTitle();
-        writeStatusFile();
     },
 };
 
@@ -114,14 +87,10 @@ sub preventSleep {
 
 sub updateStatus {
     try {
-        writeStatusFile() if $status->update;
+        $status->update;
     } catch {
         RJK::Exceptions->handle();
     };
-}
-
-sub writeStatusFile {
-    RJK::Util::JSON->write($opts->{statusFile}, $status->{status});
 }
 
 sub updateWindowTitle {
@@ -151,12 +120,7 @@ sub summary {
     my @volumes = map {
         $_->{active} ? "($_->{letter})" : $_->{letter}
     } $status->online;
-    @volumes = '(none)' unless @volumes;
-    #~ $console->printLine("Active: @volumes, ");
-
-    #~ @volumes = map { $_->{letter} } $status->online;
-    #~ @volumes = '(none)' unless @volumes;
-    $console->printLine("Online: @volumes");
+    $console->printLine("Online: " . ("@volumes" || '(none)'));
 }
 
 1;
