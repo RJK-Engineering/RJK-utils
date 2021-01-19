@@ -58,6 +58,8 @@ sub preventSleep {
     my @volumes = $status->active;
     my $poked = 0;
 
+    $console->newLine();
+
     foreach my $vol (@volumes) {
         $console->write("Poke") unless $poked;
         $poked++;
@@ -77,11 +79,8 @@ sub preventSleep {
         my $d = int tv_interval $t, [gettimeofday];
         $console->write("($d)") if $d;
     }
-    if ($poked) {
-        $console->newLine();
-    } else {
-        $console->printLine("No drives active") unless $quiet;
-    }
+
+    $console->printLine("No drives active") unless $quiet || $poked;
     return $poked;
 }
 
