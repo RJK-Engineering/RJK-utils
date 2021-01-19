@@ -1,12 +1,9 @@
 use strict;
 use warnings;
 
-use Cwd ();
+use File::Basename;
+use lib dirname (__FILE__);
 
-use RJK::Util::JSON;
-#~ use Filecheck::Search;
-use RJK::Filecheck::NameParser;
-use RJK::Filecheck::Site;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 
@@ -70,7 +67,6 @@ RJK::Options::Pod::GetOptions(
     'o|open' => \$opts{open},
     'c|site-conf=s' => \$opts{sitesConf},
     #~ 'f|filenames-conf-dir=s' => \$opts{filenamesConfDir},
-    'd|dump' => \$opts{dump},
     'b|browser=s' => \$opts{browser},
     'a|browser-args=s' => \$opts{browserArgs},
     'm|mpc=s' => \$opts{mpc},
@@ -83,74 +79,23 @@ RJK::Options::Pod::GetOptions(
 @ARGV || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP"
 );
-
-my ($name) = @ARGV;
-$name =~ s/^.*\\//; # discard directory portion
+$opts{args} = \@ARGV;
 
 my $i = 0;
-$opts{browserArgs} = [ map { $i++ % 2 ? $_ : split /\s+/ } split /"(.*?)"\s*/, $opts{browserArgs} =~ s/^\s+//r ];
+$opts{browserArgs} = [
+    map { $i++ % 2 ? $_ : split /\s+/ }
+    split /"(.*?)"\s*/, $opts{browserArgs} =~ s/^\s+//r
+];
 
 ###############################################################################
 
-my $nameParser = getNameParser();
-my $props = $nameParser->parse($name);
+use OpenFile;
+use RJK::Exceptions;
+use Try::Tiny;
 
-if ($opts{dump}) {
-    use Data::Dump;
-    dd $props;
-    exit;
-}
-
-my $sites = RJK::Util::JSON->read($opts{sitesConf});
-
-my @cmd;
-if ($props->{site}) {
-    my $site = new RJK::Filecheck::Site($sites->{$props->{site}});
-    my $url;
-    if ($props->{id}) {
-        $url = $site->downloadUrl($props->{id});
-    } elsif ($props->{nameWords}) {
-        $url = $site->searchUrl($props->{nameWords});
-    }
-    if ($url) {
-        @cmd = ($opts{browser}, @{$opts{browserArgs}}, $url);
-    }
-} elsif ($props->{snapshot}) {
-    my $cwd = Cwd::getcwd;
-    $cwd =~ s|/|\\|g;
-    my $file = "$cwd\\$props->{snapshot}{file}";
-    #~ my $search = new Filecheck::Search(
-    #~     lstDir => 'c:\data\filecheck\lists'
-    #~ );
-    #~ my $path = $search->findPath($file);
-    if (-e $file) {
-        @cmd = (
-            "start", "\"$file\"",
-            $opts{mpc}, $file,
-            "/startpos", $props->{snapshot}{position},
-        );
-    } else {
-        print "File not found: $file\n" unless $opts{quiet};
-    }
-}
-
-if (@cmd) {
-    print "@cmd\n" unless $opts{quiet};
-    if ($opts{open}) {
-        system @cmd;
-    }
-}
-
-sub getNameParser {
-    my $nameParser = new RJK::Filecheck::NameParser();
-
-    opendir my $dh, $opts{filenamesConfDir} or die "$!";
-    while (readdir $dh) {
-        next unless /\.json$/;
-        my $conf = RJK::Util::JSON->read("$opts{filenamesConfDir}/$_");
-        $nameParser->addConf($conf);
-    }
-    closedir $dh;
-
-    return $nameParser;
-}
+try {
+    OpenFile->execute(\%opts);
+} catch {
+    RJK::Exceptions->handle;
+    exit 1;
+};
