@@ -154,7 +154,6 @@ $opts{statusFile} || RJK::Options::Pod::pod2usage(
     -message => "Path to status file required."
 );
 
-$opts{statusFile} =~ s/%(.+)%/$ENV{$1}/g;
 
 my @ignore = split /\s+/, $opts{ignore};
 $opts{ignore} = { map { $_ => 1 } @ignore };
@@ -163,7 +162,10 @@ $opts{ignore} = { map { $_ => 1 } @ignore };
 
 use DriveStatus;
 use RJK::Exceptions;
+use RJK::Util::Env;
 use Try::Tiny;
+
+$opts{statusFile} = RJK::Util::Env->subst($opts{statusFile});
 
 try {
     DriveStatus->start(\%opts);
