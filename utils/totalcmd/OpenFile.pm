@@ -5,20 +5,20 @@ use warnings;
 
 use Cwd ();
 
+use RJK::Filecheck;
+use RJK::Site;
+use RJK::Sites;
 use RJK::Util::JSON;
-use RJK::Filecheck::Builder::NameParser;
-use RJK::Filecheck::Site;
 use RJK::Win32::ProcessList;
 
 my $opts;
-my $sites;
 my $browser;
 
 sub execute {
     my $self = shift;
     $opts = shift;
-    my $nameParser = RJK::Filecheck::Builder::NameParser->create($opts->{filenamesConfDir});
-    $sites //= RJK::Util::JSON->read($opts->{sitesConf} =~ s/%(.+)%/$ENV{$1}/gr);
+    $opts->{filenamesConfDir} || die "Not defined: filenames.conf.dir";
+    my $nameParser = RJK::Filecheck->createNameParser($opts->{filenamesConfDir});
 
     foreach my $filename (@{$opts->{args}}) {
         my $props = $nameParser->parse($filename);
@@ -33,10 +33,10 @@ sub getCommand {
 
     my @cmd;
     if ($props->{site}) {
-        my $site = new RJK::Filecheck::Site(getSites()->{$props->{site}});
+        my $site = RJK::Sites->get($props->{site});
         my $url;
         if ($props->{id}) {
-            $url = $site->downloadUrl($props->{id});
+            $url = $site->getDownloadUrl($props->{id});
         } elsif ($props->{nameWords}) {
             $url = $site->searchUrl($props->{nameWords});
         }
@@ -66,10 +66,6 @@ sub runCommand {
     if ($opts->{open}) {
         system @$cmd;
     }
-}
-
-sub getSites {
-    return $sites //= RJK::Util::JSON->read($opts->{sitesConf} =~ s/%(.+)%/$ENV{$1}/gr);
 }
 
 sub getBrowser {
