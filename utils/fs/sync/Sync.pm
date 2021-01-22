@@ -32,8 +32,8 @@ sub indexTarget {
     $display->setStats($stats);
     my $visitor = new IndexFileVisitor($opts, $filesInTarget, $display);
 
-    foreach (@$dirs) {
-        my $path = "$opts->{targetDir}\\$_";
+    foreach my $dir (@$dirs) {
+        my $path = "$opts->{targetDir}\\$dir";
         $display->info("Indexing $path ...");
         $display->stats;
         RJK::Files->traverse($path, $visitor, {}, $stats);

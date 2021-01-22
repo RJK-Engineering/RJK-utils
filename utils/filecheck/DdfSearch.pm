@@ -25,10 +25,10 @@ sub execute {
     $view->{results} = $visitor->{results};
 
     $view->showSearchStart($tcSearch);
-    foreach (@files) {
-        $view->showPartitionSearchStart($_);
-        my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$ddfLstDir\\$_", $visitorWithStats, { nostat => 0 });
-        $view->showPartitionSearchDone($_);
+    foreach my $file (@files) {
+        $view->showPartitionSearchStart($file);
+        my $terminated = RJK::TotalCmd::DiskDirFiles->traverse("$ddfLstDir\\$file", $visitorWithStats, { nostat => 0 });
+        $view->showPartitionSearchDone($file);
 
         $visitor->resetPartitionStats();
         last if $terminated;
@@ -46,8 +46,8 @@ sub getDdfFiles {
     return $lstDir->filenames(sub { /\.lst$/i }) if ! @$partitions;
 
     my @files;
-    foreach (@$partitions) {
-        my $f = new RJK::IO::File($lstDir, "$_.lst");
+    foreach my $name (@$partitions) {
+        my $f = new RJK::IO::File($lstDir, "$name.lst");
         if ($f->exists) {
             push @files, $f->name;
         } else {

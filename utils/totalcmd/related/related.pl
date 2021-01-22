@@ -102,8 +102,8 @@ sub group {
     my $getFile = sub {
         my $file = shift;
         my $f = { file => $file };
-        foreach (keys %$meta) {
-            $meta->{$_}($file, $f);
+        foreach my $m (keys %$meta) {
+            $meta->{$m}($file, $f);
         }
         return $f;
     };

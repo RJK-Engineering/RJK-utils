@@ -185,11 +185,11 @@ if (! $opts{list}) {
     print "Search for: @searchFor\n" if @searchFor;
 }
 
-foreach (@paths) {
+foreach my $path (@paths) {
     if ($opts{list}) {
-        print "$_\n";
+        print "$path\n";
     } else {
-        $nrOfResults += search($_);
+        $nrOfResults += search($path);
     }
 }
 
@@ -271,9 +271,7 @@ sub match {
 
     my $searchIn = $comment->{$opts{searchIn}};
     foreach (@searchFor) {
-        if ($searchIn !~ /$_/i) {
-            return 0;
-        }
+        return 0 if $searchIn !~ /$_/i;
     }
     return 1;
 }
