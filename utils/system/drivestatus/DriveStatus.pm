@@ -7,7 +7,7 @@ use Actions;
 use Controller;
 
 my $opts;
-my $console = new RJK::Win32::Console();
+my $console;
 my $status;
 my $actions;
 my $controller;
@@ -36,6 +36,7 @@ sub start {
 
 sub init {
     $status = new RJK::Win32::DriveStatus($opts);
+    $console = new RJK::Win32::Console();
     $actions = new Actions($console, $status, $opts);
     $controller = new Controller($console, $actions);
     $actions->updateStatus();
