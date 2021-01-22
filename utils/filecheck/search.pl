@@ -591,9 +591,12 @@ RJK::Options::Pod::GetOptions(
     )
 );
 
+use RJK::Env;
+use RJK::Exceptions;
 use Search;
 use Try::Tiny;
-use RJK::Exceptions;
+
+RJK::Env->subst(\$opts{log4perlConf}, \$opts{statusFile});
 
 try {
     Search->execute(\%opts);
