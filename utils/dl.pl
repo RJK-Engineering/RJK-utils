@@ -120,24 +120,23 @@ sub getFormats {
             next;
         }
         chomp;
-        if (/(.*?)\s+(.*?)\s+(.*?)\s+(.*)/) {
-            print "$1\t$2\t$3\t$4\n";
-            my $code = $1;
-            my $format = {
-                extension => $2,
-                resolution => $3,
-                note => $4,
-            };
-            next if $site && $site->{formatFilterRegex} && ! $code =~ /$site->{formatFilterRegex}/;
-            $formats->{$code} = $format;
-
-            if ($format->{resolution} =~ /(\d+)x(\d+)/) {
-                $formats->{vvs} = $1 < $2;
-                $formats->{resolutions}{$2} = $code;
-            }
-        } else {
+        if (! /(.*?)\s+(.*?)\s+(.*?)\s+(.*)/) {
             warn "ERROR: $_";
+            next;
         }
+        print "$1\t$2\t$3\t$4\n";
+        my $code = $1;
+        my $format = {
+            extension => $2,
+            resolution => $3,
+            note => $4,
+        };
+        next if $site && $site->{formatFilterRegex} && ! $code =~ /$site->{formatFilterRegex}/;
+        $formats->{$code} = $format;
+
+        next if $format->{resolution} !~ /(\d+)x(\d+)/;
+        $formats->{vvs} = $1 < $2;
+        $formats->{resolutions}{$2} = $code;
     }
     return $formats;
 }
