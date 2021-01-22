@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 
-use Exception::Class;
+use Exceptions;
 use File::Copy ();
 use File::Spec::Functions qw(splitpath);
 
