@@ -3,16 +3,9 @@ use warnings;
 
 use File::Basename;
 use lib dirname (__FILE__);
-use Try::Tiny;
 
-use RJK::Exceptions;
 use RJK::LocalConf;
 use RJK::Options::Pod;
-use RJK::Util::JSON;
-
-use FileSearch;
-use TotalCmdSearches;
-use UnicodeConsoleView;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -598,6 +591,18 @@ RJK::Options::Pod::GetOptions(
     )
 );
 
+use Try::Tiny;
+
+use RJK::Env;
+use RJK::Exceptions;
+use RJK::Util::JSON;
+
+use FileSearch;
+use TotalCmdSearches;
+use UnicodeConsoleView;
+
+$opts{statusFile} = RJK::Env->subst($opts{statusFile});
+
 try {
     go();
 } catch {
@@ -606,6 +611,7 @@ try {
     } else {
         RJK::Exceptions->handle;
     }
+    exit 1;
 };
 
 sub go {
@@ -619,7 +625,7 @@ sub go {
 }
 
 sub getPartitions {
-    my $status = RJK::Util::JSON->read($opts{statusFile} =~ s/%(\w+)%/$ENV{$1}/gr);
+    my $status = RJK::Util::JSON->read($opts{statusFile});
     my @partitions;
     if ($opts{partitions}) {
         @partitions = split /[\Q$opts{delimiters}\E]/, $opts{partitions};
