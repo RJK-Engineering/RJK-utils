@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use Log::Log4perl;
-
-use RJK::Env;
 use RJK::Util::JSON;
 
 use FileSearch;
@@ -13,13 +11,24 @@ use TotalCmdSearches;
 use UnicodeConsoleView;
 
 my $opts;
+my $logger;
 
 sub execute {
     my $self = shift;
     $opts = shift;
+    &initLog;
+    return TotalCmdSearches->listSearches() if $opts->{listSearches};
 
+    my $tcSearch = TotalCmdSearches->getSearch($opts);
+    my $view = new UnicodeConsoleView();
+    my @partitions = getPartitions() unless $opts->{allPartitions};
+
+    FileSearch->execute($view, $tcSearch, \@partitions, $opts);
+}
+
+sub initLog {
     if ($opts->{log4perlConf}) {
-        Log::Log4perl::init(RJK::Env->subst($opts->{log4perlConf}));
+        Log::Log4perl::init($opts->{log4perlConf});
     } else {
         Log::Log4perl::init(\q(
             log4perl.logger.search=DEBUG, StdErr
@@ -29,22 +38,7 @@ sub execute {
             log4perl.appender.StdErr.layout=Log::Log4perl::Layout::SimpleLayout
         ));
     }
-
-    my $logger = Log::Log4perl->get_logger('search');
-
-    $opts->{statusFile} = RJK::Env->subst($opts->{statusFile});
-
-    go();
-}
-
-sub go {
-    return TotalCmdSearches->listSearches() if $opts->{listSearches};
-
-    my $tcSearch = TotalCmdSearches->getSearch($opts);
-    my $view = new UnicodeConsoleView();
-    my @partitions = getPartitions() unless $opts->{allPartitions};
-
-    FileSearch->execute($view, $tcSearch, \@partitions, $opts);
+    $logger = Log::Log4perl->get_logger('search');
 }
 
 sub getPartitions {
