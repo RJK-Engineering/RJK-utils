@@ -591,20 +591,12 @@ RJK::Options::Pod::GetOptions(
     )
 );
 
+use Search;
 use Try::Tiny;
-
-use RJK::Env;
 use RJK::Exceptions;
-use RJK::Util::JSON;
-
-use FileSearch;
-use TotalCmdSearches;
-use UnicodeConsoleView;
-
-$opts{statusFile} = RJK::Env->subst($opts{statusFile});
 
 try {
-    go();
+    Search->execute(\%opts);
 } catch {
     if ($opts{verbose}) {
         RJK::Exceptions->handleVerbose;
@@ -613,29 +605,3 @@ try {
     }
     exit 1;
 };
-
-sub go {
-    return TotalCmdSearches->listSearches() if $opts{listSearches};
-
-    my $tcSearch = TotalCmdSearches->getSearch(\%opts);
-    my $view = new UnicodeConsoleView();
-    my @partitions = getPartitions() unless $opts{allPartitions};
-
-    FileSearch->execute($view, $tcSearch, \@partitions, \%opts);
-}
-
-sub getPartitions {
-    my $status = RJK::Util::JSON->read($opts{statusFile});
-    my @partitions;
-    if ($opts{partitions}) {
-        @partitions = split /[\Q$opts{delimiters}\E]/, $opts{partitions};
-        if ($opts{setDefault}) {
-            $status->{partitions} = \@partitions;
-            RJK::Util::JSON->write($opts{statusFile}, $status);
-        }
-    } else {
-        $status->{partitions} ||= [];
-        @partitions = @{$status->{partitions}};
-    }
-    return @partitions;
-}
