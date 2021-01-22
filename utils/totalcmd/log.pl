@@ -293,9 +293,7 @@ sub match {
 
     foreach (@searchTerms) {
         if ($opts{regex}) {
-            if ($searchStr !~ /$_/i) {
-                return 0;
-            }
+            return 0 if $searchStr !~ /$_/i;
         } elsif ($searchStr !~ /\Q$_\E/i) {
             return 0;
         }
