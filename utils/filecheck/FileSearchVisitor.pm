@@ -12,8 +12,8 @@ use parent 'RJK::FileVisitor';
 use strict;
 use warnings;
 
+use FileVisitResult;
 use RJK::TotalCmd::Searches;
-use RJK::TreeVisitResult;
 
 ###############################################################################
 =pod
@@ -83,7 +83,7 @@ sub _match {
     $self->{view}->showDirSearchDone($file, {
         info => "Maximum of $self->{numberOfResults} results reached."
     });
-    return TERMINATE;
+    return FileVisitResult::TERMINATE;
 }
 
 1;
