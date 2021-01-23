@@ -161,11 +161,11 @@ $opts{ignore} = { map { $_ => 1 } @ignore };
 ###############################################################################
 
 use DriveStatus;
+use RJK::Env;
 use RJK::Exceptions;
-use RJK::Util::Env;
 use Try::Tiny;
 
-$opts{statusFile} = RJK::Util::Env->subst($opts{statusFile});
+RJK::Env->subst(\$opts{statusFile});
 
 try {
     DriveStatus->start(\%opts);
