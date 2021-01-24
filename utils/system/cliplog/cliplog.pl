@@ -5,33 +5,49 @@ use Win32::Clipboard;
 
 my %opts = (
     pollInterval => 1,
-    chompText => 1,
-    logToClipOnExit => 1,
+    setClipAfterRead => 0,
+    setClipOnExit => 1,
 );
 
 my $clip = Win32::Clipboard();
-my ($text, $previousText) = (&getText)x2;
+my $text;
+my $prevText = "";
 my $log = "";
+&setText;
 
 $SIG{INT} = "interrupt";
 
 while (1) {
-    if ($text && $text ne $previousText) {
-        print "$text\n";
-        $previousText = $text;
-        $log .= $text . "\n";
+    $text = &getText;
+    if ($text) {
+        if ($opts{setClipAfterRead}) {
+            if ($text ne $log) {
+                print "$text\n";
+                $log .= "$text\n";
+                &setText;
+            }
+        } else {
+            if ($text ne $prevText) {
+                print "$text\n";
+                $log .= "$text\n";
+            }
+            $prevText = $text;
+        }
     }
     sleep $opts{pollInterval};
-    $text = &getText;
 }
 
 sub getText {
     my $text = $clip->GetText();
-    chomp $text if $opts{chompText};
     return $text;
 }
 
+sub setText {
+    $clip->Set($log);
+}
+
 sub interrupt {
-    $clip->Set($log) if $opts{logToClipOnExit};
+    &setText if $opts{setClipOnExit} &&
+              ! $opts{setClipAfterRead}; # clipboard already set
     exit;
 }
