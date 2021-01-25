@@ -10,26 +10,24 @@ my $site = shift || 'pod';
 my %opts = (
     noOpen => 0,
     quiet => 0,
+    openNewBrowser => 0
 );
 
 my $sites = {
     pod => {
         string => 'https://metacpan.org/pod/{pkg}',
-        replace => { pkg => [ [ '-', '::' ] ] },
+        replace => { pkg => [ '-', '::' ] },
     },
     metacpan => {
         string => 'https://metacpan.org/release/{pkg}',
-        replace => { pkg => [ [ '::', '-' ] ] },
+        replace => { pkg => [ '::', '-' ] },
     },
     activestate => {
         string => 'https://code.activestate.com/ppm/{pkg}',
-        replace => { pkg => [ [ '::', '-' ] ] },
+        replace => { pkg => [ '::', '-' ] },
     }
 };
 
-my $tp = new RJK::TemplateProcessor($sites);
-
-#~ my $url = $tp->getString($site, [$pkg]);
-my $url = $tp->getString($site, { pkg => $pkg });
+my $url = new RJK::TemplateProcessor($sites->{$site})->getString({ pkg => $pkg });
 print "$url\n" unless $opts{quiet};
-RJK::Win32::Browser->openUrl($url) unless $opts{noOpen};
+RJK::Win32::Browser->openUrl($url, $opts{openNewBrowser}) unless $opts{noOpen};
