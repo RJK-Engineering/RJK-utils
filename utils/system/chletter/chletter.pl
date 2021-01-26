@@ -91,7 +91,7 @@ Display complete help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("system/chletter.properties", (
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/system/chletter.properties", (
     tempFile => 'chdl.txt',
 ));
 

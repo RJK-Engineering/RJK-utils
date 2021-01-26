@@ -144,7 +144,7 @@ A backup is created.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("emule/known.properties");
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/emule/known.properties");
 
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],

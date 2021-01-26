@@ -21,7 +21,7 @@ use RJK::TableRowFormatter;
 use RJK::Util::JSON;
 use RJK::Win32::VolumeInfo;
 
-my %opts = RJK::LocalConf::GetOptions("backup/backup.properties");
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/backup/backup.properties");
 @ARGV || RJK::Options::Pod::ShortHelp;
 
 RJK::Options::Pod::GetOptions(

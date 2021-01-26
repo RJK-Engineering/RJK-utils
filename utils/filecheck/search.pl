@@ -451,7 +451,7 @@ Display all help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("search/search.properties", (
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/search/search.properties", (
     ignoreCase => 1,
     extMatch => 1,
     delimiters => ",;:.'\\|/[]",

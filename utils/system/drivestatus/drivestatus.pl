@@ -123,7 +123,7 @@ Type a drive letter to toggle between active/inactive.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("system/drivestatus.properties", (
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/system/drivestatus.properties", (
     pokeInterval => 234,
     ignore => "",
     windowTitle => $0,
