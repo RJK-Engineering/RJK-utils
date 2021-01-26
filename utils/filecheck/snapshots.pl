@@ -9,8 +9,9 @@ my %opts = (
     imageHeight => 360,
 );
 
-$opts{path} = shift || die "No path specified";
+$opts{path} = shift;
 $opts{position} = shift // 30;
 $opts{listFile} = $opts{path} if RJK::TotalCmd::Utils->isListFile($opts{path});
+$opts{maxDepth} = 0 if ! $opts{listFile};
 
 RJK::Filecheck::Snapshots->create(\%opts);
