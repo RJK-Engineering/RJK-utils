@@ -3,7 +3,7 @@ package Search;
 use strict;
 use warnings;
 
-use Log::Log4perl;
+use RJK::Log;
 use RJK::Util::JSON;
 
 use FileSearch;
@@ -16,7 +16,7 @@ my $logger;
 sub execute {
     my $self = shift;
     $opts = shift;
-    &initLog;
+    RJK::Log->logWarnings();
     return TotalCmdSearches->listSearches() if $opts->{listSearches};
 
     my $tcSearch = TotalCmdSearches->getSearch($opts);
@@ -24,21 +24,6 @@ sub execute {
     my @partitions = getPartitions() unless $opts->{allPartitions};
 
     FileSearch->execute($view, $tcSearch, \@partitions, $opts);
-}
-
-sub initLog {
-    if ($opts->{log4perlConf}) {
-        Log::Log4perl::init($opts->{log4perlConf});
-    } else {
-        Log::Log4perl::init(\q(
-            log4perl.logger.search=DEBUG, StdErr
-            log4perl.logger.warnings=WARN, StdErr
-            log4perl.appender.StdErr=Log::Log4perl::Appender::Screen
-            log4perl.appender.StdErr.stderr=1
-            log4perl.appender.StdErr.layout=Log::Log4perl::Layout::SimpleLayout
-        ));
-    }
-    $logger = Log::Log4perl->get_logger('search');
 }
 
 sub getPartitions {
