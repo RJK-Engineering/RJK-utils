@@ -1,24 +1,21 @@
 use strict;
 use warnings;
 
-use Number::Bytes::Human qw(format_bytes);
-
-use RJK::Media::EMule::PartMet;
 use RJK::Options::Pod;
 use RJK::LocalConf;
 
 ###############################################################################
 =head1 DESCRIPTION
 
-Utility for eMule downloads.
+Read eMule C<.part.met> file info.
 
 =head1 SYNOPSIS
 
-downloads.pl [options] [.part.met files]
+partmet.pl [options] [.part.met files]
 
 =head1 DISPLAY EXTENDED HELP
 
-eMulePartMet.pl -h
+partmet.pl -h
 
 =for options start
 
@@ -109,11 +106,11 @@ Display complete help.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("RJK-utils/emule/downloads.properties");
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/emule.properties");
 
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
-    'd|directory=s' => \$opts{directory},
+    'd|temp-dir=s' => \$opts{tempDir},
         "{Path} to directory containing C<.part.met> files.",
     'summary' => \$opts{summary},
         "Display summary.",
@@ -135,9 +132,14 @@ RJK::Options::Pod::GetOptions(
 
 $opts{readMetFiles} ||= $opts{checkPartFiles};
 
-@ARGV || $opts{directory} || RJK::Options::Pod::pod2usage(
+@ARGV || $opts{tempDir} || RJK::Options::Pod::pod2usage(
     -sections => "DESCRIPTION|SYNOPSIS|DISPLAY EXTENDED HELP",
 );
+
+###############################################################################
+
+use RJK::HumanReadable::Size;
+use RJK::Media::EMule::PartMet;
 
 my %stats = (
     totalSize => 0,
@@ -148,7 +150,7 @@ my %stats = (
     ) : ()
 );
 
-my @met = getFiles([map { glob } @ARGV], $opts{directory});
+my @met = getFiles([map { glob } @ARGV], $opts{tempDir});
 
 my @downloads;
 MET: foreach my $met (@met) {
@@ -189,7 +191,7 @@ sub display {
             printf "%s %s\n", $dl->{$key}, $dl->{filename};
         }
     } else {
-        printf "%s %s %s\n", $dl->{hash}, format_bytes($dl->{size}), $dl->{filename};
+        printf "%s %s %s\n", $dl->{hash}, RJK::HumanReadable::Size->get($dl->{size}), $dl->{filename};
     }
 }
 
@@ -201,8 +203,8 @@ sub checkPartFiles {
         my $size = -s $file;
         if ($size) {
             if ($size > $dl->{size}) {
-                print format_bytes($size), "\n";
-                print format_bytes($dl->{size}), "\n";
+                print RJK::HumanReadable::Size->get($size), "\n";
+                print RJK::HumanReadable::Size->get($dl->{size}), "\n";
                 print "$file->{path}\n";
             }
             $stats{partSize} += $size;
