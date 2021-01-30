@@ -1,1 +1,1 @@
-@call rjk-util filecheck\search.pl -d %*
+@call rjk-util filecheck\search\search.pl -d %*
