@@ -25,15 +25,20 @@ sub load {
     my ($self) = @_;
 
     $tcmdini->read;
+    my $searches = $tcmdini->getSearches();
 
     foreach my $fileType (keys %{$self->{fileTypes}}) {
         my $typeConf = $self->{fileTypes}{$fileType};
         if (ref $typeConf) {
             if ($typeConf->{tcSearch}) {
-                push @tcSearches, {
-                    search => $tcmdini->getSearch($typeConf->{tcSearch}),
-                    fileType => $fileType
-                };
+                if (my $search = $searches->{$typeConf->{tcSearch}}) {
+                    push @tcSearches, {
+                        search => $search,
+                        fileType => $fileType
+                    };
+                } else {
+                    warn "Unknown tc search: $typeConf->{tcSearch}";
+                }
             }
         } else {
             my $exts;
@@ -68,9 +73,7 @@ sub load {
 
 sub getVisitors {
     my ($self, $fileTypes) = @_;
-    [ map {
-        $fileVisitors->{$_} ? @{$fileVisitors->{$_}} : ();
-    } @$fileTypes ];
+    map { $fileVisitors->{$_} ? @{$fileVisitors->{$_}} : () } @$fileTypes;
 }
 
 sub getFileTypes {
@@ -80,7 +83,7 @@ sub getFileTypes {
         $fileTypes{$_} = 1 foreach @$fts;
     }
     foreach (@tcSearches) {
-        if (my $result = $_->{search}->match($file, $stat)) {
+        if ($_->{search}->match($file, $stat)) {
             $fileTypes{$_->{fileType}} = 1;
         }
     }
