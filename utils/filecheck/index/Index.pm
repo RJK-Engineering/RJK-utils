@@ -14,6 +14,7 @@ sub execute {
 
     my $stats = RJK::Files->createStats();
     my $visitor = new IndexVisitor($conf, $stats);
+    $conf->{chdir} = 1;
     RJK::Options::Util->traverseFiles($conf, $visitor, $stats);
 }
 
