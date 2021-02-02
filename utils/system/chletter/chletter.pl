@@ -3,7 +3,7 @@ use warnings;
 
 use RJK::LocalConf;
 use RJK::Options::Pod;
-use RJK::Win32::DriveUtils qw(DisconnectDrive);
+use RJK::Win32::DriveUtils;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -123,7 +123,7 @@ $new =~ /^\w$/ || die "Invalid drive letter: $new";
 if (-e "$new:\\") {
     if ($opts{disconnectNetworkDrive}) {
         print "Disconnecting drive $new\n";
-        DisconnectDrive($new)
+        RJK::Win32::DriveUtils->disconnectDrive($new)
             or die "Error disconnecting drive $new";
         print "Drive $new disconnected\n";
         sleep 2;
