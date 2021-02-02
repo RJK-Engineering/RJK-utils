@@ -15,34 +15,35 @@ my @ignoreMetadata = qw(compatible_brands encoder major_brand minor_version);
 
 sub visitFile {
     my ($self, $file, $stat, $props) = @_;
-    return if $props->{'media.file.format'};
+    return if $props->has('media.file.format');
 
     my $i = RJK::Media::Info::FFmpeg->info($file);
 
-    $props->{"media.file.streams.video"} = scalar @{$i->{video}};
-    $props->{"media.file.streams.audio"} = scalar @{$i->{audio}};
-    map { $props->{"media.file.$_"} = $i->{$_} } @$mediaProps;
+    $props->set("media.file.streams.video", scalar @{$i->{video}}) if @{$i->{video}};
+    $props->set("media.file.streams.audio", scalar @{$i->{audio}}) if @{$i->{audio}};
+    map { $props->set("media.file.$_", $i->{$_}) } @$mediaProps;
 
     if ($i->{video}[0]) {
-        map { $props->{"media.video.$_"} = $i->{video}[0]{$_} } @$videoProps;
-        my $v = $props->{"media.video.note"} // "";
-        delete $props->{"media.video.note"} if $v eq 'default';
+        map { $props->set("media.video.$_", $i->{video}[0]{$_}) } @$videoProps;
+        $props->delete("media.video.note") if $props->get("media.video.note") eq 'default';
     }
 
     if ($i->{audio}[0]) {
-        map { $props->{"media.audio.$_"} = $i->{audio}[0]{$_} } @$audioProps;
+        map { $props->set("media.audio.$_", $i->{audio}[0]{$_}) } @$audioProps;
+        $props->delete("media.audio.note") if $props->get("media.audio.note") eq 'default';
+        $props->delete("media.audio.language") if $props->get("media.audio.language") eq 'und';
     }
 
-    $props->{"media.file.chapters"} = $i->{chapters};
+    $props->set("media.file.chapters", $i->{chapters});
 
     if ($i->{metadata}) {
         delete $i->{metadata}{$_} for @ignoreMetadata;
         foreach my $key (keys %{$i->{metadata}}) {
-            $props->{"media.metadata.$key"} = $i->{metadata}{$key};
+            $props->set("media.metadata.$key", $i->{metadata}{$key});
         }
     }
-    $props->{"media.video.metadata"} = $i->{video}[0]{metadata} if $i->{video}[0]{metadata};
-    $props->{"media.audio.metadata"} = $i->{audio}[0]{metadata} if $i->{audio}[0]{metadata};
+    $props->set("media.video.metadata", $i->{video}[0]{metadata}) if $i->{video}[0]{metadata};
+    $props->set("media.audio.metadata", $i->{audio}[0]{metadata}) if $i->{audio}[0]{metadata};
 }
 
 1;

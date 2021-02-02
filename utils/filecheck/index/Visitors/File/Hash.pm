@@ -13,11 +13,11 @@ sub visitFile {
     my ($self, $file, $stat, $props) = @_;
     my @hashTypes = 'crc32';
     push @hashTypes, 'edonkey' if $self->isFileType($file, 'video');
-    return if not grep { ! $props->{"file.hash.$_"} } @hashTypes;
+    return if not grep { ! $props->has("file.hash.$_") } @hashTypes;
 
     my $hashes = calcHash($file);
     foreach (@hashTypes) {
-        $props->{"file.hash.$_"} = $hashes->{$_};
+        $props->set("file.hash.$_", $hashes->{$_});
     }
 }
 

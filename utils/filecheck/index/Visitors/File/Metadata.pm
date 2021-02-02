@@ -7,28 +7,28 @@ use warnings;
 sub visitFile {
     my ($self, $file, $stat, $props) = @_;
 
-    if (defined $props->{"file.size"}) {
-        if ($props->{"file.size"} != $stat->size) {
+    if ($props->has("file.size")) {
+        if ($props->get("file.size") != $stat->size) {
             warn "File size changed";
         }
     } else {
-        $props->{"file.size"} = $stat->size;
+        $props->set("file.size", $stat->size);
     }
 
-    if (defined $props->{"file.date.created"}) {
-        if ($props->{"file.date.created"} != $stat->created) {
+    if ($props->has("file.date.created")) {
+        if ($props->get("file.date.created") != $stat->created) {
             warn "File date created changed";
         }
     } else {
-        $props->{"file.date.created"} = $stat->created;
+        $props->set("file.date.created", $stat->created);
     }
 
-    if (defined $props->{"file.date.modified"}) {
-        if ($props->{"file.date.modified"} != $stat->modified) {
+    if ($props->has("file.date.modified")) {
+        if ($props->get("file.date.modified") != $stat->modified) {
             warn "File date modified changed";
         }
     } else {
-        $props->{"file.date.modified"} = $stat->modified;
+        $props->set("file.date.modified", $stat->modified);
     }
 }
 

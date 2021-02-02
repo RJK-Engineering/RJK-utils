@@ -6,6 +6,7 @@ use warnings;
 
 use FileVisitResult;
 use RJK::Filecheck::Dir;
+use RJK::Filecheck::Properties;
 
 my $conf;
 my $stats;
@@ -54,11 +55,11 @@ sub visit {
     my @v = $conf->getVisitors(["general"]);
     push @v, $conf->getVisitors($fileTypes);
 
-    my $props = $self->{dir}->getFileProperties($file->name) // {};
+    my $props = new RJK::Filecheck::Properties($self->{dir}->getFileProperties($file->name));
     foreach my $visitor (@v) {
         $visitor->visitFile($file, $stat, $props);
     }
-    $self->{dir}->setFileProperties($file->name, $props);
+    $self->{dir}->setFileProperties($file->name, $props->properties);
 }
 
 sub ignore {
