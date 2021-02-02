@@ -65,6 +65,9 @@ sub visit {
 sub ignore {
     my ($self, $file, $stat) = @_;
     local $_ = $file->{name};
+    foreach ('$RECYCLE.BIN', 'System Volume Information') {
+        return 1 if $_ eq $file->{name};
+    }
     /^[.~]/ || /~$/;
 }
 
