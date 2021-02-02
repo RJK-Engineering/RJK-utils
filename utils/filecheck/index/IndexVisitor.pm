@@ -19,18 +19,26 @@ sub new {
 
 sub preVisitDir {
     my ($self, $dir, $stat) = @_;
+    print "$dir->{path}\\\n";
     return FileVisitResult::SKIP_SUBTREE if $self->ignore($dir, $stat);
     $self->{dir} = new RJK::Filecheck::Dir($dir);
+    $self->{visited} = {};
 }
 
 sub postVisitFiles {
     my ($self, $dir, $stat) = @_;
+    foreach (@{$self->{dir}->getFiles}) {
+        next if $self->{visited}{$_};
+        $self->{dir}->removeFile($_);
+        print "Removed file: $_\n";
+    }
     $self->{dir}->saveProperties;
 }
 
 sub visitFile {
     my ($self, $file, $stat) = @_;
     return if $self->ignore($file, $stat);
+    $self->{visited}{$file->name} = 1;
     print "$file->{path}\n";
 
     my $fileTypes = $conf->getFileTypes($file, $stat);
