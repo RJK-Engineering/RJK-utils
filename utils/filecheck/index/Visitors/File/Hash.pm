@@ -1,4 +1,4 @@
-package Visitors::Hash;
+package Visitors::File::Hash;
 use parent 'FileTypeVisitor';
 
 use strict;
