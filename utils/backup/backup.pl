@@ -96,7 +96,7 @@ sub procVolumes {
         if ($opts{volume}) {
             $self->createVolume();
         } else {
-            print "Drive letter required\n";
+            print "Volume name required\n";
         }
     } else {
         $self->listVolumes();
@@ -109,7 +109,7 @@ sub procBackupDirs {
         if ($opts{volume} && defined $opts{dir}) {
             $self->createBackupDir();
         } else {
-            print "Drive letter and directory name required\n";
+            print "Volume and directory name required\n";
         }
     } else {
         $self->listBackupDirs() if $opts{allBackupDirs} || $opts{volume};
@@ -141,7 +141,7 @@ sub createVolume {
     }
     my $vol = {
         serial => $activeVol->{serial},
-        letter => $opts{volume},
+        drive => $opts{volume},
         label => $opts{dir},
     };
     $self->updateVolume($vol);
@@ -158,7 +158,7 @@ sub listVolumes {
     print $volumeRow->header;
     foreach my $vol (@volumes) {
         next if $opts{volume} && $vol->{label} ne $opts{volume};
-        $self->updateVolume($vol) if $vol->{letter};
+        $self->updateVolume($vol) if $vol->{drive};
         print $volumeRow->format($vol);
         getStore()->updateVolume($vol) if $opts{update};
     }
@@ -166,13 +166,13 @@ sub listVolumes {
 
 sub updateVolume {
     my ($self, $vol) = @_;
-    my $activeVol = $self->getActiveVolumes->{$vol->{letter}};
+    my $activeVol = $self->getActiveVolumes->{$vol->{drive}};
     return if !$activeVol;
 
     $vol->{label} = $activeVol->{label};
     $vol->{serial} = $activeVol->{serial};
 
-    my ($free, $total) = RJK::Win32::VolumeInfo->getUsage($vol->{letter});
+    my ($free, $total) = RJK::Win32::VolumeInfo->getUsage($vol->{drive});
     $vol->{size} = $total;
     $vol->{used} = $total - $free;
     $vol->{free} = $free;
