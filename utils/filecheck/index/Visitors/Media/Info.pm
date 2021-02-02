@@ -25,7 +25,8 @@ sub visitFile {
 
     if ($i->{video}[0]) {
         map { $props->{"media.video.$_"} = $i->{video}[0]{$_} } @$videoProps;
-        delete $props->{"media.video.note"} if $props->{"media.video.note"} eq 'default';
+        my $v = $props->{"media.video.note"} // "";
+        delete $props->{"media.video.note"} if $v eq 'default';
     }
 
     if ($i->{audio}[0]) {
