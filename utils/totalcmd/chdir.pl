@@ -9,7 +9,7 @@ use RJK::File::PathUtils qw(ExtractPath);
 use RJK::Options::Pod;
 use RJK::TotalCmd::Utils;
 use RJK::Win32::Console;
-use RJK::Win32::DriveUtils qw(ConnectDrive GetDriveLetter);
+use RJK::Win32::DriveUtils;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -153,12 +153,10 @@ while (my ($a, $b) = each %map) {
     }
 }
 
-my $drive = GetDriveLetter($path)
-    or Exit("No drive found for path: $path");
-
-if (! -e "$drive:\\") {
+my $drive = uc (($path =~ /^(\w:)/)[0]);
+if (! -e $drive) {
     print "Connecting drive $drive\n";
-    ConnectDrive($drive) or Exit("Drive unavailable: $drive");
+    RJK::Win32::DriveUtils->connectDrive($drive) or Exit("Could not connect drive $drive");
 }
 
 if (! -e $path) {
