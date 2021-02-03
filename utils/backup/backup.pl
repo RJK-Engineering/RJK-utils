@@ -9,17 +9,8 @@ backup.pl [options] [volume] [directory]
 use strict;
 use warnings;
 
-use Number::Bytes::Human qw(format_bytes);
-use Try::Tiny;
-
-use RJK::Exceptions;
-use RJK::Files;
-use RJK::Filecheck;
 use RJK::LocalConf;
 use RJK::Options::Pod;
-use RJK::TableRowFormatter;
-use RJK::Util::JSON;
-use RJK::Win32::VolumeInfo;
 
 my %opts = RJK::LocalConf::GetOptions("RJK-utils/backup/backup.properties");
 @ARGV || RJK::Options::Pod::ShortHelp;
@@ -45,6 +36,17 @@ RJK::Options::Pod::GetOptions(
 
 $opts{volume} = shift;
 $opts{dir} = shift;
+
+###############################################################################
+
+use Number::Bytes::Human qw(format_bytes);
+use Try::Tiny;
+
+use RJK::Exceptions;
+use RJK::Files;
+use RJK::Filecheck;
+use RJK::TableRowFormatter;
+use RJK::Win32::VolumeInfo;
 
 my $sizeFormatter = sub { $_[0] && format_bytes $_[0] };
 my $backupDirRow = new RJK::TableRowFormatter(
