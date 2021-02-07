@@ -1,1 +1,1 @@
-@call rjk-util /-p dl\dl.pl %*
+@call rjk-util dl\dl.pl %*
