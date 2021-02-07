@@ -10,6 +10,8 @@ open my $fh, '<', $file or die "$!: $file";
 while (<$fh>) {
     my @row = split /\|/;
     next if @row <3 ;
-    print URI::Encode::uri_decode($row[2] =~ s/.(.)/$1/gr), "\n";
+    my $partmet = $row[0] =~ s/.(.)/$1/gr =~ s/\s.*//r;
+    my $filename = URI::Encode::uri_decode($row[2] =~ s/.(.)/$1/gr);
+    print "$partmet $filename\n";
 }
 close $fh;
