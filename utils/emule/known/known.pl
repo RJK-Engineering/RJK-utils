@@ -1,10 +1,6 @@
 use strict;
 use warnings;
 
-use DBI;
-use DBD::mysql;
-
-use RJK::DbTable;
 use RJK::LocalConf;
 use RJK::Options::Pod;
 
@@ -144,25 +140,26 @@ A backup is created.
 =cut
 ###############################################################################
 
-my %opts = RJK::LocalConf::GetOptions("RJK-utils/emule/known.properties");
+my %opts = RJK::LocalConf::GetOptions("RJK-utils/emule.properties");
 
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'i|input-file=s' => \$opts{inputFile}, [ "Input CSV file exported by eMule MET Viewer.", "path" ],
     'o|output-file=s' => \$opts{outputFile}, [ "Write database contents to CVS file.", "path" ],
     'f|force' => \$opts{force}, "Force file overwrite.",
-    'n|no-commit' => \$opts{noCommit}, "Do not commit database changes and don't write anything to disk.",
-    'c|commit-size=i' => \$opts{commitSize}, "Commit after [{n}] database inserts/updates. Default: 100",
+    'c|commit' => \$opts{commit}, "Commit database changes.",
+    'C|commit-size=i' => \$opts{commitSize}, "Commit after [{n}] database inserts/updates. Default: 100",
     's|show-info-after=i' => \$opts{showInfoAfterLinesProcessed},
         "Show process information after each [{n}] lines processed. Default: 100",
     'l|log:s' => \$opts{log},
         "Append to log. Optional [{path}] to file, default: write log file to cwd using".
         " filename format: \"known-[timestamp].log\". Ignored when using <-n>.",
 
-    'db-host=s' => \$opts{host}, "Database host.",
-    'db-user=s' => \$opts{user}, "Database user.",
-    'db-pass=s' => \$opts{password}, "Database password.",
-    'db-name=s' => \$opts{database}, "Database name.",
+    'db-host=s' => \$opts{dbHostName}, "Database host.",
+    'db-user=s' => \$opts{dbUserName}, "Database user.",
+    'db-pass=s' => \$opts{dbPassword}, "Database password.",
+    'db-name=s' => \$opts{dbDatabaseName}, "Database name.",
+    'db-table=s' => \$opts{dbKnownTableName}, "Database table name.",
 
     ['MESSAGES'],
     RJK::Options::Pod::MessageOptions(\%opts),
@@ -187,6 +184,11 @@ $opts{showInfoAfterLinesProcessed} ||= 100;
 
 ###############################################################################
 
+use DBI;
+use DBD::mysql;
+
+use RJK::DbTable;
+
 my $header = 'Filename;File Size;Temporary Filename;Last Written (UTC);'
     .'Last Posted (UTC);Last Shared (UTC);Requests Total;Requests Accepted;'
     .'Bytes Uploaded;Upload Priority;Artist;Album;Title;Length (sec);'
@@ -201,7 +203,7 @@ my $dbh = dbConnect();
 
 my $table = new RJK::DbTable(
     dbh => $dbh,
-    table => "known_met",
+    table => $opts{dbKnownTableName},
     cols => [qw(Filename File_Size Temporary_Filename Last_Written
         Last_Posted Last_Shared Requests_Total Requests_Accepted
         Bytes_Uploaded Upload_Priority Artist Album Title Length
@@ -217,13 +219,13 @@ my $table = new RJK::DbTable(
                 info(sprintf "%s:%s->%s", $_->{column}, $_->{dbValue}, $_->{value});
             }
             $stats->{different}++;
-            return $opts{noCommit};
+            return ! $opts{commit};
         },
         onMissing => sub {
             my ($id, $object) = @_;
             info(sprintf "I %s %s", $id, $object->{Filename});
             $stats->{missing}++;
-            return $opts{noCommit};
+            return ! $opts{commit};
         },
         onIdentical => sub { $stats->{identical}++ },
         onChange => sub { $stats->{changed}++ },
@@ -231,7 +233,7 @@ my $table = new RJK::DbTable(
 );
 
 my $logFh;
-if (! $opts{noCommit} && defined $opts{log}) {
+if (defined $opts{log}) {
     if ($opts{log} eq '') {
         open $logFh, '>', "known-". time() . ".log" or die "$!";
     } else {
@@ -268,7 +270,7 @@ dbDisconnect();
 
 sub createCSV {
     my $fh;
-    if ($opts{noCommit}) {
+    if (not defined $opts{outputFile} or $opts{outputFile} =~ /^-?$/) {
         $fh = *STDOUT;
     } else {
         open $fh, '>:encoding(utf8)', $opts{outputFile} or die "$!";
@@ -335,7 +337,7 @@ sub updateDb {
     }
 
     print "$stats->{total} lines processed, ";
-    if ($opts{noCommit}) {
+    if (! $opts{commit}) {
         print "no rows committed\n";
     } else {
         print "$stats->{changed} rows committed\n";
@@ -353,12 +355,12 @@ sub info {
 }
 
 sub commit {
-    if ($opts{noCommit}) {
-        print "Skipping commit\n" if $opts{verbose};
-        return;
+    if ($opts{commit}) {
+        print "Commit.\n" if $opts{verbose};
+        $dbh->commit;
+    } else {
+        print "Changes have not been committed.\n" if $opts{verbose};
     }
-    print "Commit\n" if $opts{verbose};
-    $dbh->commit;
 }
 
 sub dateFormat {
@@ -367,8 +369,8 @@ sub dateFormat {
 }
 
 sub dbConnect {
-    my $dsn = "dbi:mysql:$opts{database}:$opts{host}:3306";
-    my $dbh = DBI->connect($dsn, $opts{user}, $opts{password},
+    my $dsn = "dbi:mysql:$opts{dbDatabaseName}:$opts{dbHostName}:3306";
+    my $dbh = DBI->connect($dsn, $opts{dbUserName}, $opts{dbPassword},
         {   HandleError => sub { die(shift) },
             mysql_enable_utf8 => 1,
             AutoCommit => 0
