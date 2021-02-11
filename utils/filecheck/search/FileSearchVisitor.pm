@@ -13,7 +13,6 @@ use strict;
 use warnings;
 
 use FileVisitResult;
-use RJK::TotalCmd::Searches;
 
 ###############################################################################
 =pod
@@ -68,9 +67,7 @@ sub resetPartitionStats {
 
 sub _match {
     my ($self, $file, $stat) = @_;
-
-    my $result = RJK::TotalCmd::Searches->match($self->{search}, $file, $stat);
-    return if ! $result->{matched};
+    my $result = $self->{search}->match($file, $stat) or return;
 
     $self->{results}{size} += $stat->size || 0;
     $self->{results}{dir}{size} += $stat->size || 0;
