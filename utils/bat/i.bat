@@ -1,1 +1,1 @@
-@call rjk-util filecheck\index.pl %*
+@call rjk-util filecheck\index\index.pl %*
