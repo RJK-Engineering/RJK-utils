@@ -1,5 +1,5 @@
 package Visitors::File::Hash;
-use parent 'FileTypeVisitor';
+use parent 'RJK::FileVisitor';
 
 use strict;
 use warnings;

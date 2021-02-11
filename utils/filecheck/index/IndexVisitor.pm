@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use FileVisitResult;
+use RJK::Filecheck;
 use RJK::Filecheck::Dir;
 use RJK::Filecheck::Properties;
 
@@ -15,6 +16,7 @@ sub new {
     my $self = bless {}, shift;
     $conf = shift;
     $stats = shift;
+    $self->{visitors} = $conf->getVisitors();
     return $self;
 }
 
@@ -22,12 +24,24 @@ sub preVisitDir {
     my ($self, $dir, $stat) = @_;
     print "$dir->{path}\\\n";
     return FileVisitResult::SKIP_SUBTREE if $self->ignore($dir, $stat);
+
     $self->{dir} = new RJK::Filecheck::Dir($dir);
     $self->{visited} = {};
+
+    $self->{dirProps} = $self->{dir}->getProperties();
+    foreach my $visitor (@{$self->{visitors}}) {
+        $visitor->preVisitDir($dir, $stat, $self->{dirProps});
+    }
 }
 
 sub postVisitFiles {
     my ($self, $dir, $stat) = @_;
+
+    foreach my $visitor (@{$self->{visitors}}) {
+        $visitor->postVisitFiles($dir, $stat, $self->{dirProps});
+    }
+    $self->{dir}->setProperties($self->{dirProps});
+
     foreach (@{$self->{dir}->getFiles}) {
         next if $self->{visited}{$_};
         $self->{dir}->removeFile($_);
@@ -52,14 +66,14 @@ sub visitFile {
 
 sub visit {
     my ($self, $fileTypes, $file, $stat) = @_;
-    my @v = $conf->getVisitors(["general"]);
-    push @v, $conf->getVisitors($fileTypes);
+    my @visitors = @{$self->{visitors}};
+    push @visitors, @{$conf->getFileTypeVisitors($fileTypes)};
 
-    my $props = new RJK::Filecheck::Properties($self->{dir}->getFileProperties($file->name));
-    foreach my $visitor (@v) {
+    my $props = $self->{dir}->getFileProperties($file->name);
+    foreach my $visitor (@visitors) {
         $visitor->visitFile($file, $stat, $props);
     }
-    $self->{dir}->setFileProperties($file->name, $props->properties);
+    $self->{dir}->setFileProperties($file->name, $props);
 }
 
 sub ignore {

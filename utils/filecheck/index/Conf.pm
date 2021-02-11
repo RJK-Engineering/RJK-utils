@@ -11,7 +11,8 @@ use Try::Tiny;
 
 my @tcSearches;
 my $extensions;
-my $fileVisitors;
+my $visitors;
+my $fileTypeVisitors;
 my $tcmdini = new RJK::TotalCmd::Settings::Ini;
 
 sub new {
@@ -52,14 +53,27 @@ sub load {
             }
         }
     }
-    foreach my $fileType (keys %{$self->{fileVisitors}}) {
-        my $visitorConf = $self->{fileVisitors}{$fileType};
-        foreach (@$visitorConf) {
+    foreach (@{$self->{visitors}}) {
+        my $module = ref ? $_->[0] : $_;
+        my $conf = $_->[1] if ref;
+        try {
+            my $class = RJK::Module->load("Visitors", $module);
+            push @$visitors, $class->new($conf);
+        } catch {
+            RJK::Exceptions->handle(
+                ModuleNotFoundException => sub {
+                    print "Module not found: $_->{module}\n";
+                }
+            );
+        };
+    }
+    foreach my $fileType (keys %{$self->{fileTypeVisitors}}) {
+        foreach (@{$self->{fileTypeVisitors}{$fileType}}) {
             my $module = ref ? $_->[0] : $_;
             my $conf = $_->[1] if ref;
             try {
                 my $class = RJK::Module->load("Visitors", $module);
-                push @{$fileVisitors->{$fileType}}, $class->new($conf);
+                push @{$fileTypeVisitors->{$fileType}}, $class->new($conf);
             } catch {
                 RJK::Exceptions->handle(
                     ModuleNotFoundException => sub {
@@ -72,8 +86,12 @@ sub load {
 }
 
 sub getVisitors {
+    $visitors;
+}
+
+sub getFileTypeVisitors {
     my ($self, $fileTypes) = @_;
-    map { $fileVisitors->{$_} ? @{$fileVisitors->{$_}} : () } @$fileTypes;
+    [ map { $fileTypeVisitors->{$_} ? @{$fileTypeVisitors->{$_}} : () } @$fileTypes ];
 }
 
 sub getFileTypes {
