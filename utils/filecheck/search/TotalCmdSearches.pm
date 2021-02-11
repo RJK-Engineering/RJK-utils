@@ -3,6 +3,7 @@ package TotalCmdSearches;
 use strict;
 use warnings;
 
+use RJK::TotalCmd::Search;
 use RJK::TotalCmd::Settings::Ini;
 
 sub listSearches {
@@ -22,7 +23,7 @@ sub getSearch {
         $search = $ini->getSearch($opts->{storedSearchName})
             or die "Search not found: $opts->{storedSearchName}";
     } else {
-        $search = $ini->getSearch;
+        $search = new RJK::TotalCmd::Search();
     }
 
     $search->{SearchIn} = $opts->{searchIn};
@@ -30,11 +31,9 @@ sub getSearch {
 
     my $flags = $search->{flags};
     my %flags = %{$opts->{flags}};
-
     foreach (keys %flags) {
         $flags->{$_} = $flags{$_} if defined $flags{$_};
     }
-
     $flags->{directory} = 1 if $opts->{searchDirs};
     $flags->{directory} = 0 if $opts->{searchFiles};
 
