@@ -11,12 +11,13 @@ use RJK::Filecheck::Properties;
 
 my $conf;
 my $stats;
+my $visitors;
 
 sub new {
     my $self = bless {}, shift;
     $conf = shift;
     $stats = shift;
-    $self->{visitors} = $conf->getVisitors();
+    $visitors = $conf->getVisitors();
     return $self;
 }
 
@@ -29,7 +30,7 @@ sub preVisitDir {
     $self->{visited} = {};
 
     $self->{dirProps} = $self->{dir}->getProperties();
-    foreach my $visitor (@{$self->{visitors}}) {
+    foreach my $visitor (@$visitors) {
         $visitor->preVisitDir($dir, $stat, $self->{dirProps});
     }
 }
@@ -37,7 +38,7 @@ sub preVisitDir {
 sub postVisitFiles {
     my ($self, $dir, $stat) = @_;
 
-    foreach my $visitor (@{$self->{visitors}}) {
+    foreach my $visitor (@$visitors) {
         $visitor->postVisitFiles($dir, $stat, $self->{dirProps});
     }
     $self->{dir}->setProperties($self->{dirProps});
@@ -66,7 +67,7 @@ sub visitFile {
 
 sub visit {
     my ($self, $fileTypes, $file, $stat) = @_;
-    my @visitors = @{$self->{visitors}};
+    my @visitors = @$visitors;
     push @visitors, @{$conf->getFileTypeVisitors($fileTypes)};
 
     my $props = $self->{dir}->getFileProperties($file->name);
