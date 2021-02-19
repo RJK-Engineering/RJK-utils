@@ -21,7 +21,7 @@ sub execute {
     dbConnect();
 
     RJK::Options::Util->traverseFiles($conf, $visitor, $stats);
-    RJK::DbTable->commit();
+    RJK::DbTable->commit() unless $conf->{noCommit};
 }
 
 sub dbConnect {
@@ -31,12 +31,6 @@ sub dbConnect {
         user => RJK::Filecheck::Config->get('db.user.name'),
         pass => RJK::Filecheck::Config->get('db.password'),
         port => RJK::Filecheck::Config->get('db.port', 3306),
-        eventHandlers => {
-            onError => sub {
-                print "ERROR: $_[0]\n";
-                exit;
-            },
-        }
     );
 }
 
