@@ -4,45 +4,62 @@ use parent 'RJK::FileVisitor';
 use strict;
 use warnings;
 
-use TBM::Dir;
-use TBM::File;
-use TBM::Factory::Dir;
-use TBM::Factory::File;
+use RJK::Drives;
+use RJK::Stat;
+use TBM::Factory;
 
 sub preVisitDir {
     my ($self, $dir, $stat) = @_;
-    $self->{dir} = TBM::Factory::Dir->fetch // TBM::Factory::Dir->create;
-    $self->updateDir($dir, $stat);
+    my $storePath = getPath($dir);
 
+    if (not $self->{dir} = TBM::Factory->Dir->fetch($storePath)) {
+        $self->{dir} = TBM::Factory->Dir->create();
+        $self->{dir}{path} = $storePath;
+    }
+    updateDir($self->{dir}, $dir, $stat);
     $self->{files} = $self->{dir}->getFiles;
-    use Data::Dump;
-    dd $self->{files};
+}
+
+sub getPath {
+    my ($diskPath) = @_;
+    my $label = RJK::Drives->getLabel($diskPath);
+    my $path = RJK::Drives->getPathOnVolume($diskPath) =~ s|\\+|/|gr;
+    return "/volumes/$label$path";
 }
 
 sub postVisitFiles {
     my ($self, $dir) = @_;
     $self->{dir}->save();
+    $self->{dir} = undef;
 }
 
 sub visitFile {
     my ($self, $file, $stat) = @_;
-    $self->{file} = $self->{files}{$file->{name}};
-    if (! $self->{file}) {
-        $self->{file} = TBM::Factory::File->create;
-        $self->{files}{$file->{name}} = $self->{file};
+    my $dbo = $self->{files}{$file->{name}};
+    if ($dbo) {
+        updateFile($dbo, $file, $stat);
+    } else {
+        $dbo = TBM::Factory->File->create;
+        updateFile($dbo, $file, $stat);
+        $self->{dir}->addFile($dbo);
     }
-    $self->updateFile($file, $stat);
-    $self->{file}->save();
+    $dbo->save();
 }
 
 sub updateDir {
-    my ($self, $dir, $stat) = @_;
-    #~ $self->{dir}
+    my ($dbo, $dir, $stat) = @_;
+    $dbo->{name} = $dir->{name};
+    $dbo->{created} = $stat->created;
+    $dbo->{modified} = $stat->modified;
 }
 
 sub updateFile {
-    my ($self, $file, $stat) = @_;
-    #~ $self->{file}
+    my ($dbo, $file, $stat) = @_;
+    $dbo->{name} = $file->{name};
+    $dbo->{size} = $file->{size};
+    $dbo->{created} = $stat->created;
+    $dbo->{modified} = $stat->modified;
+    $dbo->{crc} = $file->{crc};
 }
 
 1;
