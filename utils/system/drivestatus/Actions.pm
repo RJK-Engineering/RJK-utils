@@ -16,13 +16,13 @@ my $actions = {
     1 => sub {
         &updateStatus;
         foreach ($status->all) {
-            $console->printLine(sprintf "%-3.3s %-10.10s %s", $_->{drive}, $status->str, $_->{label});
+            $console->printLine(sprintf "%-3.3s %-10.10s %s", $_->{name}, $status->str, $_->{label});
         }
     },
     2 => sub {
         &updateStatus;
         foreach ($status->online) {
-            $console->printLine(sprintf "%-3.3s %-10.10s %s", $_->{drive}, $status->str, $_->{label});
+            $console->printLine(sprintf "%-3.3s %-10.10s %s", $_->{name}, $status->str, $_->{label});
         }
     },
     toggle => sub {
@@ -59,7 +59,7 @@ sub preventSleep {
     $console->write(@volumes ? "Poke" : "No drives active");
 
     foreach my $vol (@volumes) {
-        $console->write(" $vol->{drive}");
+        $console->write(" $vol->{name}");
         my $t = [gettimeofday];
         my $file = "$vol->{path}\\nosleep";
 
@@ -89,7 +89,7 @@ sub updateStatus {
 
 sub updateWindowTitle {
     my $self = shift;
-    my @volumes = map { $_->{drive} } $status->active;
+    my @volumes = map { $_->{name} } $status->active;
     @volumes = '(none)' unless @volumes;
     $console->title("$opts->{windowTitle} | @volumes");
 }
@@ -112,7 +112,7 @@ sub quit {
 
 sub summary {
     my @volumes = map {
-        $_->{active} ? "($_->{drive})" : $_->{drive}
+        $_->{active} ? "($_->{name})" : $_->{name}
     } $status->online;
     $console->printLine("Online: " . ("@volumes" || '(none)'));
 }
