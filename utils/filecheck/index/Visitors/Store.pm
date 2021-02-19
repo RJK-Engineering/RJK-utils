@@ -6,6 +6,8 @@ use warnings;
 
 use RJK::Drives;
 use RJK::Stat;
+use TBM::Dir;
+use TBM::File;
 use TBM::Factory;
 
 sub preVisitDir {
