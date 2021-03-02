@@ -18,6 +18,10 @@ sub visitFile {
     return if $props->has('media.file.format');
 
     my $i = RJK::Media::Info::FFmpeg->info($file);
+    if (! $i) {
+        print "WARN no media info found\n";
+        return;
+    }
 
     $props->set("media.file.streams.video", scalar @{$i->{video}}) if @{$i->{video}};
     $props->set("media.file.streams.audio", scalar @{$i->{audio}}) if @{$i->{audio}};
