@@ -10,6 +10,7 @@ if "%~1"=="" (
 
 set found=0
 for /f "delims=" %%F in ('where %1') do (
+    echo %%F
     if /i not "%%~xF"==".exe" if /i not "%%~xF"==".com" start "" /b "%EDITOR%" "%%F"
     set found=1
 )
