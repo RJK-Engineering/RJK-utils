@@ -29,7 +29,7 @@ sub visitFile {
     my $target = RJK::Paths->get($self->{opts}{targetDir}, $source->{directories}, $source->{name});
 
     if ($self->{filesInSource}{$source->{name}}) {
-        warn "Skipping duplicate: $source->{name}";
+        print "Skipping duplicate: $source->{name}\n" if $self->{opts}{verbose};
         return;
     }
     $self->{filesInSource}{$source->{name}} = 1;
@@ -57,11 +57,11 @@ sub checkTarget {
     my ($self, $sourceStat, $targetPath) = @_;
     my $targetStat = RJK::Stat->get($targetPath);
     if ($sourceStat->size != $targetStat->size) {
-        warn "Size mismatch, " . $sourceStat->size . " != " . $targetStat->size . ": $targetPath";
+        print "WARN: Size mismatch, " . $sourceStat->size . " != " . $targetStat->size . ": $targetPath\n";
         push @{$self->{modified}}, $targetPath;
     }
     if (! $self->checkDates($sourceStat, $targetStat)) {
-        warn "Date mismatch: $targetPath";
+        print "WARN: Date mismatch: $targetPath\n";
         push @{$self->{modified}}, $targetPath;
     }
 }
