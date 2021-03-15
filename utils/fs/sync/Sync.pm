@@ -39,12 +39,11 @@ sub indexTarget {
         RJK::Files->traverse($path, $visitor, {}, $stats);
     }
     $display->stats;
-
     return $filesInTarget;
 }
 
 sub synchronize {
-    my ($dirs, $filesInTarget) = shift;
+    my ($dirs, $filesInTarget) = @_;
 
     my $totals = RJK::Files->createStats();
     my $visitor = new SyncFileVisitor($filesInTarget, $opts);
