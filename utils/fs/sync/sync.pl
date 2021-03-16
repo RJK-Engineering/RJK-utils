@@ -130,7 +130,7 @@ RJK::Options::Pod::GetOptions(
     'm|move-files-in-target' => \$opts{moveFilesInTarget}, "Rename/move files in target.",
     #~ 'c|copy-missing-files' => \$opts{copyMissingFiles}, "Copy files from source to target.",
     #~ 'r|remove-files-in-target' => \$opts{removeFilesInTarget}, "Delete files in target not in source.",
-    'd|dry-run' => \$opts{dryRun}, "Don't copy or move any files.",
+    'simulate' => \$opts{simulate}, "Do not make any changes to the file system.",
 
     'v|verbose' => \$opts{verbose}, "Be verbose.",
     'q|quiet' => \$opts{quiet}, "Be quiet.",
