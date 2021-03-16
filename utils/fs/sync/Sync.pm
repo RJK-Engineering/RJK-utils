@@ -2,16 +2,16 @@ package Sync;
 
 use RJK::Files;
 
-use IndexFileVisitor;
-use SyncFileVisitor;
 use Display;
+use IndexVisitor;
 
 my $opts;
-my $display = new Display;
+my $display;
 
 sub execute {
     my $self = shift;
     $opts = shift;
+    $display = new Display($opts);
 
     opendir my $dh, $opts->{targetDir} or die "$!";
     my @dirs = grep { -d "$opts->{targetDir}\\$_" && ! /^\./ } readdir $dh;
@@ -20,53 +20,114 @@ sub execute {
     die "No dirs in target: $opts->{targetDir}" if ! @dirs;
     $display->info("Dir: $_") foreach @dirs;
 
-    my $filesInTarget = indexTarget(\@dirs);
-    synchronize(\@dirs, $filesInTarget);
+    my $filesInSource = indexDirs(".", \@dirs);
+    my $filesInTarget = indexDirs($opts->{targetDir}, \@dirs);
+    synchronize(\@dirs, $filesInSource, $filesInTarget);
 }
 
-sub indexTarget {
-    my $dirs = shift;
+sub indexDirs {
+    my ($parent, $dirs) = @_;
 
-    my $filesInTarget = {};
     my $stats = RJK::Files->createStats();
     $display->setStats($stats);
-    my $visitor = new IndexFileVisitor($opts, $filesInTarget, $display);
+    my $visitor = new IndexVisitor($display, $parent);
 
     foreach my $dir (@$dirs) {
-        my $path = "$opts->{targetDir}\\$dir";
-        $display->info("Indexing $path ...");
+        my $path = "$parent\\$dir";
+        $display->info("Reading $path ...");
         $display->stats;
         RJK::Files->traverse($path, $visitor, {}, $stats);
     }
-    $display->stats;
-    return $filesInTarget;
+    $display->totals;
+
+    my $index = $visitor->getIndex;
+    $index->{stats} = $stats;
+    return $index;
 }
 
 sub synchronize {
-    my ($dirs, $filesInTarget) = @_;
+    my ($dirs, $filesInSource, $filesInTarget) = @_;
 
-    my $totals = RJK::Files->createStats();
-    my $visitor = new SyncFileVisitor($filesInTarget, $opts);
+    my $progress = {total=>$filesInSource->{stats}{files}};
+    $display->setProgressBar($progress);
 
-    foreach my $dir (@$dirs) {
-        $display->info("Synchronizing $dir ...");
+    $display->info("Finding moved files ...");
+    $display->start();
 
-        if (! -e $dir) {
-            $display->info("Directory does not exist in source: $dir");
-            next;
-        } elsif (! -d $dir) {
-            $display->warn("Source is not a directory");
-            exit;
-        } elsif (! -r $dir) {
-            $display->warn("Source directory is not readable");
-            exit;
-        }
+    foreach my $filename (keys %{$filesInSource->{name}}) {
+        my $inSource = $filesInSource->{name}{$filename};
+        $progress->{done} += @$inSource;
+        $display->progress();
+        next if @$inSource > 1;
 
-        my $stats = RJK::Files->traverseWithStats($dir, $visitor);
-        $totals->update($stats);
-        $display->stats($totals);
+        my $inTarget = $filesInTarget->{name}{$filename};
+        next if ! $inTarget || @$inTarget > 1;
+        next if ! sameSize($inSource->[0], $inTarget->[0]);
+        next if ! sameDate($inSource->[0], $inTarget->[0]);
+
+        moveFile($inSource->[0], $inTarget->[0]);
     }
-    return $totals;
+    $display->done();
+
+    $display->info("Finding renamed files ...");
+    $display->start();
+
+    foreach my $dir (keys %{$filesInSource->{size}}) {
+        foreach my $size (keys %{$filesInSource->{size}{$dir}}) {
+            my $inSource = $filesInSource->{size}{$dir}{$size};
+            $progress->{done} += @$inSource;
+            $display->progress();
+            next if @$inSource > 1;
+
+            my $inTarget = $filesInTarget->{size}{$dir}{$size};
+            next if ! $inTarget || @$inTarget > 1;
+            next if ! sameDate($inSource->[0], $inTarget->[0]);
+
+            renameFile($inSource->[0], $inTarget->[0]);
+        }
+    }
+    $display->done();
+}
+
+sub renameFile {
+    my ($inSource, $inTarget) = @_;
+    my $targetFile = RJK::Paths->get($opts->{targetDir}, $inSource->{directories}, $inSource->{name});
+
+    $display->info(" <$inTarget");
+    $display->info(" >$targetFile");
+    return if $opts->{simulate};
+
+    File::Copy::move("$inTarget", "$targetFile") or die "$!: $inTarget -> $targetFile";
+}
+
+sub moveFile {
+    my ($inSource, $inTarget) = @_;
+    my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{directories});
+
+    if ($opts->{simulate}) {
+        -e $targetDir or $display->info("Target directory does not exist: $targetDir");
+    } else {
+        if (! -e $targetDir) {
+            File::Path::make_path($targetDir) or die "$!: $targetDir";
+        }
+        -e $targetDir or die "Target directory does not exist: $targetDir";
+    }
+
+    $display->info("<$inTarget");
+    $display->info(">$targetDir");
+    return if $opts->{simulate};
+
+    File::Copy::move("$inTarget", "$targetDir") or die "$!: $inTarget -> $targetDir";
+}
+
+sub sameDate {
+    my ($inSource, $inTarget) = @_;
+    return abs($inSource->{stat}->modified - $inTarget->{stat}->modified) < 3;
+}
+
+sub sameSize {
+    my ($inSource, $inTarget) = @_;
+    return $inSource->{stat}->size == $inTarget->{stat}->size;
 }
 
 1;
