@@ -23,11 +23,11 @@ sub getIndex {
 sub visitFile {
     my ($self, $file, $stat) = @_;
     $file->{stat} = $stat;
+    $file->{subdirs} = $file->parent =~ s/^\Q$baseDir\E[\\\/]//ir;
     $display->stats;
 
-    push @{$index->{name}{$file->name}}, $file;
-    my $dir = $file->parent =~ s/^\Q$baseDir\E//ir;
-    push @{$index->{size}{$dir}{$stat->size}}, $file;
+    push @{$index->{name}{$file->{name}}}, $file;
+    push @{$index->{size}{$file->{subdirs}}{$stat->size}}, $file;
 }
 
 sub visitFileFailed {
