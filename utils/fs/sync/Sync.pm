@@ -114,7 +114,7 @@ sub moveFile {
     my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{subdirs});
 
     if (! $opts->{simulate} && ! -e $targetDir) {
-        File::Path::make_path($targetDir) or die "$!: $targetDir";
+        File::Path::make_path("$targetDir") or die "$!: $targetDir";
     }
 
     $display->info("<$inTarget");
