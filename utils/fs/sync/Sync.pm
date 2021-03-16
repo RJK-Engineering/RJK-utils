@@ -1,6 +1,12 @@
 package Sync;
 
+use File::Copy ();
+use File::Path ();
+
 use RJK::Files;
+use RJK::Path;
+use RJK::Paths;
+use RJK::Stat;
 
 use Display;
 use IndexVisitor;
@@ -107,13 +113,8 @@ sub moveFile {
     my ($inSource, $inTarget) = @_;
     my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{subdirs});
 
-    if ($opts->{simulate}) {
-        -e $targetDir or $display->info("Target directory does not exist: $targetDir");
-    } else {
-        if (! -e $targetDir) {
-            File::Path::make_path($targetDir) or die "$!: $targetDir";
-        }
-        -e $targetDir or die "Target directory does not exist: $targetDir";
+    if (! $opts->{simulate} && ! -e $targetDir) {
+        File::Path::make_path($targetDir) or die "$!: $targetDir";
     }
 
     $display->info("<$inTarget");
