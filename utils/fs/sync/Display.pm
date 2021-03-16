@@ -33,15 +33,18 @@ sub setProgressBar {
 sub info {
     my ($self, $message) = @_;
     $console->printLine($message);
+    $lastDisplay = 0;
 }
 
 sub warn {
     my ($self, $message) = @_;
     $console->printLine($message);
+    $lastDisplay = 0;
 }
 
 sub start {
     $progress->{done} = 0;
+    $lastDisplay = 0;
     &_progress;
 }
 
