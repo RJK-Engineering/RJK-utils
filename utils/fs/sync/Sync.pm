@@ -20,7 +20,8 @@ sub execute {
     die "No dirs in target: $opts->{targetDir}" if ! @dirs;
     $display->info("Dir: $_") foreach @dirs;
 
-    my $filesInSource = indexDirs(".", \@dirs);
+    $opts->{sourceDir} = ".";
+    my $filesInSource = indexDirs($opts->{sourceDir}, \@dirs);
     my $filesInTarget = indexDirs($opts->{targetDir}, \@dirs);
     synchronize(\@dirs, $filesInSource, $filesInTarget);
 }
@@ -48,7 +49,7 @@ sub indexDirs {
 sub synchronize {
     my ($dirs, $filesInSource, $filesInTarget) = @_;
 
-    my $progress = {total=>$filesInSource->{stats}{files}};
+    my $progress = {total => $filesInSource->{stats}{files}};
     $display->setProgressBar($progress);
 
     $display->info("Finding moved files ...");
@@ -62,6 +63,7 @@ sub synchronize {
 
         my $inTarget = $filesInTarget->{name}{$filename};
         next if ! $inTarget || @$inTarget > 1;
+        next if $inSource->[0]{subdirs} eq $inTarget->[0]{subdirs};
         next if ! sameSize($inSource->[0], $inTarget->[0]);
         next if ! sameDate($inSource->[0], $inTarget->[0]);
 
@@ -81,6 +83,7 @@ sub synchronize {
 
             my $inTarget = $filesInTarget->{size}{$dir}{$size};
             next if ! $inTarget || @$inTarget > 1;
+            next if $inSource->[0]{name} eq $inTarget->[0]{name};
             next if ! sameDate($inSource->[0], $inTarget->[0]);
 
             renameFile($inSource->[0], $inTarget->[0]);
@@ -91,10 +94,10 @@ sub synchronize {
 
 sub renameFile {
     my ($inSource, $inTarget) = @_;
-    my $targetFile = RJK::Paths->get($opts->{targetDir}, $inSource->{directories}, $inSource->{name});
+    my $targetFile = RJK::Paths->get($inTarget->parent->{path}, $inSource->{name});
 
-    $display->info(" <$inTarget");
-    $display->info(" >$targetFile");
+    $display->info("-$inTarget");
+    $display->info("+$targetFile");
     return if $opts->{simulate};
 
     File::Copy::move("$inTarget", "$targetFile") or die "$!: $inTarget -> $targetFile";
@@ -102,7 +105,7 @@ sub renameFile {
 
 sub moveFile {
     my ($inSource, $inTarget) = @_;
-    my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{directories});
+    my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{subdirs});
 
     if ($opts->{simulate}) {
         -e $targetDir or $display->info("Target directory does not exist: $targetDir");
