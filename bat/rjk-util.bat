@@ -57,7 +57,7 @@ ECHO USAGE: %0 [UTIL] [OPTIONS] [ARGS]
 
 :END
 IF %errorlevel% GTR 0 (
-    ECHO Error level %errorlevel%
+    ECHO Exit code %errorlevel%
     IF NOT DEFINED nopause SET pause=1
 )
 IF DEFINED pause pause
