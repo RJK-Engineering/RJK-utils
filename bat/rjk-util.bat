@@ -6,22 +6,26 @@ IF NOT DEFINED RJK_UTILS_HOME FOR /F "delims=" %%P IN ("%~dp0..") DO SET RJK_UTI
 rem clear vars, they are inherited from master environment
 SET debug=
 SET workspaceenvironment=
-SET nopause=
 SET pause=
+SET nopause=
+SET timeout=
 SET clip=
 SET util=
 SET extension=
 SET args=
+SET timeoutarg=
 
 :getopt
 IF "%~1"=="" GOTO endgetopt
 IF DEFINED args SET args=%args% %1& GOTO nextopt
+IF DEFINED timeoutarg SET timeout=%1& SET timeoutarg=& GOTO nextopt
 IF "%~1"=="/?" GOTO USAGE
 IF "%~1"=="/d" SET debug=1& GOTO nextopt
 IF "%~1"=="/w" SET workspaceenvironment=1& GOTO nextopt
-IF "%~1"=="/n" SET nopause=1& GOTO nextopt
 IF "%~1"=="/p" SET pause=1& GOTO nextopt
 IF "%~1"=="/-p" SET nopause=1& GOTO nextopt
+IF "%~1"=="/n" SET nopause=1& GOTO nextopt
+IF "%~1"=="/t" SET timeoutarg=1& GOTO nextopt
 IF "%~1"=="/c" SET "clip=|CLIP"& GOTO nextopt
 IF NOT DEFINED util (
     SET util=%1
@@ -60,4 +64,5 @@ IF %errorlevel% GTR 0 (
     ECHO Exit code %errorlevel%
     IF NOT DEFINED nopause SET pause=1
 )
+IF DEFINED timeout timeout %timeout%
 IF DEFINED pause pause
