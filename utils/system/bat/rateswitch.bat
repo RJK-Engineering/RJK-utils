@@ -37,7 +37,7 @@ echo USAGE: %~n0 [preset name] [value]
 echo.
 echo Keyboard rate value range: 1-31
 echo.
-echo Saved presets:
+echo Stored presets:
 set | find "KEYBOARD_CHAR_REPEAT_PRESET_"
 set ERRORLEVEL=2
 
