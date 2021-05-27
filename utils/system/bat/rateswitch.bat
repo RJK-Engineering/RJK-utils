@@ -1,21 +1,45 @@
 @echo off
 
-echo rate=0-31
+set ERRORLEVEL=
+set name=%1
+set value=%2
+if not defined name goto HELP
 
-set rate=%1
-if "%1"=="" set rate=5
+set cur_rate=%KEYBOARD_CHAR_REPEAT_CURR_RATE%
+set def_rate=%KEYBOARD_CHAR_REPEAT_DEFAULT_RATE%
+if not defined def_rate set def_rate=31
 
-set default_rate=%2
-if "%2"=="" set default_rate=31
-if "%KEYBOARD_CHAR_REPEAT_RATE%"=="" set KEYBOARD_CHAR_REPEAT_RATE=%default_rate%
-
-if "%KEYBOARD_CHAR_REPEAT_RATE%"=="%default_rate%" (
-    set KEYBOARD_CHAR_REPEAT_RATE=%rate%
-    setx KEYBOARD_CHAR_REPEAT_RATE %rate% >NUL
+if defined value (
+    set rate=%value%
+    call set KEYBOARD_CHAR_REPEAT_PRESET_%name%=%value%
+    call setx KEYBOARD_CHAR_REPEAT_PRESET_%name% %value% >NUL
+) else if not "%cur_rate%"=="%def_rate%" (
+    set rate=%def_rate%
 ) else (
-    set KEYBOARD_CHAR_REPEAT_RATE=%default_rate%
-    setx KEYBOARD_CHAR_REPEAT_RATE %default_rate% >NUL
+    call set rate=%%KEYBOARD_CHAR_REPEAT_PRESET_%name%%%
 )
 
-echo rate=%KEYBOARD_CHAR_REPEAT_RATE% delay=1
-mode con rate=%KEYBOARD_CHAR_REPEAT_RATE% delay=1
+if not defined rate (
+    echo KEYBOARD_CHAR_REPEAT_PRESET_%name% not defined.
+    set ERRORLEVEL=1
+    goto END
+)
+
+:SET_RATE
+echo rate=%rate%
+mode con rate=%rate% delay=1
+set KEYBOARD_CHAR_REPEAT_CURR_RATE=%rate%
+setx KEYBOARD_CHAR_REPEAT_CURR_RATE %rate% >NUL
+goto END
+
+:HELP
+echo USAGE: %~n0 [preset name] [value]
+echo.
+echo Keyboard rate value range: 1-31
+echo.
+echo Saved presets:
+set | find "KEYBOARD_CHAR_REPEAT_PRESET_"
+set ERRORLEVEL=2
+
+:END
+if %ERRORLEVEL% GTR 0 pause
