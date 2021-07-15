@@ -24,9 +24,8 @@ IF "%~1"=="" GOTO endgetopt
 IF DEFINED args SET args=%args% %1& GOTO nextopt
 IF "%~1"=="/?" GOTO USAGE
 IF "%~1"=="/w" SET workspaceenvironment=1& GOTO nextopt
-IF "%~1"=="/p" SET pause=1& GOTO nextopt
-IF "%~1"=="/-p" SET nopause=1& GOTO nextopt
-IF "%~1"=="/n" SET nopause=1& GOTO nextopt
+IF "%~1"=="/p" SET pause=1& SET nopause=& GOTO nextopt
+IF "%~1"=="/-p" SET nopause=1& SET pause=& GOTO nextopt
 IF "%~1"=="/q" SET "quiet=>NUL"& GOTO nextopt
 IF "%~1"=="/-e" SET "errorredirect=2>NUL"& GOTO nextopt
 IF "%~1"=="/r" SET "errorredirect=2>&1"& GOTO nextopt
@@ -62,18 +61,30 @@ IF "%extension%"==".bat" SET cmd=call
 IF DEFINED output (
     SET "output=> %output%"
 ) ELSE (
-    SET "output=%quiet% %clip%"
+    SET "output=%clip%"
 )
 
-%cmd% %RJK_UTILS_HOME%\utils\%util% %args% %errorredirect% %output%
+%cmd% %RJK_UTILS_HOME%\utils\%util% %args% %errorredirect% %quiet% %output%
 GOTO END
 
 :ERROR
-SET pause=1
+SET errorlevel=1
 ECHO.
 
 :USAGE
-ECHO USAGE: %script% [UTIL] [OPTIONS] [ARGS]
+ECHO USAGE: %script% [UTIL] [OPTIONS] [UTIL ARGS] [OPTIONS]
+ECHO.
+ECHO OPTIONS:
+ECHO./?        Help
+ECHO /w        Workspace environment
+ECHO /p        Force pause before exit
+ECHO /-p       Force no pause before exit
+ECHO /q        Be quiet (redirect standard output to NUL)
+ECHO /-e       No errors (redirect error output to NUL)
+ECHO /r        Redirect error output to standard ouput
+ECHO /t [n]    Timeout before exit
+ECHO /c        Copy standard ouput to clipboard
+ECHO /o [path] Write standard ouput to file
 
 :END
 IF %errorlevel% GTR 0 (
