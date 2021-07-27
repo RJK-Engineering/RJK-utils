@@ -1,0 +1,10 @@
+
+SET script=%1
+IF DEFINED help GOTO USAGE
+IF "%~2"=="" GOTO USAGE
+GOTO END
+
+:USAGE
+CALL run_usage
+
+:END
