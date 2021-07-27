@@ -8,10 +8,10 @@ IF DEFINED args SET args=%args% %1&        GOTO NEXTOPT
 IF "%~1"=="/p"  SET pause=1& SET nopause=& GOTO NEXTOPT
 IF "%~1"=="/-p" SET nopause=1& SET pause=& GOTO NEXTOPT
 IF "%~1"=="/t"  SET timeout=%2&    SHIFT & GOTO NEXTOPT
-IF "%~1"=="/q"  SET "quiet=>NUL"&          GOTO NEXTOPT
+IF "%~1"=="/q"  SET "quiet=>NUL"         & GOTO NEXTOPT
 IF "%~1"=="/-e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
-IF "%~1"=="/r"  SET "errorredirect=2>&1"&  GOTO NEXTOPT
-IF "%~1"=="/c"  SET "clip=|CLIP"&          GOTO NEXTOPT
+IF "%~1"=="/r"  SET "errorredirect=2>&1" & GOTO NEXTOPT
+IF "%~1"=="/c"  SET "clip=|CLIP"         & GOTO NEXTOPT
 IF "%~1"=="/o"  SET output=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/f"  SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a"  SET append=%2&     SHIFT & GOTO NEXTOPT
