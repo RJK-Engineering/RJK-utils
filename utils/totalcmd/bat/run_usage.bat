@@ -1,9 +1,11 @@
 ECHO USAGE: %script% [OPTIONS] [COMMAND] [OPTIONS] [ARGS]
 ECHO.
-ECHO OPTIONS
-ECHO./?        Display extended help
-IF NOT DEFINED help GOTO END
+IF NOT DEFINED help (
+    ECHO DISPLAY EXTENDED HELP: %script% /?
+    GOTO END
+)
 
+ECHO OPTIONS
 ECHO./p        Force pause before exit
 ECHO./-p       Force no pause before exit (pauses on error by default)
 ECHO./t [n]    Timeout before exit

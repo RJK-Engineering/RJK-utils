@@ -11,7 +11,7 @@ IF DEFINED end GOTO END
 CALL run_getopt %*
 IF DEFINED end GOTO END
 
-%cmd% %args% %errorredirect% %quiet% %output%
+CALL run_execute
 
 :END
 CALL run_end
