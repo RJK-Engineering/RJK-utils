@@ -6,7 +6,8 @@ IF NOT DEFINED RJK_UTILS_HOME (
 )
 SET script=%0
 
-IF "%~1"=="/?" GOTO USAGE
+IF "%~1"=="" GOTO USAGE
+IF "%~1"=="/?" GOTO HELP
 SET option/w=
 CALL run_getopt %*
 
@@ -22,9 +23,16 @@ SET cmd=%RJK_UTILS_HOME%\utils\%cmd%
 CALL run_execute
 GOTO END
 
+:HELP
+SET help=1
+
 :USAGE
 ECHO USAGE: %script% [UTIL] [OPTIONS] [UTIL ARGS] [OPTIONS]
 ECHO.
+IF NOT DEFINED help (
+    ECHO DISPLAY EXTENDED HELP: %script% /?
+    GOTO END
+)
 ECHO OPTIONS:
 ECHO./?        Help
 ECHO /w        Workspace environment
