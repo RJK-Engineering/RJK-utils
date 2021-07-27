@@ -11,9 +11,11 @@ ECHO./-p       Force no pause before exit (pauses on error by default)
 ECHO./t [n]    Timeout before exit
 ECHO./q        Be quiet (supress standard output)
 ECHO./-e       Hide errors (supress error output)
-ECHO./r        Redirect error output to standard ouput
+ECHO./r        Redirect error output to standard output
 ECHO./c        Redirect standard output to clipboard
-ECHO /o [path] Write standard ouput to file
+ECHO /o [path] Write standard output to file
+ECHO./f        Force overwrite (no overwrite by default)
+ECHO /a [path] Append standard output to file
 ECHO /-        OPTIONS terminator, rest of command line are ARGS
 
 ECHO.

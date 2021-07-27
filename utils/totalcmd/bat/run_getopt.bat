@@ -13,6 +13,8 @@ IF "%~1"=="/-e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
 IF "%~1"=="/r"  SET "errorredirect=2>&1"&  GOTO NEXTOPT
 IF "%~1"=="/c"  SET "clip=|CLIP"&          GOTO NEXTOPT
 IF "%~1"=="/o"  SET output=%2&     SHIFT & GOTO NEXTOPT
+IF "%~1"=="/f"  SET force=1&               GOTO NEXTOPT
+IF "%~1"=="/a"  SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/-"  SET args=%2&       SHIFT & GOTO NEXTOPT
 SET "arg=%~1"
 IF "%arg:~0,1%"=="/" SET option%1=1&       GOTO NEXTOPT
@@ -36,7 +38,10 @@ IF "%extension%"==".pl"  SET call=perl
 IF "%extension%"==".bat" SET call=call
 
 :SETOUTPUT
-IF DEFINED output (
+IF DEFINED append (
+    SET "output=>> %append%"
+) ELSE IF DEFINED output (
+    CALL run_check_output %output%
     SET "output=> %output%"
 ) ELSE (
     SET "output=%clip%"
