@@ -5,23 +5,23 @@ SET script=%0
 IF "%~1"=="" GOTO USAGE
 
 REM clear vars, they are inherited from master environment
-FOR %%V in (cmd filelist args display pause nopause timeout quiet errorredirect clip output call) do set %%V=
+FOR %%V IN (cmd filelist args display pause nopause timeout quiet errorredirect clip output call) do set %%V=
 
-:getopt
-IF "%~1"=="" GOTO endgetopt
-IF DEFINED args SET args=%args% %1&        GOTO nextopt
+:GETOPT
+IF "%~1"=="" GOTO ENDGETOPT
+IF DEFINED args SET args=%args% %1&        GOTO NEXTOPT
 IF "%~1"=="/?" GOTO HELP
-IF "%~1"=="/f"  SET display=%%~fF&         GOTO nextopt
-IF "%~1"=="/n"  SET display=%%~nxF&        GOTO nextopt
-IF "%~1"=="/p"  SET pause=1& SET nopause=& GOTO nextopt
-IF "%~1"=="/-p" SET nopause=1& SET pause=& GOTO nextopt
-IF "%~1"=="/t"  SET timeout=%2&    SHIFT & GOTO nextopt
-IF "%~1"=="/q"  SET "quiet=>NUL"         & GOTO nextopt
-IF "%~1"=="/-e" SET "errorredirect=2>NUL"& GOTO nextopt
-IF "%~1"=="/r"  SET "errorredirect=2>&1" & GOTO nextopt
-IF "%~1"=="/c"  SET "clip=|CLIP"         & GOTO nextopt
-IF "%~1"=="/a"  SET "append=>>%2"& SHIFT & GOTO nextopt
-IF "%~1"=="/-"  SET args=%2&       SHIFT & GOTO nextopt
+IF "%~1"=="/f"  SET display=%%~fF&         GOTO NEXTOPT
+IF "%~1"=="/n"  SET display=%%~nxF&        GOTO NEXTOPT
+IF "%~1"=="/p"  SET pause=1& SET nopause=& GOTO NEXTOPT
+IF "%~1"=="/-p" SET nopause=1& SET pause=& GOTO NEXTOPT
+IF "%~1"=="/t"  SET timeout=%2&    SHIFT & GOTO NEXTOPT
+IF "%~1"=="/q"  SET "quiet=>NUL"         & GOTO NEXTOPT
+IF "%~1"=="/-e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
+IF "%~1"=="/r"  SET "errorredirect=2>&1" & GOTO NEXTOPT
+IF "%~1"=="/c"  SET "clip=|CLIP"         & GOTO NEXTOPT
+IF "%~1"=="/a"  SET "append=>>%2"& SHIFT & GOTO NEXTOPT
+IF "%~1"=="/-"  SET args=%2&       SHIFT & GOTO NEXTOPT
 IF NOT DEFINED cmd (
     SET cmd=%1
     SET extension=%~x1
@@ -30,9 +30,9 @@ IF NOT DEFINED cmd (
 ) ELSE (
     SET args=%1
 )
-:nextopt
-SHIFT & GOTO getopt
-:endgetopt
+:NEXTOPT
+SHIFT & GOTO GETOPT
+:ENDGETOPT
 
 IF NOT DEFINED filelist GOTO USAGE
 
