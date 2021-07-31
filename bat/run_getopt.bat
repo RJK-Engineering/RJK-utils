@@ -1,6 +1,6 @@
 
 REM clear vars, they are inherited from master environment
-FOR %%V in (cmd args pause nopause timeout quiet errorredirect clip output force append call) do set %%V=
+FOR %%V IN (cmd args pause nopause timeout quiet errorredirect clip output force append call) do set %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
