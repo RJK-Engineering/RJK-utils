@@ -1,6 +1,6 @@
 
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd args pause nopause timeout quiet errorredirect clip output force append call) do set %%V=
+FOR %%V IN (cmd args pause nopause timeout quiet errorredirect clip output force append background call) do set %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
@@ -15,6 +15,7 @@ IF "%~1"=="/c"  SET "clip=|CLIP"         & GOTO NEXTOPT
 IF "%~1"=="/o"  SET output=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/f"  SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a"  SET "append=>>%2"& SHIFT & GOTO NEXTOPT
+IF "%~1"=="/b"  SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/-"  SET args=%2&       SHIFT & GOTO NEXTOPT
 SET "arg=%~1"
 IF "%arg:~0,1%"=="/" SET option%1=1&       GOTO NEXTOPT
@@ -31,11 +32,10 @@ GOTO GETOPT
 :ENDGETOPT
 IF NOT DEFINED cmd GOTO USAGE
 
-:SETCALL
-IF "%extension%"==".pl"  SET call=perl
-IF "%extension%"==".bat" SET call=call
+IF /I "%extension%"==".pl"  SET call=PERL
+IF /I "%extension%"==".bat" SET call=CALL
+IF DEFINED background SET cmd=START /B %cmd%
 
-:SETOUTPUT
 IF DEFINED append (
     SET "output=%append%"
 ) ELSE IF DEFINED output (
