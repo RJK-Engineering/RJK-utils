@@ -24,8 +24,6 @@ IF DEFINED cmd (
     SET cmd=%1
     SET extension=%~x1
 )
-GOTO NEXTOPT
-
 :NEXTOPT
 SHIFT
 GOTO GETOPT
