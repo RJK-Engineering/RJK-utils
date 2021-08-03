@@ -16,6 +16,7 @@ ECHO./c        Redirect standard output to clipboard
 ECHO /o [path] Write standard output to file
 ECHO./f        Force overwrite (no overwrite by default)
 ECHO /a [path] Append standard output to file
+ECHO /b        Run in background (START /B)
 ECHO /-        OPTIONS terminator, rest of command line are ARGS
 
 ECHO.
