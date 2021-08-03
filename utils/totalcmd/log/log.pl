@@ -252,12 +252,13 @@ sub processLogfile {
         visitEntry => sub {
             if (match($_)) {
                 displayResult($_);
-                return ++$results == $opts{head};
+                return ++$results != $opts{head};
             }
+            return 1;
         },
         visitFailed => sub {
             warn "Corrupt line: $_[0]";
-            return 0;
+            return 1;
         },
     );
 }
