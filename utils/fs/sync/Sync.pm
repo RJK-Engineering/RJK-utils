@@ -27,9 +27,9 @@ sub execute {
     $display->info("Dir: $_") foreach @dirs;
 
     $opts->{sourceDir} = ".";
-    my $filesInSource = indexDirs($opts->{sourceDir}, \@dirs);
-    my $filesInTarget = indexDirs($opts->{targetDir}, \@dirs);
-    synchronize(\@dirs, $filesInSource, $filesInTarget);
+    my $sourceIdx = indexDirs($opts->{sourceDir}, \@dirs);
+    my $targetIdx = indexDirs($opts->{targetDir}, \@dirs);
+    synchronize(\@dirs, $sourceIdx, $targetIdx);
 }
 
 sub indexDirs {
@@ -53,21 +53,21 @@ sub indexDirs {
 }
 
 sub synchronize {
-    my ($dirs, $filesInSource, $filesInTarget) = @_;
+    my ($dirs, $sourceIdx, $targetIdx) = @_;
 
-    my $progress = {total => $filesInSource->{stats}{files}};
+    my $progress = {total => $sourceIdx->{stats}{files}};
     $display->setProgressBar($progress);
 
     $display->info("Finding moved files ...");
     $display->start();
 
-    foreach my $filename (keys %{$filesInSource->{name}}) {
-        my $inSource = $filesInSource->{name}{$filename};
+    foreach my $filename (keys %{$sourceIdx->{name}}) {
+        my $inSource = $sourceIdx->{name}{$filename};
         $progress->{done} += @$inSource;
         $display->progress();
         next if @$inSource > 1;
 
-        my $inTarget = $filesInTarget->{name}{$filename};
+        my $inTarget = $targetIdx->{name}{$filename};
         next if ! $inTarget || @$inTarget > 1;
         next if $inSource->[0]{subdirs} eq $inTarget->[0]{subdirs};
         next if ! sameSize($inSource->[0], $inTarget->[0]);
@@ -80,14 +80,14 @@ sub synchronize {
     $display->info("Finding renamed files ...");
     $display->start();
 
-    foreach my $dir (keys %{$filesInSource->{size}}) {
-        foreach my $size (keys %{$filesInSource->{size}{$dir}}) {
-            my $inSource = $filesInSource->{size}{$dir}{$size};
+    foreach my $dir (keys %{$sourceIdx->{size}}) {
+        foreach my $size (keys %{$sourceIdx->{size}{$dir}}) {
+            my $inSource = $sourceIdx->{size}{$dir}{$size};
             $progress->{done} += @$inSource;
             $display->progress();
             next if @$inSource > 1;
 
-            my $inTarget = $filesInTarget->{size}{$dir}{$size};
+            my $inTarget = $targetIdx->{size}{$dir}{$size};
             next if ! $inTarget || @$inTarget > 1;
             next if $inSource->[0]{name} eq $inTarget->[0]{name};
             next if ! sameDate($inSource->[0], $inTarget->[0]);
