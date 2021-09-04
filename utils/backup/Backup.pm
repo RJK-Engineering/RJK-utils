@@ -12,7 +12,7 @@ use RJK::Win32::VolumeInfo;
 
 my $sizeFormatter = sub { $_[0] && format_bytes $_[0] };
 my $backupDirRow = new RJK::TableRowFormatter(
-    format => "%volume=-10 %name=-30 %size=4 %files=10 %backupLocation=-10 %lastBackup=8 %state",
+    format => "%volume=-10 %name=-30 %size=4 %backupLocation=-10 %lastBackup=8 %state",
     filters => { size => $sizeFormatter },
     header => {
         name => 'Directory',
