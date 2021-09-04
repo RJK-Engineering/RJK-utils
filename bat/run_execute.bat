@@ -1,4 +1,7 @@
 
+REM clear vars, they are inherited from master environment
+FOR %%V IN (run out) do set %%V=
+
 :SET_RUN
 IF /I "%extension%"==".pl" SET run= PERL
 IF /I "%extension%"==".bat" SET run= CALL

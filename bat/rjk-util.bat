@@ -7,7 +7,7 @@ IF NOT DEFINED RJK_UTILS_HOME (
 SET script=%0
 
 IF "%~1"=="" GOTO USAGE
-IF "%~1"=="/?" GOTO HELP
+IF "%~1"=="/?" SET help=1& GOTO USAGE
 SET option/w=
 CALL run_getopt %*
 
@@ -22,9 +22,6 @@ IF DEFINED option/w (
 SET cmd=%RJK_UTILS_HOME%\utils\%cmd%
 CALL run_execute
 GOTO END
-
-:HELP
-SET help=1
 
 :USAGE
 ECHO USAGE: %script% [UTIL] [OPTIONS] [UTIL ARGS] [OPTIONS]

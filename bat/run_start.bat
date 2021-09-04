@@ -1,6 +1,9 @@
 
+REM clear vars, they are inherited from master environment
+SET end=
+
 SET script=%1
-IF DEFINED help GOTO USAGE
+IF "%~2"=="/?" SET help=1& GOTO USAGE
 IF "%~2"=="" GOTO USAGE
 GOTO END
 
