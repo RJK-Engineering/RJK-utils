@@ -4,8 +4,6 @@ use strict;
 use warnings;
 
 use RJK::Filecheck::DirLists;
-use RJK::Paths;
-
 use Utils;
 
 my $opts;
@@ -14,12 +12,12 @@ sub execute {
     my $self = shift;
     $opts = shift;
     my @terms = getTerms();
+    my @result;
 
     RJK::Filecheck::DirLists->traverse($opts->{list}, sub {
-        my $path = RJK::Paths->get(shift);
-        my $names = Utils::getNames($path);
+        my $vpath = shift;
+        my $names = Utils::getNames($vpath);
         my $match;
-
         NAME: foreach my $name (@$names) {
             foreach my $term (@terms) {
                 next NAME if $name !~ /$term/i
@@ -27,9 +25,11 @@ sub execute {
             $match = 1;
             last;
         }
-        print join(", ", @$names), "\n" if $match;
+        push @result, $vpath if $match;
         return 0;
     });
+
+    return [sort @result];
 }
 
 sub getTerms {
