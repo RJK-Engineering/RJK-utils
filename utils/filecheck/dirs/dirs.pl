@@ -42,11 +42,19 @@ RJK::Options::Pod::GetOptions(
     'f|filename-search' => \$opts{filenameSearch}, "Find directories for a file by matching words in its name.",
     'g|get-dirs' => \$opts{getDirs}, "Get dirs.",
 
-    't|set-tc-target-dir' => \$opts{setTcTargetDir}, "Set Total Commander target directory.",
     'c|set-clipboard' => \$opts{setClipboard}, "Set clipboard.",
     'a|add-to-download-list' => \$opts{addToDownloadList}, "Add to download list.",
         'o|download-list-operation=s' => \$opts{downloadListOperation}, "Operation added to download list, \"copy\" or \"move\". Default: \"move\".",
     'exit|exit-value=i' => \$opts{exitValue}, "Program exit value on succesfull program execution.",
+
+    'O|tc-open' => \$opts{tcOpen}, "Open in Total Commander. Default in source window.",
+    'a|tc-open-all' => \$opts{tcOpenAll}, "Open all dirs in new tabs in Total Commander. Default in source window.",
+    't|tc-open-new-tab' => \$opts{tcOpenNewTab}, "Total Commander command line option /T. Opens the passed dir(s) in new tab(s). Now also works when Total Commander hasn't been open yet. Default in source window.",
+    'N|tc-open-new-instance' => \$opts{tcOpenNewInstance}, "Total Commander command line option /N. Opens in any case a new Total Commander window (overrides the settings in the configuration dialog to allow only one copy of Total Commander at a time). Default in source window.",
+    'L|tc-set-left-path' => \$opts{tcSetLeftPath}, "Total Commander command line option /L=. Set path in left window. Default in running instance.",
+    'R|tc-set-right-path' => \$opts{tcSetRightPath}, "Total Commander command line option /R=. Set path in right window. Default in running instance.",
+    'S|tc-set-source-path' => \$opts{tcSetSourcePath}, "Total Commander command line options  /S /L=. Set path in source window. Default in running instance.",
+    'T|tc-set-target-path' => \$opts{tcSetTargetPath}, "Total Commander command line options  /S /R=. Set path in target window. Default in running instance.",
 
     ['POD'],
     RJK::Options::Pod::Options,
@@ -64,6 +72,21 @@ if ($opts{showDownloadLists}) {
 
 $opts{args} = [@ARGV];
 $opts{outputFile} = shift;
+
+$opts{tcOpen} ||=
+    $opts{tcOpenNewInstance} ||
+    $opts{tcOpenAll} ||
+    $opts{tcOpenNewTab} ||
+    $opts{tcSetLeftPath} ||
+    $opts{tcSetRightPath} ||
+    $opts{tcSetSourcePath} ||
+    $opts{tcSetTargetPath}
+;
+$opts{tcSetSourcePath} ||= !(
+    $opts{tcSetLeftPath} ||
+    $opts{tcSetRightPath} ||
+    $opts{tcSetTargetPath}
+);
 
 ###############################################################################
 
