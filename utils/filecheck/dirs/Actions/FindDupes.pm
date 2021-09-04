@@ -12,6 +12,7 @@ sub execute {
     my $self = shift;
     $opts = shift;
     my %dirs;
+    my $results;
 
     RJK::Filecheck::DirLists->traverse($opts->{list}, sub {
         my $vpath = shift;
@@ -22,10 +23,12 @@ sub execute {
             if (@$dir) {
                 print "--\n$dir->[0]\n" if @$dir == 1;
                 print "$vpath\n";
+                $results++;
             }
             push @$dir, $vpath->{path};
         }
     });
+    return $results;
 }
 
 1;
