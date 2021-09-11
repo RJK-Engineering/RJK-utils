@@ -4,30 +4,33 @@ use parent 'RJK::FileVisitor';
 use RJK::Path;
 use RJK::Stat;
 
-my $display;
-my $baseDir;
-my $index;
+my ($display, $baseDir, $left);
 
 sub new {
     my $self = bless {}, shift;
-    $display = shift;
-    $baseDir = shift;
-    $index = {};
+    ($display, $baseDir, $left) = @_;
     return $self;
 }
 
-sub getIndex {
-    return $index;
-}
+sub index { $_[0]{index} }
+sub equal { $_[0]{equal} }
 
 sub visitFile {
     my ($self, $file, $stat) = @_;
     $file->{stat} = $stat;
     $file->{subdirs} = $file->parent =~ s/^\Q$baseDir\E[\\\/]//ir;
+    my $subpath = $file->{subdirs} ."\\". $file->{name};
     $display->stats;
 
-    push @{$index->{name}{$file->{name}}}, $file;
-    push @{$index->{size}{$file->{subdirs}}{$stat->size}}, $file;
+    if ($left) {
+        if (my $match = delete $left->{$subpath}) {
+            $self->{equal}{$subpath} = $file;
+        } else {
+            push @{$self->{index}{$file->{stat}->size}}, $file;
+        }
+    } else {
+        $self->{index}{$subpath} = $file;
+    }
 }
 
 sub visitFileFailed {
