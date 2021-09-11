@@ -24,7 +24,7 @@ sub visitFile {
 
     if ($left) {
         if (my $match = delete $left->{$subpath}) {
-            $self->{equal}{$subpath} = $file;
+            $self->{equal}{$subpath} = $file if $self->{indexEqual};
         } else {
             push @{$self->{index}{$file->{stat}->size}}, $file;
         }
