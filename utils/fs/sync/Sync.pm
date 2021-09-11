@@ -27,17 +27,21 @@ sub execute {
     $display->info("Dir: $_") foreach @dirs;
 
     $opts->{sourceDir} = ".";
-    my $sourceIdx = indexDirs($opts->{sourceDir}, \@dirs);
-    my $targetIdx = indexDirs($opts->{targetDir}, \@dirs);
-    synchronize(\@dirs, $sourceIdx, $targetIdx);
+    my $left = indexDirs($opts->{sourceDir}, \@dirs);
+    my $right = indexDirs($opts->{targetDir}, \@dirs, $left);
+
+    $display->info("Synchronizing ...");
+    foreach (values %$left) {
+        synchronize($_, $right);
+    }
 }
 
 sub indexDirs {
-    my ($parent, $dirs) = @_;
+    my ($parent, $dirs, $left) = @_;
 
     my $stats = RJK::Files->createStats();
     $display->setStats($stats);
-    my $visitor = new IndexVisitor($display, $parent);
+    my $visitor = new IndexVisitor($display, $parent, $left);
 
     foreach my $dir (@$dirs) {
         my $path = "$parent\\$dir";
@@ -47,55 +51,27 @@ sub indexDirs {
     }
     $display->totals;
 
-    my $index = $visitor->getIndex;
-    $index->{stats} = $stats;
-    return $index;
+    return $visitor->index;
 }
 
 sub synchronize {
-    my ($dirs, $sourceIdx, $targetIdx) = @_;
+    my ($file, $right) = @_;
+    my $sizeMatch = $right->{$file->{stat}->size} or return;
 
-    my $progress = {total => $sourceIdx->{stats}{files}};
-    $display->setProgressBar($progress);
-
-    $display->info("Finding moved files ...");
-    $display->start();
-
-    foreach my $filename (keys %{$sourceIdx->{name}}) {
-        my $inSource = $sourceIdx->{name}{$filename};
-        $progress->{done} += @$inSource;
-        $display->progress();
-        next if @$inSource > 1;
-
-        my $inTarget = $targetIdx->{name}{$filename};
-        next if ! $inTarget || @$inTarget > 1;
-        next if $inSource->[0]{subdirs} eq $inTarget->[0]{subdirs};
-        next if ! sameSize($inSource->[0], $inTarget->[0]);
-        next if ! sameDate($inSource->[0], $inTarget->[0]);
-
-        moveFile($inSource->[0], $inTarget->[0]);
-    }
-    $display->done();
-
-    $display->info("Finding renamed files ...");
-    $display->start();
-
-    foreach my $dir (keys %{$sourceIdx->{size}}) {
-        foreach my $size (keys %{$sourceIdx->{size}{$dir}}) {
-            my $inSource = $sourceIdx->{size}{$dir}{$size};
-            $progress->{done} += @$inSource;
-            $display->progress();
-            next if @$inSource > 1;
-
-            my $inTarget = $targetIdx->{size}{$dir}{$size};
-            next if ! $inTarget || @$inTarget > 1;
-            next if $inSource->[0]{name} eq $inTarget->[0]{name};
-            next if ! sameDate($inSource->[0], $inTarget->[0]);
-
-            renameFile($inSource->[0], $inTarget->[0]);
+    my $match;
+    foreach (@$sizeMatch) {
+        if ($match) {
+            print "Multimatch!\n";
+            return;
         }
+        $match = $_ if sameDate($file, $_);
     }
-    $display->done();
+
+    if ($file->name eq $match->name)  {
+        moveFile($file, $match);
+    } else {
+        renameFile($file, $match);
+    }
 }
 
 sub renameFile {
@@ -118,7 +94,7 @@ sub moveFile {
     }
 
     $display->info("<$inTarget");
-    $display->info(">$targetDir");
+    $display->info(">$targetDir\\");
     return if $opts->{simulate};
 
     File::Copy::move("$inTarget", "$targetDir") or die "$!: $inTarget -> $targetDir";
@@ -127,11 +103,6 @@ sub moveFile {
 sub sameDate {
     my ($inSource, $inTarget) = @_;
     return abs($inSource->{stat}->modified - $inTarget->{stat}->modified) < 3;
-}
-
-sub sameSize {
-    my ($inSource, $inTarget) = @_;
-    return $inSource->{stat}->size == $inTarget->{stat}->size;
 }
 
 1;
