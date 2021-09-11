@@ -67,16 +67,16 @@ sub synchronize {
         $match = $_ if sameDate($file, $_);
     }
 
-    if ($file->name eq $match->name)  {
-        moveFile($file, $match);
-    } else {
+    if ($file->{subdirs} eq $match->{subdirs})  {
         renameFile($file, $match);
+    } else {
+        moveFile($file, $match);
     }
 }
 
 sub renameFile {
     my ($inSource, $inTarget) = @_;
-    my $targetFile = RJK::Paths->get($inTarget->parent->{path}, $inSource->{name});
+    my $targetFile = RJK::Paths->get($inTarget->parent->path, $inSource->name);
 
     $display->info("-$inTarget");
     $display->info("+$targetFile");
@@ -87,17 +87,21 @@ sub renameFile {
 
 sub moveFile {
     my ($inSource, $inTarget) = @_;
-    my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{subdirs});
-
-    if (! $opts->{simulate} && ! -e $targetDir) {
-        File::Path::make_path("$targetDir") or die "$!: $targetDir";
-    }
+    my $target = my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{subdirs});
 
     $display->info("<$inTarget");
-    $display->info(">$targetDir\\");
+    if ($inSource->name eq $inTarget->name)  {
+        $display->info(">$target\\");
+    } else {
+        $target = RJK::Paths->get($targetDir, $inSource->name);
+        $display->info(">$target");
+    }
     return if $opts->{simulate};
 
-    File::Copy::move("$inTarget", "$targetDir") or die "$!: $inTarget -> $targetDir";
+    if (! -e $targetDir) {
+        File::Path::make_path("$targetDir") or die "$!: $targetDir";
+    }
+    File::Copy::move("$inTarget", "$target") or die "$!: $inTarget -> $target";
 }
 
 sub sameDate {
