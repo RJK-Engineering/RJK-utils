@@ -12,8 +12,7 @@ sub new {
     return $self;
 }
 
-sub index { $_[0]{index} }
-sub equal { $_[0]{equal} }
+sub files { $_[0]{files} }
 
 sub visitFile {
     my ($self, $file, $stat) = @_;
@@ -23,13 +22,10 @@ sub visitFile {
     $display->stats;
 
     if ($left) {
-        if (my $match = delete $left->{$subpath}) {
-            $self->{equal}{$subpath} = $file if $self->{indexEqual};
-        } else {
-            push @{$self->{index}{$file->{stat}->size}}, $file;
-        }
+        return if delete $left->files->{$subpath};
+        push @{$self->{files}{$file->{stat}->size}}, $file;
     } else {
-        $self->{index}{$subpath} = $file;
+        $self->{files}{$subpath} = $file;
     }
 }
 
