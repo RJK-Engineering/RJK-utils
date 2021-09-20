@@ -30,9 +30,9 @@ sub execute {
     my $left = indexDirs($opts->{sourceDir}, \@dirs);
     my $right = indexDirs($opts->{targetDir}, \@dirs, $left);
 
-    $display->info("Synchronizing ...");
-    foreach (values %$left) {
-        synchronize($_, $right);
+    $display->info("Synchronizing files ...");
+    foreach (values %{$left->files}) {
+        synchronize($_, $right->files);
     }
 }
 
@@ -51,7 +51,7 @@ sub indexDirs {
     }
     $display->totals;
 
-    return $visitor->index;
+    return $visitor;
 }
 
 sub synchronize {
@@ -106,7 +106,11 @@ sub moveFile {
 
 sub sameDate {
     my ($inSource, $inTarget) = @_;
-    return abs($inSource->{stat}->modified - $inTarget->{stat}->modified) < 3;
+    if ($opts->{useFatDateResolution}) {
+        return abs($inSource->{stat}->modified - $inTarget->{stat}->modified) < 3;
+    } else {
+        return $inSource->{stat}->modified == $inTarget->{stat}->modified;
+    }
 }
 
 1;
