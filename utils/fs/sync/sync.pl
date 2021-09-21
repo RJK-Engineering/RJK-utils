@@ -27,12 +27,15 @@ sync.pl -h
 
 my %opts = RJK::LocalConf::GetOptions("RJK-utils/fs/sync.properties", (
     refreshInterval => .2,
+    minDirNameLength => 5,
 ));
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'i|refresh-interval=f' => \$opts{refreshInterval},
         "Refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
     'simulate' => \$opts{simulate}, "Do not make any changes to the file system.",
+    'dirs' => \$opts{visitDirs}, "Synchronize dirs.",
+    'min-dir-name-length' => \$opts{minDirNameLength}, "Minimum required dir name length when matching dirs. Default: $opts{minDirNameLength}",
 
     ['POD'],
     RJK::Options::Pod::Options,
@@ -46,13 +49,6 @@ RJK::Options::Pod::GetOptions(
 );
 
 $opts{targetDir} = shift =~ s|\/|\\|gr =~ s|\\+$||r;
-if (! -e $opts{targetDir}) {
-    die "Target does not exist: $opts{targetDir}";
-} elsif (! -d $opts{targetDir}) {
-    die "Target is not a directory: $opts{targetDir}";
-} elsif (! -r $opts{targetDir}) {
-    die "Target dir is not readable: $opts{targetDir}";
-}
 
 ###############################################################################
 
