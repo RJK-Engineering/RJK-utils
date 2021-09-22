@@ -6,22 +6,24 @@ use File::Path ();
 use RJK::Files;
 use RJK::Path;
 use RJK::Paths;
-use RJK::Stat;
 
 use Display;
 use IndexVisitor;
 
 my $opts;
 my $display;
+my ($sourceDir, $targetDir);
 
 sub execute {
     my $self = shift;
     $opts = shift;
     $display = new Display($opts);
 
+    $sourceDir = $opts->{sourceDir} // ".";
+    $targetDir = $opts->{targetDir};
     my $dirs = getDirs();
-    my $left = createIndex($opts->{sourceDir} // ".", $dirs);
-    my $right = createIndex($opts->{targetDir}, $dirs, $left);
+    my $left = createIndex($sourceDir, $dirs);
+    my $right = createIndex($targetDir, $dirs, $left);
 
     $display->info("Synchronizing ...");
     if ($opts->{visitDirs}) {
@@ -36,15 +38,15 @@ sub execute {
 }
 
 sub getDirs {
-    -e $opts->{targetDir} or die "Target dir does not exist: $opts->{targetDir}";
-    -d $opts->{targetDir} or die "Target is not a directory: $opts->{targetDir}";
-    -r $opts->{targetDir} or die "Target dir is not readable: $opts->{targetDir}";
+    -e $targetDir or die "Target dir does not exist: $targetDir";
+    -d $targetDir or die "Target is not a directory: $targetDir";
+    -r $targetDir or die "Target dir is not readable: $targetDir";
 
-    opendir my $dh, $opts->{targetDir} or die "$!";
-    my @dirs = grep { -d "$opts->{targetDir}\\$_" && ! /^\./ } readdir $dh;
+    opendir my $dh, $targetDir or die "$!";
+    my @dirs = grep { -d "$targetDir\\$_" && ! /^\./ } readdir $dh;
     closedir $dh;
 
-    @dirs or die "No dirs in target dir: $opts->{targetDir}";
+    @dirs or die "No dirs in target dir: $targetDir";
     $display->info("Dir: $_") foreach @dirs;
     return \@dirs;
 }
@@ -57,7 +59,7 @@ sub createIndex {
     my $visitor = new IndexVisitor($opts, $display, $parent, $left);
 
     foreach my $dir (@$dirs) {
-        my $path = "$parent\\$dir";
+        my $path = RJK::Paths->get($parent, $dir);
         $display->info("Reading $path ...");
         $display->stats;
         RJK::Files->traverse($path, $visitor, {}, $stats);
@@ -75,19 +77,25 @@ sub synchronizeDirs {
         $display->info("Multimatch for name: $dir->{name}");
         return;
     }
-    moveDir($dir, $nameMatch->[0]);
+    moveDir($dir, $nameMatch->[0], $right);
 }
 
 sub moveDir {
-    my ($inSource, $inTarget) = @_;
-    my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{subdirs});
-    my $target = RJK::Paths->get($opts->{targetDir}, $inSource->{subpath});
+    my ($inSource, $inTarget, $right) = @_;
+    my $target = RJK::Paths->get($targetDir, $inSource->{path});
 
-    $display->info("<$inTarget");
+    $display->info("<$inTarget->{fullPath}");
     $display->info(">$target");
     return if $opts->{simulate};
 
-    move($inTarget, $targetDir, $target);
+    my $dir = RJK::Paths->get($targetDir, $inSource->{parent});
+    move($inTarget->{fullPath}, $dir, $target);
+    updateIndex($inTarget, $target, $right);
+}
+
+sub updateIndex {
+    my ($inTarget, $target, $right) = @_;
+    ...
 }
 
 sub move {
@@ -100,18 +108,18 @@ sub move {
 
 sub synchronize {
     my ($file, $right) = @_;
-    my $sizeMatch = $right->{$file->{stat}->size} or return;
+    my $sizeMatch = $right->{$file->{size}} or return;
 
     my $match;
     foreach (@$sizeMatch) {
         if ($match) {
-            $display->info("Multimatch for size: $file->{stat}->size");
+            $display->info("Multimatch for size: $file->{size}");
             return;
         }
         $match = $_ if sameDate($file, $_);
     }
 
-    if ($file->{subdirs} eq $match->{subdirs})  {
+    if ($file->{parent} eq $match->{parent})  {
         renameFile($file, $match);
     } else {
         moveFile($file, $match);
@@ -120,37 +128,37 @@ sub synchronize {
 
 sub renameFile {
     my ($inSource, $inTarget) = @_;
-    my $targetFile = RJK::Paths->get($inTarget->parent->path, $inSource->name);
+    my $targetFile = RJK::Paths->get($targetDir, $inTarget->{parent}, $inSource->{name});
 
-    $display->info("-$inTarget");
+    $display->info("-$inTarget->{fullPath}");
     $display->info("+$targetFile");
     return if $opts->{simulate};
 
-    File::Copy::move("$inTarget", "$targetFile") or die "$!: $inTarget -> $targetFile";
+    File::Copy::move($inTarget->{fullPath}, "$targetFile") or die "$!: $inTarget -> $targetFile";
 }
 
 sub moveFile {
     my ($inSource, $inTarget) = @_;
-    my $target = my $targetDir = RJK::Paths->get($opts->{targetDir}, $inSource->{subdirs});
+    my $target = my $dir = RJK::Paths->get($targetDir, $inSource->{parent});
 
-    $display->info("<$inTarget");
-    if ($inSource->name eq $inTarget->name)  {
+    $display->info("<$inTarget->{fullPath}");
+    if ($inSource->{name} eq $inTarget->{name})  {
         $display->info(">$target\\");
     } else {
-        $target = RJK::Paths->get($targetDir, $inSource->name);
+        $target = RJK::Paths->get($dir, $inSource->{name});
         $display->info(">$target");
     }
     return if $opts->{simulate};
 
-    move($inTarget, $targetDir, $target);
+    move($inTarget->{fullPath}, $dir, $target);
 }
 
 sub sameDate {
     my ($inSource, $inTarget) = @_;
     if ($opts->{useFatDateResolution}) {
-        return abs($inSource->{stat}->modified - $inTarget->{stat}->modified) < 3;
+        return abs($inSource->{modified} - $inTarget->{modified}) < 3;
     } else {
-        return $inSource->{stat}->modified == $inTarget->{stat}->modified;
+        return $inSource->{modified} == $inTarget->{modified};
     }
 }
 

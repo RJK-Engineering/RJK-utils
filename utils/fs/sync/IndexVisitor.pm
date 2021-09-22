@@ -2,6 +2,7 @@ package IndexVisitor;
 use parent 'RJK::FileVisitor';
 
 use RJK::Path;
+use RJK::Paths;
 use RJK::Stat;
 
 my ($opts, $display, $baseDir, $left);
@@ -20,10 +21,17 @@ sub new {
 sub dirs { $_[0]{dirs} }
 sub files { $_[0]{files} }
 
-sub getRelativePaths {
-    my $file = shift;
-    $file->{subdirs} = $file->parent =~ s/^$baseDirRegex[\\\/]?//ir;
-    $file->{subpath} = $file->{subdirs} ."\\". $file->{name};
+sub getFileInfo {
+    my ($path, $stat) = @_;
+    my $parent = $path->parent =~ s/^$baseDirRegex[\\\/]?//ir;
+    return {
+        fullPath => $path->path,
+        path => RJK::Paths->get($parent, $path->name),
+        parent => $parent,
+        name => $path->name,
+        size => $stat->size,
+        modified => $stat->modified
+    };
 }
 
 sub preVisitDir {
@@ -32,13 +40,14 @@ sub preVisitDir {
     if (length $dir->{name} < $opts->{minDirNameLength}) {
         $display->info("Skipping short name: $dir");
     }
-    getRelativePaths($dir);
+
+    $dir = getFileInfo($dir, $stat);
 
     if ($left) {
-        return if delete $left->{dirs}{$dir->{subpath}};
+        return if delete $left->{dirs}{$dir->{path}};
         push @{$self->{dirs}{$dir->{name}}}, $dir;
     } else {
-        $self->{dirs}{$dir->{subpath}} = $dir;
+        $self->{dirs}{$dir->{path}} = $dir;
     }
 }
 
@@ -46,15 +55,14 @@ sub visitFile {
     my ($self, $file, $stat) = @_;
     not $opts->{visitDirs} or return;
 
-    $file->{stat} = $stat;
-    getRelativePaths($file);
+    $file = getFileInfo($file, $stat);
     $display->stats;
 
     if ($left) {
-        return if delete $left->{files}{$file->{subpath}};
-        push @{$self->{files}{$file->{stat}->size}}, $file;
+        return if delete $left->{files}{$file->{path}};
+        push @{$self->{files}{$file->{size}}}, $file;
     } else {
-        $self->{files}{$file->{subpath}} = $file;
+        $self->{files}{$file->{path}} = $file;
     }
 }
 
