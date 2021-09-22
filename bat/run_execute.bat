@@ -4,7 +4,6 @@ FOR %%V IN (run out) do set %%V=
 
 :SET_RUN
 IF /I "%extension%"==".pl" SET run= PERL
-IF /I "%extension%"==".bat" SET run= CALL
 IF DEFINED background SET run= START /B%run%
 SET run=%run% %cmd%
 SET run=%run:~1%
@@ -21,6 +20,10 @@ SET "out=%quiet%%out%%clip%"
 
 :EXECUTE
 IF DEFINED echo ECHO run=%run%& ECHO arg=%args%& ECHO out="%out%"
+
+REM a bat files terminates when a bat file is executed unless CALL is used,
+REM but since this is the last line in this bat file CALL is not needed
+
 IF DEFINED args (
     %run% %args%%out%
 ) ELSE (
