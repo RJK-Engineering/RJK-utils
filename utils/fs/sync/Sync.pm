@@ -132,6 +132,7 @@ sub synchronize {
         }
         $match = $_ if sameDate($file, $_);
     }
+    $match or return;
 
     if ($file->{parent} eq $match->{parent})  {
         renameFile($file, $match);
