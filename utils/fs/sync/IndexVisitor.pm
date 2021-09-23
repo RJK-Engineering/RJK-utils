@@ -38,7 +38,7 @@ sub preVisitDir {
     my ($self, $dir, $stat) = @_;
     $opts->{visitDirs} or return;
     if (length $dir->{name} < $opts->{minDirNameLength}) {
-        $display->info("Skipping short name: $dir");
+        $display->info("Skipping short name: $dir") if $opts->{verbose};
     }
 
     $dir = getFileInfo($dir, $stat);
