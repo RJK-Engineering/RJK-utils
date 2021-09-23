@@ -32,8 +32,9 @@ sub execute {
             synchronizeDirs($dirs->{$_}, $right->dirs);
         }
     } else {
-        foreach (values %{$left->files}) {
-            synchronize($_, $right->files);
+        my $files = $left->files;
+        foreach (sort keys %$files) {
+            synchronize($files->{$_}, $right->files);
         }
     }
 }
