@@ -39,9 +39,10 @@ sub preVisitDir {
     $opts->{visitDirs} or return;
     if (length $dir->{name} < $opts->{minDirNameLength}) {
         $display->info("Skipping short name: $dir") if $opts->{verbose};
+        return;
     }
-
     $dir = getFileInfo($dir, $stat);
+    $display->stats;
 
     if ($left) {
         return if delete $left->{dirs}{$dir->{path}};
