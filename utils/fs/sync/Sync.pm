@@ -27,8 +27,9 @@ sub execute {
 
     $display->info("Synchronizing ...");
     if ($opts->{visitDirs}) {
-        foreach (values %{$left->dirs}) {
-            synchronizeDirs($_, $right->dirs);
+        my $dirs = $left->dirs;
+        foreach (sort keys %$dirs) {
+            synchronizeDirs($dirs->{$_}, $right->dirs);
         }
     } else {
         foreach (values %{$left->files}) {
@@ -77,25 +78,37 @@ sub synchronizeDirs {
         $display->info("Multimatch for name: $dir->{name}");
         return;
     }
+    if ($dir->{path} eq $nameMatch->[0]) {
+        $display->info("=$dir->{path}");
+        return;
+    }
     moveDir($dir, $nameMatch->[0], $right);
 }
 
 sub moveDir {
     my ($inSource, $inTarget, $right) = @_;
-    my $target = RJK::Paths->get($targetDir, $inSource->{path});
+    my $newPath = $inSource->{path};
+    my $newFullPath = RJK::Paths->get($targetDir, $newPath);
 
     $display->info("<$inTarget->{fullPath}");
-    $display->info(">$target");
-    return if $opts->{simulate};
+    $display->info(">$newFullPath");
 
-    my $dir = RJK::Paths->get($targetDir, $inSource->{parent});
-    move($inTarget->{fullPath}, $dir, $target);
-    updateIndex($inTarget, $target, $right);
+    my $newParent = RJK::Paths->get($targetDir, $inSource->{parent});
+    move($inTarget->{fullPath}, $newParent, $newFullPath) unless $opts->{simulate};
+    updateIndex($inTarget, $newFullPath, $newPath, $right);
 }
 
 sub updateIndex {
-    my ($inTarget, $target, $right) = @_;
-    ...
+    my ($parent, $newParentFullPath, $newParentPath, $right) = @_;
+    my $parentFullPath = quotemeta $parent->{fullPath};
+    my $parentPath = quotemeta $parent->{path};
+    foreach my $dirs (values %$right) {
+        foreach my $dir (@$dirs) {
+            $dir->{fullPath} =~ s/^$parentFullPath\\(.+)/$newParentFullPath\\$1/ or next;
+            $dir->{parent} =~ s/^$parentPath/$newParentPath/ or die;
+            $dir->{path} = RJK::Paths->get($dir->{parent}, $dir->{name});
+        }
+    }
 }
 
 sub move {
