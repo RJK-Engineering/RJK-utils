@@ -35,7 +35,7 @@ RJK::Options::Pod::GetOptions(
         "Refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
     'simulate' => \$opts{simulate}, "Do not make any changes to the file system.",
     'dirs' => \$opts{visitDirs}, "Synchronize dirs.",
-    'min-dir-name-length' => \$opts{minDirNameLength}, "Minimum required dir name length when matching dirs. Default: $opts{minDirNameLength}",
+    'min-dir-name-length=i' => \$opts{minDirNameLength}, "Minimum required dir name length when matching dirs. Default: $opts{minDirNameLength}",
 
     ['POD'],
     RJK::Options::Pod::Options,
