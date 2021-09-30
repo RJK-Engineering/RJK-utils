@@ -32,6 +32,11 @@ sub execute {
         my $clip = Win32::Clipboard();
         $clip->Set(join "\n", @$result);
     }
+    if ($opts->{outputFile}) {
+        open my $fh, '>', $opts->{outputFile} or die "$!: $opts->{outputFile}";
+        print $fh join "\n", @$result;
+        close $fh;
+    }
 }
 
 sub getAction {
