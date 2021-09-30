@@ -1,4 +1,4 @@
-package Actions::ListMultipleNames;
+package Actions::MultipleNames;
 
 use strict;
 use warnings;
