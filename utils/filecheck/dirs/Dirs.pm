@@ -18,7 +18,7 @@ sub execute {
     my $result = Actions::exec($action, $opts);
 
     if (! $result) {
-        print "No results.\n";
+        print "No results.\n" if defined $result;
         return;
     }
 
