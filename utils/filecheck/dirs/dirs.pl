@@ -34,7 +34,7 @@ RJK::Options::Pod::GetOptions(
     'l|list=s' => \$opts{list}, "List name.",
     'm|multiple-names' => \$opts{listMultipleNames}, "List dirs with multiple names.",
     'd|dupes' => \$opts{listDupes}, "Find duplicates.",
-        'v|same-volume' => \$opts{dupesSameVolume}, "Find duplicates on same volume.",
+    'v|volume=s' => \$opts{volume}, "Volume filter.",
     'D|download-list-dir=s' => \$opts{downloadListDir}, "Path to directory containing totalcmd download list files.",
         'dl|download-lists' => \$opts{showDownloadLists}, "Show download lists.",
         'O|open-download-list=s' => \$opts{openDownloadList}, "Open download list.",
@@ -45,7 +45,6 @@ RJK::Options::Pod::GetOptions(
     'c|set-clipboard' => \$opts{setClipboard}, "Set clipboard.",
     'a|add-to-download-list' => \$opts{addToDownloadList}, "Add to download list.",
         'o|download-list-operation=s' => \$opts{downloadListOperation}, "Operation added to download list, \"copy\" or \"move\". Default: \"move\".",
-    'exit|exit-value=i' => \$opts{exitValue}, "Program exit value on succesfull program execution.",
 
     'O|tc-open' => \$opts{tcOpen}, "Open in Total Commander. Default in source window.",
     'a|tc-open-all' => \$opts{tcOpenAll}, "Open all dirs in new tabs in Total Commander. Default in source window.",
@@ -107,7 +106,3 @@ try {
     }
     exit 1;
 };
-
-END {
-    $? ||= $opts{exitValue} // 0;
-}
