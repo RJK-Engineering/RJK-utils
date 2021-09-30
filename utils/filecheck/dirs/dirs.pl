@@ -32,6 +32,9 @@ RJK::Options::Pod::GetOptions(
     #~ 'L|list-file=s' => \$opts{listFile}, "Path to totalcmd list file containing files to resolve dirs for.",
     #~ 'map=s@' => \$opts{map}, "Map volume label to drive name.",
     'l|list=s' => \$opts{list}, "List name.",
+    'o|output-file=s' => \$opts{outputFile}, "Write results to file.",
+    'p|print' => \$opts{print}, "Print results to standard output.",
+
     'm|multiple-names' => \$opts{listMultipleNames}, "List dirs with multiple names.",
     'd|dupes' => \$opts{listDupes}, "Find duplicates.",
     'v|volume=s' => \$opts{volume}, "Volume filter.",
@@ -44,7 +47,7 @@ RJK::Options::Pod::GetOptions(
 
     'c|set-clipboard' => \$opts{setClipboard}, "Set clipboard.",
     'a|add-to-download-list' => \$opts{addToDownloadList}, "Add to download list.",
-        'o|download-list-operation=s' => \$opts{downloadListOperation}, "Operation added to download list, \"copy\" or \"move\". Default: \"move\".",
+        'op|download-list-operation=s' => \$opts{downloadListOperation}, "Operation added to download list, \"copy\" or \"move\". Default: \"move\".",
 
     'O|tc-open' => \$opts{tcOpen}, "Open in Total Commander. Default in source window.",
     'a|tc-open-all' => \$opts{tcOpenAll}, "Open all dirs in new tabs in Total Commander. Default in source window.",
@@ -70,7 +73,6 @@ if ($opts{showDownloadLists}) {
 }
 
 $opts{args} = [@ARGV];
-$opts{outputFile} = shift;
 
 $opts{tcOpen} ||=
     $opts{tcOpenNewInstance} ||
