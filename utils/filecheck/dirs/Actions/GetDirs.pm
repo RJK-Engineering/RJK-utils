@@ -11,12 +11,10 @@ my $opts;
 my $fh;
 my $currVol;
 my $currDir;
-my @results;
 
 sub execute {
     my $self = shift;
     $opts = shift;
-    @results = ();
     my %volumes;
 
     RJK::Filecheck::DirLists->traverse($opts->{list}, sub {
@@ -42,7 +40,7 @@ sub execute {
     }
 
     close $fh if $opts->{outputFile};
-    return \@results;
+    return undef;
 }
 
 sub preVisitDir {
@@ -59,8 +57,7 @@ sub preVisitDir {
         } elsif ($relative !~ /^$currDir\\/) {
             $currDir = undef;
         } elsif ($relative =~ /^$currDir\\(\[[^\\]*)\\.*\[/) {
-            print STDERR "$currVol->{label}:$relative\n";
-            push @results, "$currVol->{label}:$relative";
+            print "Skip: $currVol->{label}:$relative\n";
         }
     }
     if (! $currDir && $currVol->{dirs}{$relative}) {
