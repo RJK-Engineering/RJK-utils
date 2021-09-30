@@ -51,8 +51,6 @@ sub match {
             $matched{$_->{vpath}} = $_;
         }
     }
-    print "No matches.\n" if ! keys %matched;
-
     return [ values %matched ];
 }
 
