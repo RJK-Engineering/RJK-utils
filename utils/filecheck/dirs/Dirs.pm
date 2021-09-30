@@ -22,6 +22,9 @@ sub execute {
         return;
     }
 
+    if ($opts->{print}) {
+        print join "\n", @$result;
+    }
     if ($opts->{tcOpen}) {
         tcOpen($result);
     }
