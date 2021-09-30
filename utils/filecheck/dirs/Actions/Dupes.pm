@@ -1,4 +1,4 @@
-package Actions::FindDupes;
+package Actions::Dupes;
 
 use strict;
 use warnings;
