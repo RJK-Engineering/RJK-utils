@@ -14,11 +14,12 @@ my $video = getVideo();
 writeScriptStart();
 
 my ($frameNr, $currFrame, $prevFrame, $inSegm, $startTime, $total);
-$opts{frameDuration} || detectFrameDuration();
+$opts{frameDuration} || detectFrameDuration()
+    or die "Could not determine frame duration, to set manually, use arguments: frameDuration [micro seconds]";
 print "Frame gap: $opts{frameDuration}\n";
 
 while (<$fhCsv>) {
-    if (/frame\|key_frame=(\d)\|pkt_pts_time=(\d+.\d+)/) {
+    if (/frame\|(?:.+\|)*key_frame=(\d)\|(?:.+\|)*pkt_pts_time=(\d+.\d+)/) {
         $prevFrame = $currFrame;
         $currFrame = { key_frame => $1, time => $2 * 1_000_000 };
         processFrame();
@@ -108,7 +109,7 @@ sub writeScriptEnd {
     print $fhScript "adm.audioClearTracks()\n";
     unless ($opts{noaudio}) {
         print $fhScript "adm.audioAddTrack(0)\n";
-        print $fhScript "adm.audioCodec(0, \"copy\");\n";
+        print $fhScript "adm.audioCodec(0, \"copy\")\n";
         print $fhScript "adm.audioSetDrc(0, 0)\n";
         print $fhScript "adm.audioSetShift(0, 0,0)\n";
     }
