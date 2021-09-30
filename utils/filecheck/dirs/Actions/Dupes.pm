@@ -27,10 +27,8 @@ sub execute {
     foreach my $dirs (sort {$a->[0] cmp $b->[0]} values %$dupes) {
         next if @$dirs == 1;
         next if $opts->{volume} && ! grep { $_ =~ /^$opts->{volume}/i } @$dirs;
-        print "--\n";
         push @result, "--";
         foreach (@$dirs) {
-            print "$_\n";
             push @result, $_;
         }
     }
