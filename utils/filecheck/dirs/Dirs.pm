@@ -13,12 +13,15 @@ my $opts;
 sub execute {
     my $self = shift;
     $opts = shift;
-    my $result = getResult();
+
+    my $action = getAction();
+    my $result = Actions::exec($action, $opts);
 
     if (! $result) {
         print "No results.\n";
         return;
     }
+
     if ($opts->{tcOpen}) {
         tcOpen($result);
     }
@@ -31,18 +34,12 @@ sub execute {
     }
 }
 
-sub getResult {
-    if ($opts->{getDirs}) {
-        Actions::exec('GetDirs', $opts);
-    } elsif ($opts->{listMultipleNames}) {
-        Actions::exec('ListMultipleNames', $opts);
-    } elsif ($opts->{listDupes}) {
-        Actions::exec('FindDupes', $opts);
-    } elsif ($opts->{filenameSearch}) {
-        Actions::exec('FilenameSearch', $opts);
-    } else {
-        Actions::exec('NameSearch', $opts);
-    }
+sub getAction {
+    return 'GetDirs' if $opts->{getDirs};
+    return 'MultipleNames' if $opts->{listMultipleNames};
+    return 'Dupes' if $opts->{listDupes};
+    return 'FilenameSearch' if $opts->{filenameSearch};
+    return 'NameSearch';
 }
 
 sub tcOpen {
