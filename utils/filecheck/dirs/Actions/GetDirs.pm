@@ -8,7 +8,7 @@ use RJK::Filecheck::DirLists;
 use RJK::SimpleFileVisitor;
 
 my $opts;
-my $fh;
+my @result;
 my $currVol;
 my $currDir;
 
@@ -23,11 +23,6 @@ sub execute {
         return 0;
     });
 
-    open $fh, '>', $opts->{outputFile}
-        or die "$!: $opts->{outputFile}"
-            if $opts->{outputFile};
-    $fh //= *STDOUT;
-
     foreach my $label (sort keys %volumes) {
         $currVol = $volumes{$label};
         $currVol->{label} = $label;
@@ -39,8 +34,7 @@ sub execute {
         );
     }
 
-    close $fh if $opts->{outputFile};
-    return undef;
+    return \@result;
 }
 
 sub preVisitDir {
@@ -51,9 +45,9 @@ sub preVisitDir {
         my $subdirnameRe = qr/\[{1,2} \w+ \]{1,2}/x;
 
         if ($relative      =~ /^$currDir\\$subdirnameRe\\($dirnameRe)$/) {
-            print $fh "$currVol->{label}:$relative\n";
+            push @result, "$currVol->{label}:$relative";
         } elsif ($relative =~ /^$currDir\\($dirnameRe)$/) {
-            print $fh "$currVol->{label}:$relative\n";
+            push @result, "$currVol->{label}:$relative";
         } elsif ($relative !~ /^$currDir\\/) {
             $currDir = undef;
         } elsif ($relative =~ /^$currDir\\(\[[^\\]*)\\.*\[/) {
