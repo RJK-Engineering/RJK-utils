@@ -11,6 +11,8 @@ my $opts;
 sub execute {
     my $self = shift;
     $opts = shift;
+    @{$opts->{args}} or throw Exception("No search arguments");
+
     my @terms = getTerms();
     my @result;
 
