@@ -17,19 +17,13 @@ sub execute {
     my $action = getAction();
     my $result = Actions::exec($action, $opts);
 
-    if (! $result) {
+    if (! $result or ! @$result) {
         print "No results.\n" if defined $result;
         return;
     }
 
     if ($opts->{print}) {
-        print join "\n", @$result;
-    }
-    if ($opts->{tcOpen}) {
-        tcOpen($result);
-    }
-    if ($opts->{addToDownloadList}) {
-        addToDownloadList($result);
+        print join("\n", @$result), "\n";
     }
     if ($opts->{setClipboard}) {
         my $clip = Win32::Clipboard();
@@ -37,8 +31,14 @@ sub execute {
     }
     if ($opts->{outputFile}) {
         open my $fh, '>', $opts->{outputFile} or die "$!: $opts->{outputFile}";
-        print $fh join "\n", @$result;
+        print $fh join("\n", @$result), "\n";
         close $fh;
+    }
+    if ($opts->{tcOpen}) {
+        tcOpen($result);
+    }
+    if ($opts->{addToDownloadList}) {
+        addToDownloadList($result);
     }
 }
 
