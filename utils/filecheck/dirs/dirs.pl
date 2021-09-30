@@ -72,6 +72,12 @@ if ($opts{showDownloadLists}) {
     exit system "$opts{downloadListDir}\\$opts{openDownloadList}.dl";
 }
 
+$opts{print} = 1 unless
+    $opts{tcOpen} ||
+    $opts{addToDownloadList} ||
+    $opts{setClipboard} ||
+    $opts{outputFile};
+
 $opts{args} = [@ARGV];
 
 $opts{tcOpen} ||=
