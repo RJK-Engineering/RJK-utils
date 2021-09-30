@@ -12,7 +12,7 @@ sub execute {
     my $self = shift;
     $opts = shift;
     my %dirs;
-    my $result = 1;
+    my @result;
     my $dupes;
 
     RJK::Filecheck::DirLists->traverse($opts->{list}, sub {
@@ -28,12 +28,14 @@ sub execute {
         next if @$dirs == 1;
         next if $opts->{volume} && ! grep { $_ =~ /^$opts->{volume}/i } @$dirs;
         print "--\n";
+        push @result, "--";
         foreach (@$dirs) {
             print "$_\n";
+            push @result, $_;
         }
     }
 
-    return $result;
+    return \@result;
 }
 
 1;
