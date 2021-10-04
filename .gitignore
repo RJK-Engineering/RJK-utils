@@ -1,9 +1,10 @@
-*.bak
-*.lnk
-*.tmp
-*.sublime-*
-*.*-project
-*.*-workspace
+.*
+~*
 *~
 *~.*
 *.orig
+*.bak
+*.lnk
+*.tmp
+*.*-project
+*.*-workspace
