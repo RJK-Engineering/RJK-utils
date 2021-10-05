@@ -16,16 +16,15 @@ sub execute {
     my $string = join " ", @{$opts->{args}};
     print "Search in string: $string\n";
 
-    my $dirs = getDirList($opts->{list});
+    my $dirs = getDirList();
     my $matched = match($dirs, $string);
     return [sort map {$_->{vpath}} @$matched] if @$matched;
 }
 
 sub getDirList {
-    my ($list) = @_;
     my %dirs;
 
-    RJK::Filecheck::DirLists->traverse($list, sub {
+    RJK::Filecheck::DirLists->traverse($opts->{list}, sub {
         my $vpath = shift;
         my $names = Utils::getNames($vpath);
 
