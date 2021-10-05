@@ -20,20 +20,48 @@ sub execute {
         my $names = Utils::getNames($vpath);
 
         foreach my $name (@$names) {
-            push @{$dupes->{$name}}, $vpath;
+            $dupes->{$name}{$vpath} = 1;
         }
     });
 
-    foreach my $dirs (sort {$a->[0] cmp $b->[0]} values %$dupes) {
-        next if @$dirs == 1;
-        next if $opts->{volume} && ! grep { $_ =~ /^$opts->{volume}/i } @$dirs;
+    filter($dupes);
+
+    foreach my $paths (sort {(sort keys %$a)[0] cmp (sort keys %$b)[0]} values %$dupes) {
         push @result, "--";
-        foreach (@$dirs) {
-            push @result, $_;
-        }
+        push @result, $_ for sort keys %$paths;
     }
 
     return \@result;
+}
+
+sub filter {
+    my ($dupes) = @_;
+    foreach my $name (keys %$dupes) {
+        my @paths = keys %{$dupes->{$name}};
+        delete $dupes->{$name}
+            if @paths == 1
+            or not $opts->{volume}
+            or not grep { $_ =~ /^$opts->{volume}/i } @paths;
+    }
+    removeSubsets($dupes);
+}
+
+sub removeSubsets {
+    my ($dupes) = @_;
+    foreach my $a (keys %$dupes) {
+        foreach my $b (keys %$dupes) {
+            delete $dupes->{$a}
+                if $a ne $b
+                and isSubsetOf($dupes->{$a}, $dupes->{$b});
+        }
+    }
+}
+
+sub isSubsetOf {
+    foreach (keys %{$_[0]}) {
+        return if not exists $_[1]{$_};
+    }
+    return 1;
 }
 
 1;
