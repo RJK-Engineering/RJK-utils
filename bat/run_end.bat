@@ -1,8 +1,8 @@
 
-IF %errorlevel% GTR 0 (
+IF %errorlevel% gtr 0 (
     ECHO Exit code %errorlevel%
-    IF NOT DEFINED nopause SET pause=1
+    IF not defined nopause SET pause=1
 )
 
-IF DEFINED timeout timeout %timeout%
-IF DEFINED pause pause
+IF defined timeout TIMEOUT %timeout%
+IF defined pause PAUSE

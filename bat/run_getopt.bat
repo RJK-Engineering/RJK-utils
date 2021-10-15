@@ -14,7 +14,7 @@ FOR %%V IN (cmd extension filelist args pause nopause timeout quiet errorredirec
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
-IF DEFINED args SET args=%args% %1&        GOTO NEXTOPT
+IF defined args SET args=%args% %1&        GOTO NEXTOPT
 IF "%~1"=="/p"  SET pause=1& SET nopause=& GOTO NEXTOPT
 IF "%~1"=="/-p" SET nopause=1& SET pause=& GOTO NEXTOPT
 IF "%~1"=="/t"  SET timeout=%2&    SHIFT & GOTO NEXTOPT
@@ -29,11 +29,11 @@ IF "%~1"=="/b"  SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/-"  SET args=%2&       SHIFT & GOTO NEXTOPT
 SET "arg=%~1"
 IF "%arg:~0,1%"=="/" SET option%1=1&       GOTO NEXTOPT
-IF NOT DEFINED cmd (
+IF not defined cmd (
     SET cmd=%1
     SET extension=%~x1
     GOTO NEXTOPT
-) ELSE IF DEFINED get_filelist IF NOT DEFINED filelist (
+) ELSE IF defined get_filelist IF not defined filelist (
     SET filelist=%1
     GOTO NEXTOPT
 )

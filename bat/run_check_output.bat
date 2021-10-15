@@ -1,4 +1,4 @@
 
-IF EXIST %1 IF NOT DEFINED force (
+IF exist %1 IF not defined force (
     CALL run_error File exists: %1
 )
