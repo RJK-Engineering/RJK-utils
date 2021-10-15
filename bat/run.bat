@@ -11,7 +11,7 @@ CALL run_execute
 GOTO END
 
 :HELP
-CALL run_usage
+CALL run_help
 
 :END
 CALL run_end
