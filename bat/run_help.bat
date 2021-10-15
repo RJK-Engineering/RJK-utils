@@ -1,6 +1,6 @@
 ECHO USAGE: %script% [OPTIONS] [COMMAND] [OPTIONS] [ARGS]
 ECHO.
-IF DEFINED usage (
+IF "%help%"=="usage" (
     ECHO DISPLAY EXTENDED HELP: %script% /?
     GOTO END
 )

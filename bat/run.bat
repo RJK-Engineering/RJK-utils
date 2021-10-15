@@ -1,12 +1,12 @@
 @ECHO OFF
 SETLOCAL
 
-SET usage=
 CALL run_start %0 "%~1"
 IF defined help GOTO HELP
+SET help=usage
 
 CALL run_getopt %*
-IF not defined cmd SET usage=1& GOTO HELP
+IF not defined cmd GOTO HELP
 
 CALL run_execute
 GOTO END

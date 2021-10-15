@@ -1,10 +1,14 @@
 
-SET help=1
-SET usage=
+SET help=
 SET script=%1
+SET arg1=%~2
 
-IF "%~2"=="" (
-    SET usage=1
-) ELSE IF not "%~2"=="/?" (
-    SET help=
+IF "%arg1%"=="" (
+    SET help=usage
+) ELSE IF "%arg1%"=="/?" (
+    SET help=extended
+) ELSE IF "%arg1%"=="/??" (
+    SET help=full
+) ELSE IF "%arg1:~0,2%"=="/?" (
+    SET help=full
 )
