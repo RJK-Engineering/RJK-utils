@@ -20,12 +20,12 @@ ECHO /b        Run in background (START /B)
 ECHO /-        OPTIONS terminator, rest of command line are ARGS
 
 ECHO.
-ECHO BUG: ARGS can't contain /?
-ECHO.
 ECHO Example usage in Total Commander:
 ECHO     Command:   run.bat command.exe /p /r
 ECHO     Params:    ?/q %%N
 ECHO Extra OPTIONS can be added or removed quickly (by pressing HOME) at
 ECHO the start of the parameter list in the dialog box opened on execution.
+ECHO.
+ECHO BUGS: ARGS can't contain /?
 
 :END
