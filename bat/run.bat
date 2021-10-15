@@ -1,6 +1,7 @@
 @ECHO OFF
 SETLOCAL
 
+SET usage=
 CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 

@@ -1,14 +1,15 @@
 
-REM clear vars, they are inherited from master environment
-FOR %%V IN (run out) do set %%V=
+IF not "%~1"=="" SET args=%*
 
-:SET_RUN
+::SET_RUN
+SET run=
 IF /I "%extension%"==".pl" SET run= PERL
 IF defined background SET run= START /B%run%
 SET run=%run% %cmd%
 SET run=%run:~1%
 
-:SET_OUT
+::SET_OUT
+SET out=
 IF defined append (
     SET "out=>>%append%"
 ) ELSE IF defined output (
@@ -18,7 +19,7 @@ IF defined append (
 IF defined errorredirect SET "out=%out% %errorredirect%"
 SET "out=%quiet%%out%%clip%"
 
-:EXECUTE
+::EXECUTE
 IF defined echo ECHO run=%run%& ECHO arg=%args%& ECHO out="%out%"
 
 REM a bat files terminates when a bat file is executed unless CALL is used,

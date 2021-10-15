@@ -7,7 +7,7 @@ REM %* = <cmd> [options] <filelist> <args>
 REM
 REM - [options] start with a "/" and can be followed by a value
 REM - <cmd> and <filelist> can be mixed with [options]
-REM - to get <filelist>, set get_filelist=1 before calling run_getopt
+REM - to get <filelist>, set run_getopt_get_filelist=1 before calling run_getopt
 
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd extension filelist args pause nopause timeout quiet errorredirect clip output force append background) do set %%V=
@@ -33,7 +33,7 @@ IF not defined cmd (
     SET cmd=%1
     SET extension=%~x1
     GOTO NEXTOPT
-) ELSE IF defined get_filelist IF not defined filelist (
+) ELSE IF defined run_getopt_get_filelist IF not defined filelist (
     SET filelist=%1
     GOTO NEXTOPT
 )
