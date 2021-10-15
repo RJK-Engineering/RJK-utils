@@ -1,6 +1,16 @@
+REM Get options from command-line arguments.
+REM CALL run_getopt %*
+REM
+REM %* = <cmd> [options] <args>
+REM or
+REM %* = <cmd> [options] <filelist> <args>
+REM
+REM - [options] start with a "/" and can be followed by a value
+REM - <cmd> and <filelist> can be mixed with [options]
+REM - to get <filelist>, set get_filelist=1 before calling run_getopt
 
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd args pause nopause timeout quiet errorredirect clip output force append background) do set %%V=
+FOR %%V IN (cmd extension filelist args pause nopause timeout quiet errorredirect clip output force append background) do set %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
@@ -19,18 +29,17 @@ IF "%~1"=="/b"  SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/-"  SET args=%2&       SHIFT & GOTO NEXTOPT
 SET "arg=%~1"
 IF "%arg:~0,1%"=="/" SET option%1=1&       GOTO NEXTOPT
-IF DEFINED cmd (
-    SET args=%1
-) ELSE (
+IF NOT DEFINED cmd (
     SET cmd=%1
     SET extension=%~x1
+    GOTO NEXTOPT
+) ELSE IF DEFINED get_filelist IF NOT DEFINED filelist (
+    SET filelist=%1
+    GOTO NEXTOPT
 )
+SET args=%1
 :NEXTOPT
 SHIFT
 GOTO GETOPT
 
 :ENDGETOPT
-IF DEFINED cmd GOTO END
-CALL run_usage
-
-:END

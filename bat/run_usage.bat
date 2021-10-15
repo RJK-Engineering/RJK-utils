@@ -1,6 +1,6 @@
 ECHO USAGE: %script% [OPTIONS] [COMMAND] [OPTIONS] [ARGS]
 ECHO.
-IF NOT DEFINED help (
+IF DEFINED usage (
     ECHO DISPLAY EXTENDED HELP: %script% /?
     GOTO END
 )
@@ -29,4 +29,3 @@ ECHO Extra OPTIONS can be added or removed quickly (by pressing HOME) at
 ECHO the start of the parameter list in the dialog box opened on execution.
 
 :END
-SET end=1
