@@ -1,5 +1,4 @@
 @ECHO OFF
-SETLOCAL
 
 IF /I "%~1"=="/install" (
     CALL %~dpn0_check.bat
@@ -24,8 +23,9 @@ IF /I "%~1"=="/install" (
     GOTO END
 )
 
-DOSKEY /MACROFILE=%~dpn0.macros.properties
-
+ENDLOCAL
+SET AUTORUN_MACROS=%~dpn0.macros.properties
+DOSKEY /MACROFILE=%AUTORUN_MACROS%
 SET tempfile=%TEMP%\cmd-autorun-startup-info-lockfile
 IF EXIST %tempfile% GOTO END
 ECHO.> %tempfile%
