@@ -20,6 +20,7 @@ FOR /F "tokens=*" %%F IN (%filelist%) DO (
     SET output=%output%
     CALL run_execute %args%
     IF defined error GOTO END
+    IF defined exitcode PAUSE
 )
 GOTO END
 
