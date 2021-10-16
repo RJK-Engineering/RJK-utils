@@ -13,11 +13,13 @@ SET background=
 SET display=
 IF defined option/d SET display=%%~fF
 IF defined option/n SET display=%%~nxF
-IF defined output SET append=%output%
 
 FOR /F "tokens=*" %%F IN (%filelist%) DO (
     IF defined display ECHO %display%
+    SET append=%append%
+    SET output=%output%
     CALL run_execute %args%
+    IF defined error GOTO END
 )
 GOTO END
 

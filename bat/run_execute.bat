@@ -14,6 +14,7 @@ IF defined append (
     SET "out=>>%append%"
 ) ELSE IF defined output (
     CALL run_check_output %output%
+    IF defined error GOTO END
     SET "out=>%output%"
 )
 IF defined errorredirect SET "out=%out% %errorredirect%"
@@ -30,3 +31,4 @@ IF defined args (
 ) ELSE (
     %run%%out%
 )
+:END

@@ -8,14 +8,14 @@ IF "%help%"=="usage" (
 ECHO OPTIONS
 ECHO./p        Force pause before exit
 ECHO./-p       Force no pause before exit (pauses on error by default)
-ECHO./t [n]    Timeout before exit
+ECHO./t [N]    Timeout for N seconds before exit
 ECHO./q        Be quiet (supress standard output)
 ECHO./-e       Hide errors (supress error output)
 ECHO./r        Redirect error output to standard output
 ECHO./c        Redirect standard output to clipboard
-ECHO /o [path] Write standard output to file
-ECHO./f        Force overwrite (no overwrite by default)
-ECHO /a [path] Append standard output to file
+ECHO /o [PATH] Write standard output to file, quits if PATH exists and /f option not present
+ECHO./f        Force overwrite
+ECHO /a [PATH] Append standard output to file
 ECHO /b        Run in background (START /B)
 ECHO /-        OPTIONS terminator, rest of command line are ARGS
 

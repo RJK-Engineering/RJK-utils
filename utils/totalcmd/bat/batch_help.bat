@@ -14,13 +14,14 @@ ECHO./d        Display path name before each execution.
 ECHO./n        Display file name before each execution.
 ECHO./p        Force pause before exit
 ECHO./-p       Force no pause before exit (pauses on error by default)
-ECHO./t [n]    Timeout before exit
+ECHO./t [N]    Timeout for N seconds before exit
 ECHO./q        Be quiet (supress standard output)
 ECHO./-e       Hide errors (supress error output)
 ECHO./r        Redirect error output to standard output
 ECHO./c        Redirect standard output to clipboard
-ECHO /a [path] Append standard output to file
-ECHO /o [path] Append standard output to file
+ECHO /o [PATH] Write standard output to file, %%%%F allowed in PATH, batch quits if PATH exists and /f option not present
+ECHO./f        Force overwrite
+ECHO /a [PATH] Append standard output to file, %%%%F allowed in PATH
 ECHO /-        OPTIONS terminator, rest of command line are ARGS
 IF "%help%"=="extended" GOTO END
 
