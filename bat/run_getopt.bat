@@ -26,6 +26,7 @@ IF "%~1"=="/q"  SET "quiet=>NUL"         & GOTO NEXTOPT
 IF "%~1"=="/-e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
 IF "%~1"=="/r"  SET "errorredirect=2>&1" & GOTO NEXTOPT
 IF "%~1"=="/c"  SET "clip=|CLIP"         & GOTO NEXTOPT
+IF "%~1"=="/g"  SET grep=%~2&      SHIFT & GOTO NEXTOPT
 IF "%~1"=="/o"  SET output=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/f"  SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a"  SET append=%2&     SHIFT & GOTO NEXTOPT
@@ -41,7 +42,7 @@ IF defined arg3 (
     IF defined args3 (
         SET args3=%args3% %1
     ) ELSE (
-        SET args3=%1
+        SET args3= %1
     )
 ) ELSE IF defined arg2 (
     SET arg3=%1
@@ -52,7 +53,7 @@ IF defined arg2 (
     IF defined args2 (
         SET args2=%args2% %1
     ) ELSE (
-        SET args2=%1
+        SET args2= %1
     )
 ) ELSE IF defined arg1 (
     SET arg2=%1
@@ -63,7 +64,7 @@ IF defined arg1 (
     IF defined args1 (
         SET args1=%args1% %1
     ) ELSE (
-        SET args1=%1
+        SET args1= %1
     )
 ) ELSE (
     SET arg1=%1

@@ -19,11 +19,14 @@ IF defined errorredirect SET "out=%out% %errorredirect%"
 SET "out=%quiet%%out%%clip%"
 
 ::EXECUTE
-IF defined wait ECHO run=%run%& ECHO arg=%args%& ECHO out="%out%"& PAUSE
+IF defined wait ECHO run=%run%& ECHO args=%args%& ECHO "out=%out%"& PAUSE
 
 SET exitcode=
-IF defined args %run% %args%%out%
-IF not defined args %run%%out%
+IF defined grep (
+    %run%%args%|FIND /I "%grep%"%out%
+) ELSE (
+    %run%%args%%out%
+)
 IF %errorlevel% gtr 0 SET exitcode=%errorlevel%
 
 :END
