@@ -19,6 +19,7 @@ IF defined option/n SET display=%%~nxF
 
 FOR /F "tokens=*" %%F IN (%filelist%) DO (
     IF defined display ECHO %display%
+    REM replace %%F in append and output vars
     SET append=%append%
     SET output=%output%
     CALL run_execute %args%
