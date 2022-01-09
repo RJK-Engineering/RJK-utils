@@ -1,25 +1,26 @@
-@echo off
-if "%EDITOR%"=="" set EDITOR=c:\progz\SciTE\SciTE.exe
+@ECHO OFF
+SETLOCAL
 
-if "%~1"=="" (
-    goto END
-) else if exist "%~1" (
-    start "" /b "%EDITOR%" %1
-    goto END
+IF not defined EDITOR SET EDITOR=c:\progz\SciTE\SciTE.exe
+
+IF "%~1"=="" GOTO END
+IF exist %1 (
+    START "" /b "%EDITOR%" %1
+    GOTO END
 )
 
-set found=0
-for /f "delims=" %%F in ('where %1') do (
-    echo %%F
-    if /i not "%%~xF"==".exe" if /i not "%%~xF"==".com" start "" /b "%EDITOR%" "%%F"
-    set found=1
+SET found=
+FOR /f "delims=" %%F IN ('where %1') DO (
+    ECHO %%F
+    IF /i not "%%~xF"==".exe" IF /i not "%%~xF"==".com" START "" /b "%EDITOR%" "%%F"
+    SET found=1
 )
-if %found%==1 goto END
+IF defined found GOTO END
 
-if "%2"=="new" (
-    start "" /b "%EDITOR%" %1
-) else (
-    echo Add "new" to open new file.
+IF "%2"=="new" (
+    START "" /b "%EDITOR%" %1
+) ELSE (
+    ECHO Add "new" to open new file.
 )
 
 :END
