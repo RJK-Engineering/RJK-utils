@@ -5,9 +5,12 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-SET run_getopt_get_filelist=1
 CALL run_getopt %*
+SET cmd=%arg1%
+SET filelist=%arg2%
 IF not defined filelist GOTO HELP
+SET extension=%ext1%
+SET args=%args2%
 
 SET background=
 SET display=
