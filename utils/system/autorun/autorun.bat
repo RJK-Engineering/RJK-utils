@@ -37,7 +37,8 @@ ECHO.
 ECHO Available DOSKEY macros:
 DOSKEY /MACROS
 ECHO.
-ECHO (this message is displayed once after system startup)
-ECHO.
 
 :END
+
+schtasks /delete /f /tn GoogleUpdateTaskMachineUA 2>NUL
+schtasks /delete /f /tn GoogleUpdateTaskMachineCore 2>NUL
