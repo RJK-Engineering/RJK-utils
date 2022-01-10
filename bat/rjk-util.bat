@@ -4,15 +4,18 @@ SETLOCAL
 IF NOT DEFINED RJK_UTILS_HOME (
     FOR /F "delims=" %%P IN ("%~dp0..") DO SET RJK_UTILS_HOME=%%~fP
 )
-SET script=%0
 
-IF "%~1"=="" GOTO USAGE
-IF "%~1"=="/?" SET help=1& GOTO USAGE
+CALL run_start %0 "%~1"
+IF defined help GOTO HELP
+
 SET option/w=
 CALL run_getopt %*
 
-IF DEFINED end GOTO END
-IF NOT DEFINED cmd GOTO USAGE
+SET cmd=%arg1%
+IF not defined cmd GOTO HELP
+SET extension=%ext1%
+SET args=%args1%
+
 IF DEFINED option/w (
     SET "RJK_UTILS_HOME=c:\workspace\RJK-utils%"
     SET "PATH=%PATH:c:\scripts\RJK-utils\bat=c:\workspace\RJK-utils\bat%"
@@ -23,10 +26,10 @@ SET cmd=%RJK_UTILS_HOME%\utils\%cmd%
 CALL run_execute
 GOTO END
 
-:USAGE
+:HELP
 ECHO USAGE: %script% [UTIL] [OPTIONS] [UTIL ARGS] [OPTIONS]
 ECHO.
-IF NOT DEFINED help (
+IF "%help%"=="usage" (
     ECHO DISPLAY EXTENDED HELP: %script% /?
     GOTO END
 )
