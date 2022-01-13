@@ -3,14 +3,11 @@ REM CALL run_getopt %*
 REM
 REM EXAMPLE
 REM
-REM run_getopt a b c d
+REM run_getopt a.ext b c d
 REM
-REM arg1=a
-REM arg2=b
-REM arg3=c
-REM args1=b c d
-REM args2=c d
-REM args3=d
+REM arg1=a.ext   args1= b c d   ext1=ext
+REM arg2=b       args2= c d
+REM arg3=c       args3= d
 
 REM clear vars, they are inherited from master environment
 FOR %%V IN (optstop arg1 arg2 arg3 ext1 ext2 ext3 args1 args2 args3 pause nopause timeout quiet errorredirect clip output force append background wait) do set %%V=
@@ -39,33 +36,22 @@ IF "%arg:~0,1%"=="/" SET option%1=1&       GOTO NEXTOPT
 
 :GETARG
 IF defined arg3 (
-    IF defined args3 (
-        SET args3=%args3% %1
-    ) ELSE (
-        SET args3= %1
-    )
+    SET args3=%args3% %1
 ) ELSE IF defined arg2 (
     SET arg3=%1
     SET ext3=%~x1
 )
 
 IF defined arg2 (
-    IF defined args2 (
-        SET args2=%args2% %1
-    ) ELSE (
-        SET args2= %1
-    )
+    SET args2=%args2% %1
+    SET args2= %1
 ) ELSE IF defined arg1 (
     SET arg2=%1
     SET ext2=%~x1
 )
 
 IF defined arg1 (
-    IF defined args1 (
-        SET args1=%args1% %1
-    ) ELSE (
-        SET args1= %1
-    )
+    SET args1=%args1% %1
 ) ELSE (
     SET arg1=%1
     SET ext1=%~x1
