@@ -1,10 +1,15 @@
-ECHO USAGE: %script% [OPTIONS] [COMMAND] [OPTIONS] [ARGS]
+ECHO USAGE: %script% [OPTIONS] [EXECUTABLE] [ARGUMENTS]
 ECHO.
-IF "%help%"=="usage" (
-    ECHO DISPLAY EXTENDED HELP: %script% /?
-    GOTO END
-)
 
+IF not "%help%"=="usage" GOTO EXTENDED
+ECHO Execute EXECUTABLE with ARGUMENTS.
+ECHO Arguments starting with a '/' are OPTIONS, except after terminator '--'.
+ECHO.
+ECHO DISPLAY EXTENDED HELP: %script% /?
+ECHO DISPLAY FULL HELP: %script% /??
+GOTO END
+
+:EXTENDED
 ECHO OPTIONS
 ECHO./p        Force pause before exit
 ECHO./-p       Force no pause before exit (pauses on error by default)
@@ -17,7 +22,8 @@ ECHO /o [PATH] Write standard output to file, quits if PATH exists and /f option
 ECHO./f        Force overwrite
 ECHO /a [PATH] Append standard output to file
 ECHO /b        Run in background (START /B)
-ECHO /-        OPTIONS terminator, rest of command line are ARGS
+ECHO --        OPTIONS terminator
+IF "%help%"=="extended" GOTO END
 
 ECHO.
 ECHO Example usage in Total Commander:
@@ -26,6 +32,6 @@ ECHO     Params:    ?/q %%N
 ECHO Extra OPTIONS can be added or removed quickly (by pressing HOME) at
 ECHO the start of the parameter list in the dialog box opened on execution.
 ECHO.
-ECHO BUGS: ARGS can't contain /?
+ECHO BUGS: ARGUMENTS can't contain /?
 
 :END

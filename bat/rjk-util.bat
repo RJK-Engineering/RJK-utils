@@ -9,17 +9,17 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 
 CALL run_getopt %*
-SET cmd=%arg1%
-IF not defined cmd GOTO HELP
+SET util=%arg1%
+IF not defined util GOTO HELP
 SET extension=%ext1%
 SET args=%args1%
 
-SET cmd=%RJK_UTILS_HOME%\utils\%cmd%
+SET cmd=%RJK_UTILS_HOME%\utils\%util%
 CALL run_execute
 GOTO END
 
 :HELP
-ECHO USAGE: %script% [UTIL] [OPTIONS] [UTIL ARGS] [OPTIONS]
+ECHO USAGE: %script% [UTIL] [OPTIONS] [UTIL ARGS]
 ECHO.
 IF "%help%"=="usage" (
     ECHO DISPLAY EXTENDED HELP: %script% /?

@@ -1,17 +1,19 @@
-ECHO USAGE: %script% [OPTIONS] [COMMAND] [OPTIONS] [FILELIST] [OPTIONS] [ARGS]
+ECHO USAGE: %script% [OPTIONS] [EXECUTABLE] [FILELIST] [ARGUMENTS]
 ECHO.
-ECHO Execute COMMAND with ARGS for every file in FILELIST.
-ECHO In ARGS, %%%%F expands to the current file (for help run: %script% /??).
-ECHO.
-IF "%help%"=="usage" (
-    ECHO DISPLAY EXTENDED HELP: %script% /?
-    ECHO DISPLAY FULL HELP: %script% /??
-    GOTO END
-)
 
+IF not "%help%"=="usage" GOTO EXTENDED
+ECHO Execute EXECUTABLE with ARGUMENTS for every file in FILELIST.
+ECHO Arguments starting with a '/' are OPTIONS, except after terminator '--'.
+ECHO In ARGUMENTS, %%%%F expands to the current file (for help run: %script% /??).
+ECHO.
+ECHO DISPLAY EXTENDED HELP: %script% /?
+ECHO DISPLAY FULL HELP: %script% /??
+GOTO END
+
+:EXTENDED
 ECHO OPTIONS
-ECHO./d        Display path name before each execution.
-ECHO./n        Display file name before each execution.
+ECHO./d        Display path name before each execution
+ECHO./n        Display file name before each execution
 ECHO./p        Force pause before exit
 ECHO./-p       Force no pause before exit (pauses on error by default)
 ECHO./t [N]    Timeout for N seconds before exit
@@ -22,7 +24,8 @@ ECHO./c        Redirect standard output to clipboard
 ECHO /o [PATH] Write standard output to file, %%%%F allowed in PATH, batch quits if PATH exists and /f option not present
 ECHO./f        Force overwrite
 ECHO /a [PATH] Append standard output to file, %%%%F allowed in PATH
-ECHO /-        OPTIONS terminator, rest of command line are ARGS
+ECHO /b        Run in background (START /B)
+ECHO --        OPTIONS terminator
 IF "%help%"=="extended" GOTO END
 
 ECHO.
@@ -54,6 +57,6 @@ ECHO %%~ftzaF  Expands %%F to a dir-like output line.
 ECHO.
 ECHO (source: http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/percent.mspx)
 ECHO.
-ECHO BUGS: ARGS can't contain /?
+ECHO BUGS: ARGUMENTS can't contain /?
 
 :END
