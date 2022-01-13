@@ -21,10 +21,12 @@ ECHO./q        Be quiet (supress standard output)
 ECHO./-e       Hide errors (supress error output)
 ECHO./r        Redirect error output to standard output
 ECHO./c        Redirect standard output to clipboard
-ECHO /o [PATH] Write standard output to file, %%%%F allowed in PATH, batch quits if PATH exists and /f option not present
+ECHO./g [TEXT] Grep standard output
+ECHO./o [PATH] Write standard output to file, %%%%F allowed in PATH, batch quits if PATH exists and /f option not present
 ECHO./f        Force overwrite
-ECHO /a [PATH] Append standard output to file, %%%%F allowed in PATH
-ECHO /b        Run in background (START /B)
+ECHO./a [PATH] Append standard output to file, %%%%F allowed in PATH
+ECHO./b        Run in background (START /B)
+ECHO./w        Wait for any key before execution
 ECHO --        OPTIONS terminator
 IF "%help%"=="extended" GOTO END
 

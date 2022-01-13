@@ -19,22 +19,31 @@ CALL run_execute
 GOTO END
 
 :HELP
-ECHO USAGE: %script% [UTIL] [OPTIONS] [UTIL ARGS]
+ECHO USAGE: %script% [OPTIONS] [UTIL] [ARGUMENTS]
 ECHO.
-IF "%help%"=="usage" (
-    ECHO DISPLAY EXTENDED HELP: %script% /?
-    GOTO END
-)
-ECHO OPTIONS:
-ECHO./?        Help
-ECHO /p        Force pause before exit
-ECHO /-p       Force no pause before exit
-ECHO /t [n]    Timeout before exit
-ECHO /q        Be quiet (redirect standard output to NUL)
-ECHO /-e       No errors (redirect error output to NUL)
-ECHO /r        Redirect error output to standard ouput
-ECHO /c        Copy standard ouput to clipboard
-ECHO /o [path] Write standard ouput to file
+IF not "%help%"=="usage" GOTO EXTENDED
+ECHO Execute UTIL with ARGUMENTS.
+ECHO Arguments starting with a '/' are OPTIONS, except after terminator '--'.
+ECHO.
+ECHO DISPLAY EXTENDED HELP: %script% /?
+GOTO END
+
+:EXTENDED
+ECHO OPTIONS
+ECHO./p        Force pause before exit
+ECHO./-p       Force no pause before exit (pauses on error by default)
+ECHO./t [N]    Timeout for N seconds before exit
+ECHO./q        Be quiet (supress standard output)
+ECHO./-e       Hide errors (supress error output)
+ECHO./r        Redirect error output to standard output
+ECHO./c        Redirect standard output to clipboard
+ECHO./g [TEXT] Grep standard output
+ECHO./o [PATH] Write standard output to file, quits if PATH exists and /f option not present
+ECHO./f        Force overwrite
+ECHO./a [PATH] Append standard output to file
+ECHO./b        Run in background (START /B)
+ECHO./w        Wait for any key before execution
+ECHO --        OPTIONS terminator
 
 :END
 CALL run_end
