@@ -40,5 +40,4 @@ ECHO.
 
 :END
 
-schtasks /delete /f /tn GoogleUpdateTaskMachineUA 2>NUL
-schtasks /delete /f /tn GoogleUpdateTaskMachineCore 2>NUL
+IF EXIST %~dpn0_local.bat %~dpn0_local.bat
