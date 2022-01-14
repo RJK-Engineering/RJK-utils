@@ -5,32 +5,59 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-SET option/d=
-SET option/n=
-CALL run_getopt %*
+REM clear vars, they are inherited from master environment
+FOR %%V IN (terminator cmd filelist extension args display pause nopause^
+    timeout quiet errorredirect clip output force append background wait) DO SET %%V=
 
-SET cmd=%arg1%
-SET filelist=%arg2%
+GOTO GETOPT
+:ENDGETOPT
 IF not defined filelist GOTO HELP
-SET extension=%ext1%
-SET args=%args2%
-
-SET display=
-IF defined option/d SET display=%%~fF
-IF defined option/n SET display=%%~nxF
-SET background=
 
 FOR /F "tokens=*" %%F IN (%filelist%) DO (
     IF defined display ECHO %display%
     REM replace %%F in vars
     SET append=%append%
     SET output=%output%
-    SET args=%args%
-    CALL run_execute
+    CALL run_execute %args%
     IF defined error GOTO END
     IF defined exitcode PAUSE
 )
 GOTO END
+
+:GETOPT
+IF "%~1"=="" GOTO ENDGETOPT
+IF defined terminator GOTO GETARG
+
+IF "%~1"=="/d"  SET display=%%~fF&         GOTO NEXTOPT
+IF "%~1"=="/n"  SET display=%%~nxF&        GOTO NEXTOPT
+IF "%~1"=="/p"  SET pause=1& SET nopause=& GOTO NEXTOPT
+IF "%~1"=="/-p" SET nopause=1& SET pause=& GOTO NEXTOPT
+IF "%~1"=="/t"  SET timeout=%2&    SHIFT & GOTO NEXTOPT
+IF "%~1"=="/q"  SET "quiet=>NUL"         & GOTO NEXTOPT
+IF "%~1"=="/-e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
+IF "%~1"=="/r"  SET "errorredirect=2>&1" & GOTO NEXTOPT
+IF "%~1"=="/c"  SET "clip=|CLIP"         & GOTO NEXTOPT
+IF "%~1"=="/g"  SET grep=%~2&      SHIFT & GOTO NEXTOPT
+IF "%~1"=="/o"  SET output=%2&     SHIFT & GOTO NEXTOPT
+IF "%~1"=="/f"  SET force=1&               GOTO NEXTOPT
+IF "%~1"=="/a"  SET append=%2&     SHIFT & GOTO NEXTOPT
+IF "%~1"=="/b"  SET background=1&          GOTO NEXTOPT
+IF "%~1"=="/w"  SET wait=1&                GOTO NEXTOPT
+IF "%~1"=="--"  SET terminator=1&          GOTO NEXTOPT
+
+:GETARG
+IF defined filelist (
+    SET args=%args% %1
+) ELSE IF defined cmd (
+    SET filelist=%1
+) ELSE (
+    SET cmd=%1
+    SET extension=%~x1
+)
+
+:NEXTOPT
+SHIFT
+GOTO GETOPT
 
 :HELP
 CALL batch_help

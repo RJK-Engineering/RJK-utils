@@ -1,5 +1,5 @@
 
-IF not "%~1"=="" SET args=%*
+IF not "%~1"=="" SET args= %*
 
 ::SET_RUN
 SET run=
