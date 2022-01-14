@@ -16,6 +16,8 @@ ECHO./d        Display path name before each execution
 ECHO./n        Display file name before each execution
 ECHO./p        Force pause before exit
 ECHO./-p       Force no pause before exit (pauses on error by default)
+ECHO./i        Ignore errors during batch processing (pauses on error by default)
+ECHO./x        Ignore exit codes during batch processing (pauses when exit code ^> 0 by default)
 ECHO./t [N]    Timeout for N seconds before exit
 ECHO./q        Be quiet (supress standard output)
 ECHO./-e       Hide errors (supress error output)
