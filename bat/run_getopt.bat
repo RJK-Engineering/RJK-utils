@@ -44,7 +44,6 @@ IF defined arg3 (
 
 IF defined arg2 (
     SET args2=%args2% %1
-    SET args2= %1
 ) ELSE IF defined arg1 (
     SET arg2=%1
     SET ext2=%~x1
