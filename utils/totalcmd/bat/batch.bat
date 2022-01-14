@@ -22,10 +22,11 @@ SET background=
 
 FOR /F "tokens=*" %%F IN (%filelist%) DO (
     IF defined display ECHO %display%
-    REM replace %%F in append and output vars
+    REM replace %%F in vars
     SET append=%append%
     SET output=%output%
-    CALL run_execute %args%
+    SET args=%args%
+    CALL run_execute
     IF defined error GOTO END
     IF defined exitcode PAUSE
 )
