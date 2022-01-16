@@ -64,12 +64,12 @@ RJK::Options::Pod::GetOptions(
     RJK::Options::Pod::HelpOptions
 );
 
-$opts{downloadListDir} or die "Missing property: download.list.dir";
+$opts{downloadListDir} or die "Missing property: downloadListDir";
 
 if ($opts{showDownloadLists}) {
     exit system "dir *.dl", $opts{downloadListDir};
 } elsif (defined $opts{openDownloadList}) {
-    exit system "$opts{downloadListDir}\\$opts{openDownloadList}.dl";
+    exit system "$opts{downloadListDir}\\$opts{openDownloadList}";
 }
 
 $opts{print} = 1 unless
