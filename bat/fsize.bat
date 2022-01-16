@@ -1,0 +1,1 @@
+set fsize=%~z1
