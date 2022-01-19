@@ -21,12 +21,10 @@ SET "out=%quiet%%out%%clip%"
 ::EXECUTE
 IF defined wait ECHO run=%run%& ECHO args=%args%& ECHO "out=%out%"& PAUSE
 
-SET exitcode=
 IF defined grep (
     %run%%args%|FIND /I "%grep%"%out%
 ) ELSE (
     %run%%args%%out%
 )
-IF %errorlevel% gtr 0 SET exitcode=%errorlevel%
 
 :END
