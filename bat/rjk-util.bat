@@ -13,7 +13,7 @@ GOTO BEGINGETOPT
 :ENDGETOPT
 IF not defined util GOTO HELP
 
-SET util=%RJK_UTILS_HOME%\utils\%util%
+SET cmd=%RJK_UTILS_HOME%\utils\%util%
 CALL run_execute
 CALL run_exit
 GOTO END
