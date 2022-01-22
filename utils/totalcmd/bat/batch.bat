@@ -14,7 +14,6 @@ FOR /F "tokens=*" %%F IN (%filelist%) DO (
     REM replace %%F in vars
     SET append=%append%
     SET output=%output%
-    SET paused=
     CALL run_execute %args%
     CALL run_exit
 )
