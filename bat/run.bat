@@ -14,8 +14,8 @@ CALL run_exit
 GOTO END
 
 REM clear vars, they are inherited from master environment
-FOR %%V IN (terminator cmd args pause ignoreerrors ignoreexitcode^
-    timeout quiet errorredirect clip output force append background wait) DO SET %%V=
+FOR %%V IN (cmd args pause ignoreerrors ignoreexitcode timeout quiet errorredirect^
+    clip grep output force append background wait terminator) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT

@@ -3,6 +3,7 @@ SET script=%1
 SET arg1=%~2
 SET help=
 SET error=
+SET paused=
 
 IF "%arg1%"=="" (
     SET help=usage

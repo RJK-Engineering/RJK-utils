@@ -1,3 +1,3 @@
 
 IF defined timeout TIMEOUT %timeout%
-IF defined pause PAUSE
+IF defined pause IF not defined paused PAUSE
