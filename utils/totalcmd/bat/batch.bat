@@ -5,11 +5,7 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-REM clear vars, they are inherited from master environment
-FOR %%V IN (terminator cmd filelist extension args display pause ignoreerrors ignoreexitcode^
-    timeout quiet errorredirect clip output force append background wait) DO SET %%V=
-
-GOTO GETOPT
+GOTO BEGINGETOPT
 :ENDGETOPT
 IF not defined filelist GOTO HELP
 
@@ -23,6 +19,11 @@ FOR /F "tokens=*" %%F IN (%filelist%) DO (
     CALL run_exit
 )
 GOTO END
+
+:BEGINGETOPT
+REM clear vars, they are inherited from master environment
+FOR %%V IN (terminator cmd filelist extension args display pause ignoreerrors ignoreexitcode^
+    timeout quiet errorredirect clip output force append background wait) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT

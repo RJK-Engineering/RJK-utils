@@ -5,7 +5,7 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-GOTO GETOPT
+GOTO BEGINGETOPT
 :ENDGETOPT
 IF not defined cmd GOTO HELP
 
@@ -13,6 +13,7 @@ CALL run_execute
 CALL run_exit
 GOTO END
 
+:BEGINGETOPT
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd args pause ignoreerrors ignoreexitcode timeout quiet errorredirect^
     clip grep output force append background wait terminator) DO SET %%V=
