@@ -41,3 +41,4 @@ ECHO.
 :END
 
 IF EXIST %~dpn0_local.bat %~dpn0_local.bat
+EXIT /B 0
