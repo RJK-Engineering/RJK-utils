@@ -1,16 +1,19 @@
 @ECHO OFF
+SETLOCAL
 
-IF /I "%~1"=="/install" (
+IF /i "%~1"=="/install" (
     GOTO INSTALL
-) ELSE IF /I "%~1"=="/uninstall" (
+) ELSE IF /i "%~1"=="/uninstall" (
     GOTO UNINSTALL
-) ELSE IF /I "%~1"=="/check" (
+) ELSE IF /i "%~1"=="/check" (
     CALL :CHECK
     GOTO END
 )
 
+:START
 ENDLOCAL
 SET AUTORUN_MACROS=%~dpn0.macros.properties
+SETLOCAL
 DOSKEY /MACROFILE=%AUTORUN_MACROS%
 SET tempfile=%TEMP%\cmd-autorun-startup-info-lockfile
 IF EXIST %tempfile% GOTO END
@@ -21,14 +24,13 @@ GOTO INFO
 CALL :CHECK
 IF "%installed%"=="%~f0" (
     ECHO Script already installed.
-    SET installed=
-    GOTO END
+    EXIT /b
 )
 ECHO Installing cmd.exe auto-run script %~f0
 IF defined installed ECHO Warning! Replacing currently installed cmd.exe auto-run script: %installed%
 SET installed=
 REG add "HKCU\Software\Microsoft\Command Processor" /v "AutoRun" /t REG_EXPAND_SZ /d "%~f0"
-GOTO INFO
+GOTO START
 
 :UNINSTALL
 ECHO Uninstalling cmd.exe auto-run script
