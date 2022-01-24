@@ -40,9 +40,11 @@ ECHO.
 
 :END
 
-REM Exit code of this autorun script is exit code of "cmd /c" execution!!!
-REM If bat file on next line is executed that will determine the exit code.
+REM first available bat file will be executed
+REM NOTE: using CALL will result in recursive execution of cmd.exe,
+REM not using CALL means the rest of this script will not be executed!
+IF EXIST %APPDATA%\%~n0_local.bat %APPDATA%\%~n0_local.bat
 IF EXIST %~dpn0_local.bat %~dpn0_local.bat
-REM If bat file on previous line is executed the rest of this script
-REM is not executed bacause no CALL is used to execute the bat file.
-REM Using CALL will result in recursive execution of cmd.exe!!!
+
+REM make sure errorlevel is set to zero after execution of this script
+exit /b 0
