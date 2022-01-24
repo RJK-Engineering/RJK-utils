@@ -53,7 +53,7 @@ ECHO.
 
 REM NOTE: CALL is not used because it will result in recursive execution of cmd.exe,
 REM however not using CALL means that the rest of this script will not be executed!
-IF EXIST %~dpn0_local.bat %~dpn0_local.bat
+IF EXIST %~dpn0.local.bat %~dpn0.local.bat
 
 :END
 IF defined installed (
