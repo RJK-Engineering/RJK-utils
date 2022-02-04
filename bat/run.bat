@@ -8,6 +8,7 @@ SET help=usage
 GOTO BEGINGETOPT
 :ENDGETOPT
 IF not defined cmd GOTO HELP
+IF defined pause SET ignoreerrors=1& SET ignoreexitcode=1
 
 CALL run_execute
 CALL run_exit
@@ -15,15 +16,15 @@ GOTO END
 
 :BEGINGETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd args pause ignoreerrors ignoreexitcode timeout quiet errorredirect^
-    clip grep output force append background wait terminator) DO SET %%V=
+FOR %%V IN (cmd args printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
+    errorredirect clip grep output force append background wait terminator) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
-IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
-IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
-IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT
+IF "%~1"=="/k" SET printexitcode=1& SET pause=1& GOTO NEXTOPT
+IF "%~1"=="/p" SET printexitcode=1&       GOTO NEXTOPT
+IF "%~1"=="/z" SET pause=1&               GOTO NEXTOPT
 IF "%~1"=="/i" SET ignoreerrors=1&        GOTO NEXTOPT
 IF "%~1"=="/x" SET ignoreexitcode=1&      GOTO NEXTOPT
 IF "%~1"=="/t" SET timeout=%2&    SHIFT & GOTO NEXTOPT

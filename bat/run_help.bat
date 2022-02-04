@@ -11,9 +11,9 @@ GOTO END
 
 :EXTENDED
 ECHO OPTIONS
-ECHO./k        Short for: /z /p /i /x
-ECHO./z        Print exit code
-ECHO./p        Force pause before exit
+ECHO./k        Short for: /p /z (print exit code and pause before exit)
+ECHO./p        Print exit code
+ECHO./z        Force pause before exit
 ECHO./i        Ignore errors (pauses on error by default)
 ECHO./x        Ignore exit code (pauses when exit code ^> 0 by default)
 ECHO./t [N]    Timeout for N seconds before exit
