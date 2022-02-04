@@ -12,6 +12,7 @@ SET help=usage
 GOTO BEGINGETOPT
 :ENDGETOPT
 IF not defined util GOTO HELP
+IF defined pause SET ignoreerrors=1& SET ignoreexitcode=1
 
 SET cmd=%RJK_UTILS_HOME%\utils\%util%
 CALL run_execute
@@ -20,12 +21,14 @@ GOTO END
 
 :BEGINGETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (util args pause ignoreerrors ignoreexitcode timeout quiet errorredirect^
-    clip grep output force append background wait terminator) DO SET %%V=
+FOR %%V IN (util args printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
+    errorredirect clip grep output force append background wait terminator) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
+IF "%~1"=="/k" SET printexitcode=1& SET pause=1& GOTO NEXTOPT
+IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT
 IF "%~1"=="/i" SET ignoreerrors=1&        GOTO NEXTOPT
 IF "%~1"=="/x" SET ignoreexitcode=1&      GOTO NEXTOPT
@@ -66,11 +69,14 @@ GOTO END
 
 :EXTENDED
 ECHO OPTIONS
+ECHO./k        Short for: /z /p (display exit code and pause before exit)
+ECHO./z        Display exit code
 ECHO./p        Force pause before exit
-ECHO./-p       Force no pause before exit (pauses on error by default)
+ECHO./i        Ignore errors (pauses on error by default)
+ECHO./x        Ignore exit code (pauses when exit code ^> 0 by default)
 ECHO./t [N]    Timeout for N seconds before exit
 ECHO./q        Be quiet (supress standard output)
-ECHO./-e       Hide errors (supress error output)
+ECHO./e        Hide errors (supress error output)
 ECHO./r        Redirect error output to standard output
 ECHO./c        Redirect standard output to clipboard
 ECHO./g [TEXT] Grep standard output

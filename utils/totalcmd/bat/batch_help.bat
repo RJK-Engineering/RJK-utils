@@ -12,6 +12,8 @@ GOTO END
 
 :EXTENDED
 ECHO OPTIONS
+ECHO./k        Short for: /z /p /i /x (display exit codes and pause only once, before exit)
+ECHO./z        Display exit codes
 ECHO./d        Display path name before each execution
 ECHO./n        Display file name before each execution
 ECHO./p        Force pause before exit

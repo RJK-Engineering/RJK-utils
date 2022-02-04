@@ -21,12 +21,14 @@ GOTO END
 
 :BEGINGETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (terminator cmd filelist extension args display pause ignoreerrors ignoreexitcode^
-    timeout quiet errorredirect clip output force append background wait) DO SET %%V=
+FOR %%V IN (cmd extension filelist args printexitcode display pause ignoreerrors ignoreexitcode^
+    timeout quiet errorredirect clip grep output force append background wait terminator) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
+IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
+IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
 IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT
