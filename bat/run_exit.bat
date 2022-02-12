@@ -2,8 +2,10 @@
 IF defined error (
     ECHO %error%
     IF not defined ignoreerrors PAUSE
-    EXIT /B
+    EXIT/B 1
 )
+
+SET exitcode=%errorlevel%
 
 IF defined printexitcode (
     IF %errorlevel%==0 (
@@ -14,7 +16,7 @@ IF defined printexitcode (
 )
 
 IF %errorlevel% gtr 0 (
-    IF defined ignoreexitcode EXIT /B
+    IF defined ignoreexitcode EXIT/B
     IF not defined printexitcode ECHO Exit code %errorlevel%
     PAUSE
 )
