@@ -1,1 +1,1 @@
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command %~f1 %2 %3 %4
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command %*
