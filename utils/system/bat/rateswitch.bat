@@ -1,6 +1,5 @@
 @echo off
 
-set ERRORLEVEL=
 set name=%1
 set value=%2
 if not defined name goto HELP
