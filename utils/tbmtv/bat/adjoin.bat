@@ -10,9 +10,9 @@ if "%~2"=="" (
 set load=
 for /f "delims=" %%F in (%1) do (
     if defined load (
-        call set load=%%load%% --append %%F
+        call set load=%%load%% --append "%%F"
     ) else (
-        call set load=--load %%F
+        call set load=--load "%%F"
     )
 )
 
