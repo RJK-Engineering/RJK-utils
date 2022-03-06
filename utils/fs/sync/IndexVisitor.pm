@@ -11,7 +11,6 @@ my $baseDirRegex;
 sub new {
     my $self = bless {}, shift;
     ($opts, $display, $baseDir, $left) = @_;
-    $opts->{minDirNameLength} //= 5;
 
     $baseDirRegex = quotemeta $baseDir;
     $self->{dirs} = $self->{files} = {};
@@ -34,28 +33,8 @@ sub getFileInfo {
     };
 }
 
-sub preVisitDir {
-    my ($self, $dir, $stat) = @_;
-    $opts->{visitDirs} or return;
-    if (length $dir->{name} < $opts->{minDirNameLength}) {
-        $display->info("Skipping short name: $dir") if $opts->{verbose};
-        return;
-    }
-    $dir = getFileInfo($dir, $stat);
-    $display->stats;
-
-    if ($left) {
-        return if delete $left->{dirs}{$dir->{path}};
-        push @{$self->{dirs}{$dir->{name}}}, $dir;
-    } else {
-        $self->{dirs}{$dir->{path}} = $dir;
-    }
-}
-
 sub visitFile {
     my ($self, $file, $stat) = @_;
-    not $opts->{visitDirs} or return;
-
     $file = getFileInfo($file, $stat);
     $display->stats;
 
