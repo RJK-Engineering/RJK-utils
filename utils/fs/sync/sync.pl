@@ -31,7 +31,7 @@ my %opts = RJK::LocalConf::GetOptions("RJK-utils/fs/sync.properties", (
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'i|refresh-interval=f' => \$opts{refreshInterval},
-        "Refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
+        "On screen counter refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
     'simulate' => \$opts{simulate}, "Do not make any changes to the file system.",
 
     ['POD'],
