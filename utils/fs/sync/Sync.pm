@@ -99,7 +99,7 @@ sub renameFile {
 
     $display->info("-$inTarget->{fullPath}");
     $display->info("+$targetFile");
-    return if $opts->{simulate};
+    return if not $opts->{synchronize};
 
     File::Copy::move($inTarget->{fullPath}, "$targetFile") or die "$!: $inTarget -> $targetFile";
 }
@@ -115,7 +115,7 @@ sub moveFile {
         $target = RJK::Paths->get($dir, $inSource->{name});
         $display->info(">$target");
     }
-    return if $opts->{simulate};
+    return if not $opts->{synchronize};
 
     move($inTarget->{fullPath}, $dir, $target);
 }
