@@ -27,15 +27,13 @@ sync.pl -h
 
 my %opts = RJK::LocalConf::GetOptions("RJK-utils/fs/sync.properties", (
     refreshInterval => .2,
-    minDirNameLength => 5,
+    useFatDateResolution => 1,
 ));
 RJK::Options::Pod::GetOptions(
     ['OPTIONS'],
     'i|refresh-interval=f' => \$opts{refreshInterval},
-        "Refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
-    'simulate' => \$opts{simulate}, "Do not make any changes to the file system.",
-    'dirs' => \$opts{visitDirs}, "Synchronize dirs.",
-    'min-dir-name-length=i' => \$opts{minDirNameLength}, "Minimum required dir name length when matching dirs. Default: $opts{minDirNameLength}",
+        "On screen counter refresh interval in {seconds}. Real number, default: $opts{refreshInterval}",
+    'synchronize' => \$opts{synchronize}, "Synchronize.",
 
     ['POD'],
     RJK::Options::Pod::Options,
