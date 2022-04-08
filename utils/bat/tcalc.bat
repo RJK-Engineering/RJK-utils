@@ -1,1 +1,4 @@
-@call rjk-util /-p /c timecalc.pl %*
+@echo off
+call rjk-util /c timecalc.pl %*
+call getclip
+if defined clip echo %clip%
