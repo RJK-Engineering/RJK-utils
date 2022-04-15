@@ -1,0 +1,76 @@
+run/batch
+    filter for filelist created from dir
+    rename filelist > listfile
+    logging
+
+
+list from clipboard:      %%C
+list from cwd, paths:     %%D
+list from cwd, filenames: %%N
+list from cwd+subdirs:    %%S
+set dir (instead of cwd): /P <dir>
+
+precedence high to low
+batch from listfile:       /L %L
+batch from clipboard:      /C
+batch from cwd, paths:     /D
+batch from cwd, filenames: /N
+batch from cwd+subdirs:    /S
+set dir (instead of cwd):  /dir <dir>
+
+
+alternative filelist if %L in param but no selection (cursor on "..", no param string passed)
+    batch: /D in cmd = batch from cwd
+        cmd=batch /D cmd args
+        param=/L %L
+    run: /D? at end of cmd = append filelist from cwd
+        cmd=run cmd args /D?
+        param=%L
+    prepend/append args to filelist arg
+        cmd=run cmd /D /P arg1b /A arg2b
+        param=arg1a %L arg2a
+            selection    -> cmd arg1a C:\..\CMD....tmp arg1a
+            no selection -> cmd arg1b C:\..\CMD....tmp arg2b
+        cmd=run cmd /D /P arg1 /A arg2
+        param=%L
+            -> cmd arg1 C:\..\CMD....tmp arg2
+
+/P arg = if no args (or only options) hereafter, prepend arg
+/A arg = if no args (or only options) hereafter, append arg
+
+
+batch.bat
+
+list from selected files or from selected listfile (single file selected, must have extension .tmp)
+    cmd=batch cmd
+    param=%L /l %N
+list from selected files or from file under cursor (no file selection, file under cursor must have extension .tmp)
+    cmd=batch cmd /-l
+    param=%L
+disable list from selected listfile
+    cmd=batch cmd /-l
+    param=%L
+listfile must have extension .txt
+    cmd=batch cmd /le txt
+    param=%L
+
+--------
+SET listfile=aa.listfile
+SET listfileext=tmp
+
+SET line=
+FOR /F "delims=" %%F IN (%listfile%) DO (
+    IF defined line GOTO multi
+    CALL SET line=%%F
+)
+FOR /F "delims=" %%F IN ("%line%") DO (
+    IF /I "%%~xF"==".%listfileext%" SET listfile=%line%
+)
+SET listfile
+GOTO end
+
+:multi
+echo multi
+
+:end
+--------
