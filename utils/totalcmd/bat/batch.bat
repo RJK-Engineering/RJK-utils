@@ -10,29 +10,29 @@ GOTO BEGINGETOPT
 IF not defined cmd GOTO HELP
 
 CALL run_create_listfiles
-SET delfilelist=
-IF defined filelist GOTO EXECUTE
+SET dellistfile=
+IF defined listfile GOTO EXECUTE
 
-SET filelist=%TEMP%\CMD%RANDOM%.tmp
-SET delfilelist=1
+SET listfile=%TEMP%\CMD%RANDOM%.tmp
+SET dellistfile=1
 
 IF defined fromclip (
-    CALL getclip /d > %filelist%
+    CALL getclip /d > %listfile%
 ) ELSE IF defined fromdird (
     IF defined dirpath PUSHD. & cd/d %dirpath%
-    IF exist %filelist% del/q %filelist%
-    FOR /F "delims=" %%F IN ('dir/a-d/b') DO ECHO %%~fF>> %filelist%
+    IF exist %listfile% del/q %listfile%
+    FOR /F "delims=" %%F IN ('dir/a-d/b') DO ECHO %%~fF>> %listfile%
     IF defined dirpath POPD
 ) ELSE IF defined fromdirn (
-    dir/a-d/b %dirpath% > %filelist%
+    dir/a-d/b %dirpath% > %listfile%
 ) ELSE IF defined fromdirs (
-    dir/a-d/b/s %dirpath% > %filelist%
+    dir/a-d/b/s %dirpath% > %listfile%
 ) ELSE (
     GOTO HELP
 )
 
 :EXECUTE
-FOR /F "tokens=*" %%F IN (%filelist%) DO (
+FOR /F "tokens=*" %%F IN (%listfile%) DO (
     IF defined display ECHO %display%
     REM replace %%F in vars
     SET append=%append%
@@ -41,19 +41,19 @@ FOR /F "tokens=*" %%F IN (%filelist%) DO (
     CALL run_exit
 )
 CALL run_del_listfiles
-IF defined delfilelist del/q %filelist%
+IF defined dellistfile del/q %listfile%
 GOTO END
 
 :BEGINGETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd extension args filelist fromclip fromdird fromdirn fromdirs dirpath paramdir^
+FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs dirpath paramdir^
     terminator printexitcode display pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
-IF "%~1"=="/L" SET filelist=%2&   SHIFT & GOTO NEXTOPT
+IF "%~1"=="/L" SET listfile=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/C" SET fromclip=1&            GOTO NEXTOPT
 IF "%~1"=="/D" SET fromdird=1&            GOTO NEXTOPT
 IF "%~1"=="/N" SET fromdirn=1&            GOTO NEXTOPT
