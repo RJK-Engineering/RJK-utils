@@ -1,9 +1,8 @@
-run/batch
-    filter for filelist created from dir
-    rename filelist > listfile
-    logging
+TODO
+batch.bat: use selected listfile when no selection (see below!)
+filter for filelist created from dir
 
-
+-----------
 list from clipboard:      %%C
 list from cwd, paths:     %%D
 list from cwd, filenames: %%N
@@ -35,42 +34,31 @@ alternative filelist if %L in param but no selection (cursor on "..", no param s
         param=%L
             -> cmd arg1 C:\..\CMD....tmp arg2
 
-/P arg = if no args (or only options) hereafter, prepend arg
-/A arg = if no args (or only options) hereafter, append arg
+append params on empty input
+    cmd=run cmd args /A whenvaluemissing
+    param=?value
+run, enter      -> cmd args value
+run, del, enter -> cmd args whenvaluemissing
+
+--------------------
+batch.bat: use selected listfile when no selection
+(%L in param auto-selects file under cursor)
+
+default: list from selected listfile when single file selected and has extension .tmp
+disable list from selected listfile: /-l
+alternative extension: /le txt
 
 
-batch.bat
-
-list from selected files or from selected listfile (single file selected, must have extension .tmp)
-    cmd=batch cmd
-    param=%L /l %N
-list from selected files or from file under cursor (no file selection, file under cursor must have extension .tmp)
-    cmd=batch cmd /-l
-    param=%L
-disable list from selected listfile
-    cmd=batch cmd /-l
-    param=%L
-listfile must have extension .txt
-    cmd=batch cmd /le txt
-    param=%L
-
---------
 SET listfile=aa.listfile
 SET listfileext=tmp
 
 SET line=
 FOR /F "delims=" %%F IN (%listfile%) DO (
-    IF defined line GOTO multi
+    IF defined line EXIT/B
     CALL SET line=%%F
 )
 FOR /F "delims=" %%F IN ("%line%") DO (
     IF /I "%%~xF"==".%listfileext%" SET listfile=%line%
 )
 SET listfile
-GOTO end
-
-:multi
-echo multi
-
-:end
 --------
