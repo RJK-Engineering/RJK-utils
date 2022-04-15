@@ -14,7 +14,7 @@ goto USAGE
 
 :LIST
 echo list volume| diskpart
-goto END
+EXIT/B
 
 :ASSIGN
 set label=%1
@@ -31,7 +31,7 @@ for /f "tokens=1-10" %%F in ('echo list volume^| diskpart') do (
     )
 )
 echo Label not found: %label% (volume may not already have a drive letter assigned)
-goto END
+EXIT/B
 
 :REMOVE
 set letter=%1
@@ -57,12 +57,10 @@ goto EXECUTE
 :EXECUTE
 diskpart /s %diskpartscript%
 del %diskpartscript%
-goto END
+EXIT/B
 
 :USAGE
 echo USAGE:
 echo %script% assign [label] [letter]
 echo %script% remove [letter]
 echo %script% reassign [letter] [letter]
-
-:END

@@ -13,7 +13,7 @@ SET run=%run:~1%
 SET out=
 IF defined append SET "out=>>%append%"
 IF defined output CALL run_check_output %output%
-IF defined error GOTO END
+IF defined error EXIT/B
 IF defined output SET "out=>%output%"
 IF defined errorredirect SET "out=%out% %errorredirect%"
 SET "out=%quiet%%out%%clip%"
@@ -26,5 +26,3 @@ IF defined grep (
 ) ELSE (
     %run%%args%%out%
 )
-
-:END

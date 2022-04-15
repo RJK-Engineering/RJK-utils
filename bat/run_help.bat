@@ -7,7 +7,7 @@ ECHO Arguments starting with a '/' are OPTIONS, except after terminator '--'.
 ECHO.
 ECHO DISPLAY EXTENDED HELP: %script% /?
 ECHO DISPLAY FULL HELP: %script% /??
-GOTO END
+EXIT/B
 
 :EXTENDED
 ECHO OPTIONS
@@ -28,7 +28,7 @@ ECHO./a [PATH] Append standard output to file
 ECHO./b        Run in background (START /B)
 ECHO./w        Wait for any key before execution
 ECHO --        OPTIONS terminator
-IF "%help%"=="extended" GOTO END
+IF "%help%"=="extended" EXIT/B
 
 ECHO.
 ECHO Example usage in Total Commander:
@@ -38,5 +38,3 @@ ECHO Extra OPTIONS can be added or removed quickly (by pressing HOME) at
 ECHO the start of the parameter list in the dialog box opened on execution.
 ECHO.
 ECHO BUGS: ARGUMENTS can't contain /?
-
-:END

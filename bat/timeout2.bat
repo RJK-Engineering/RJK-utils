@@ -10,7 +10,7 @@ IF %timeout% gtr 1 IF %timeout% lss 60 GOTO START
 :HELP
 ECHO USAGE: %0 [timeout in seconds]
 ECHO timeout must be greater than 1 and less than 60
-GOTO END
+EXIT/B
 
 :START
 SET start=%TIME:~6,2%%TIME:~9,2%
@@ -27,5 +27,3 @@ IF %diff% lss 0 SET /a diff+=6000
 SET slack=100
 SET /a diff+=slack
 IF %diff% lss %timeout%00 ENDLOCAL & SET TIMEOUT_ABORT=aborted
-
-:END

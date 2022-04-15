@@ -14,11 +14,9 @@ tasklist /v %TASKS_FILTER% %TASKS_FORMAT%
 @echo off
 echo.
 echo For help type: %0 /?
-
-goto END
+EXIT/B
 
 :HELP
 echo Run tasklist command.
 echo USAGE: %0 [image name eg: EXAMPLE.EXE] [format: TABLE, LIST or CSV]
 echo Format shortcuts: T=TABLE, L=LIST, C=CSV
-:END

@@ -9,10 +9,9 @@ for /f %%F in ('where %1.bat') do (
     type %%F
     echo.
 )
-goto END
+EXIT/B
 
 :HELP
 echo USAGE: %0 [search pattern]
 echo Search for batch files and display their contents.
 echo For search pattern help, see the "where" command.
-:END

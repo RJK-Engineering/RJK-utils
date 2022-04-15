@@ -19,7 +19,7 @@ FOR /F "tokens=1-10 delims=\ " %%i in ("%cd%") do (
     set _subdirs=%%k\%%l\%%m\%%n\%%o\%%p\%%q\%%r
 )
 
-if not exist "%_environment%" echo Environment does not exist & goto END
+if not exist "%_environment%" echo Environment does not exist & EXIT/B
 
 set _r=%_environment%\
 if "%_environment%"=="c:\scripts" (
@@ -44,11 +44,9 @@ if defined _environment (
     )
 ) else (
     echo Not in environment
-    goto END
+    EXIT/B
 )
 
 echo PATH=%PATH%
 echo PERL5LIB=%PERL5LIB%
 echo RJK_UTILS_HOME=%RJK_UTILS_HOME%
-
-:END

@@ -8,7 +8,7 @@ ECHO In ARGUMENTS, %%%%F expands to the current file (for help run: %script% /??
 ECHO.
 ECHO DISPLAY EXTENDED HELP: %script% /?
 ECHO DISPLAY FULL HELP: %script% /??
-GOTO END
+EXIT/B
 
 :EXTENDED
 ECHO OPTIONS
@@ -31,7 +31,7 @@ ECHO./a [PATH] Append standard output to file, %%%%F allowed in PATH
 ECHO./b        Run in background (START /B)
 ECHO./w        Wait for any key before execution
 ECHO --        OPTIONS terminator
-IF "%help%"=="extended" GOTO END
+IF "%help%"=="extended" EXIT/B
 
 ECHO.
 ECHO Example usage in Total Commander:
@@ -63,5 +63,3 @@ ECHO.
 ECHO (source: http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/percent.mspx)
 ECHO.
 ECHO BUGS: ARGUMENTS can't contain /?
-
-:END
