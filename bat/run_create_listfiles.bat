@@ -1,5 +1,8 @@
 SET delfilec=&SET delfiled=&SET delfilen=&SET delfiles=
 
+ECHO %args% | FIND "%%" >NUL
+IF %errorlevel% neq 0 EXIT/B
+
 SET tmpfile=%TEMP%\CMD%RANDOM%c.tmp
 ECHO %args% | FIND "%%C" >NUL
 IF %errorlevel% equ 0 (
