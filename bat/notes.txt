@@ -1,6 +1,6 @@
 TODO
-batch.bat: use selected listfile when no selection (see below!)
 filter for filelist created from dir
+update help files
 
 -----------
 list from clipboard:      %%C
@@ -48,17 +48,4 @@ default: list from selected listfile when single file selected and has extension
 disable list from selected listfile: /-l
 alternative extension: /le txt
 
-
-SET listfile=aa.listfile
-SET listfileext=tmp
-
-SET line=
-FOR /F "delims=" %%F IN (%listfile%) DO (
-    IF defined line EXIT/B
-    CALL SET line=%%F
-)
-FOR /F "delims=" %%F IN ("%line%") DO (
-    IF /I "%%~xF"==".%listfileext%" SET listfile=%line%
-)
-SET listfile
 --------
