@@ -31,8 +31,9 @@ GOTO END
 
 :GETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs dirpath paramdir^
-    noderef terminator printexitcode display pause ignoreerrors ignoreexitcode timeout quiet^
+FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs^
+    dirpath display noderef terminator
+    printexitcode paramdir pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait) DO SET %%V=
 
 :GETNEXTOPT
