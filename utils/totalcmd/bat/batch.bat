@@ -5,33 +5,15 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-GOTO BEGINGETOPT
-:ENDGETOPT
+CALL :GETOPT
 IF not defined cmd GOTO HELP
 
 CALL run_create_listfiles
 SET dellistfile=
-IF defined listfile GOTO EXECUTE
 
-SET listfile=%TEMP%\CMD%RANDOM%.tmp
-SET dellistfile=1
-
-IF defined fromclip (
-    CALL getclip /d > %listfile%
-) ELSE IF defined fromdird (
-    IF defined dirpath PUSHD. & cd/d %dirpath%
-    IF exist %listfile% del/q %listfile%
-    FOR /F "delims=" %%F IN ('dir/a-d/b') DO ECHO %%~fF>> %listfile%
-    IF defined dirpath POPD
-) ELSE IF defined fromdirn (
-    dir/a-d/b %dirpath% > %listfile%
-) ELSE IF defined fromdirs (
-    dir/a-d/b/s %dirpath% > %listfile%
-) ELSE (
-    GOTO HELP
+IF not defined listfile CALL :CREATELISTFILE
 )
 
-:EXECUTE
 FOR /F "tokens=*" %%F IN (%listfile%) DO (
     IF defined display ECHO %display%
     REM replace %%F in vars
@@ -44,14 +26,14 @@ CALL run_del_listfiles
 IF defined dellistfile del/q %listfile%
 GOTO END
 
-:BEGINGETOPT
+:GETOPT
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs dirpath paramdir^
     terminator printexitcode display pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait) DO SET %%V=
 
-:GETOPT
-IF "%~1"=="" GOTO ENDGETOPT
+:GETNEXTOPT
+IF "%~1"=="" EXIT/B
 IF defined terminator GOTO GETARG
 IF "%~1"=="/L" SET listfile=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/C" SET fromclip=1&            GOTO NEXTOPT
@@ -91,7 +73,27 @@ IF defined cmd (
 
 :NEXTOPT
 SHIFT
-GOTO GETOPT
+GOTO GETNEXTOPT
+
+:CREATELISTFILE
+SET listfile=%TEMP%\CMD%RANDOM%.tmp
+SET dellistfile=1
+
+IF defined fromclip (
+    CALL getclip /d > %listfile%
+) ELSE IF defined fromdird (
+    IF defined dirpath PUSHD. & cd/d %dirpath%
+    IF exist %listfile% del/q %listfile%
+    FOR /F "delims=" %%F IN ('dir/a-d/b') DO ECHO %%~fF>> %listfile%
+    IF defined dirpath POPD
+) ELSE IF defined fromdirn (
+    dir/a-d/b %dirpath% > %listfile%
+) ELSE IF defined fromdirs (
+    dir/a-d/b/s %dirpath% > %listfile%
+) ELSE (
+    GOTO HELP
+)
+EXIT/B
 
 :HELP
 CALL batch_help
