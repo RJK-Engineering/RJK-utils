@@ -59,13 +59,13 @@ IF "%~1"=="/D" SET fromdird=1&            GOTO NEXTOPT
 IF "%~1"=="/N" SET fromdirn=1&            GOTO NEXTOPT
 IF "%~1"=="/S" SET fromdirs=1&            GOTO NEXTOPT
 IF "%~1"=="/dir" SET dirpath=%2&  SHIFT & GOTO NEXTOPT
-IF "%~1"=="/P" SET paramdir=%2&   SHIFT & GOTO NEXTOPT
-IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
-IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ^
-    ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
-IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
+IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ^
+    ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
+IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
+IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
+IF "%~1"=="/P" SET paramdir=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT
 IF "%~1"=="/i" SET ignoreerrors=1&        GOTO NEXTOPT
 IF "%~1"=="/x" SET ignoreexitcode=1&      GOTO NEXTOPT
@@ -74,7 +74,7 @@ IF "%~1"=="/q" SET "quiet=>NUL"         & GOTO NEXTOPT
 IF "%~1"=="/e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
 IF "%~1"=="/r" SET "errorredirect=2>&1" & GOTO NEXTOPT
 IF "%~1"=="/c" SET "clip=|CLIP"         & GOTO NEXTOPT
-IF "%~1"=="/g" SET "grep=%~2"&    SHIFT & GOTO NEXTOPT
+IF "%~1"=="/g" SET "grep=%~2"   & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/o" SET output=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
