@@ -11,7 +11,10 @@ IF not defined cmd GOTO HELP
 CALL run_create_listfiles
 SET dellistfile=
 
-IF not defined listfile CALL :CREATELISTFILE
+IF not defined listfile (
+    CALL :CREATELISTFILE
+) ELSE IF not defined noderef (
+    CALL :DEREFLISTFILE
 )
 
 FOR /F "tokens=*" %%F IN (%listfile%) DO (
@@ -29,7 +32,7 @@ GOTO END
 :GETOPT
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs dirpath paramdir^
-    terminator printexitcode display pause ignoreerrors ignoreexitcode timeout quiet^
+    noderef terminator printexitcode display pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait) DO SET %%V=
 
 :GETNEXTOPT
@@ -45,6 +48,7 @@ IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
 IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ^
     ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
+IF "%~1"=="/noderef" SET noderef=1&       GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/P" SET paramdir=%2&   SHIFT & GOTO NEXTOPT
@@ -92,6 +96,18 @@ IF defined fromclip (
     dir/a-d/b/s %dirpath% > %listfile%
 ) ELSE (
     GOTO HELP
+)
+EXIT/B
+
+:DEREFLISTFILE
+SET listfileext=tmp
+SET line=
+FOR /F "delims=" %%F IN (%listfile%) DO (
+    IF defined line EXIT/B
+    CALL SET line=%%F
+)
+FOR /F "delims=" %%F IN ("%line%") DO (
+    IF /I "%%~xF"==".%listfileext%" SET listfile=%line%
 )
 EXIT/B
 
