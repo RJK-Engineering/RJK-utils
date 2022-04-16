@@ -50,6 +50,7 @@ IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
 IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ^
     ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
 IF "%~1"=="/noderef" SET noderef=1&       GOTO NEXTOPT
+IF "%~1"=="/E" SET listfileext=%2&SHIFT & GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/P" SET paramdir=%2&   SHIFT & GOTO NEXTOPT
@@ -101,7 +102,7 @@ IF defined fromclip (
 EXIT/B
 
 :DEREFLISTFILE
-SET listfileext=tmp
+IF not defined listfileext SET listfileext=tmp
 SET line=
 FOR /F "delims=" %%F IN (%listfile%) DO (
     IF defined line EXIT/B
