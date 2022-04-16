@@ -1,36 +1,36 @@
 SET delfilec=&SET delfiled=&SET delfilen=&SET delfiles=
 
-SET listfile=%TEMP%\CMD%RANDOM%c.tmp
+SET tmpfile=%TEMP%\CMD%RANDOM%c.tmp
 ECHO %args% | FIND "%%C" >NUL
 IF %errorlevel% equ 0 (
-    FOR /F %%C IN ("%listfile%") DO SET args=%args%
-    CALL getclip /d > %listfile%
-    SET delfilec=%listfile%
+    FOR /F %%C IN ("%tmpfile%") DO SET args=%args%
+    CALL getclip /d > %tmpfile%
+    SET delfilec=%tmpfile%
 )
 
-SET listfile=%TEMP%\CMD%RANDOM%d.tmp
+SET tmpfile=%TEMP%\CMD%RANDOM%d.tmp
 ECHO %args% | FIND "%%D" >NUL
 IF %errorlevel% equ 0 (
-    FOR /F %%D IN ("%listfile%") DO SET args=%args%
+    FOR /F %%D IN ("%tmpfile%") DO SET args=%args%
     IF defined paramdir PUSHD. & cd/d %paramdir%
-    IF exist %listfile% del/q %listfile%
-    FOR /F "delims=" %%F IN ('dir/a-d/b') DO ECHO %%~fF>> %listfile%
+    IF exist %tmpfile% del/q %tmpfile%
+    FOR /F "delims=" %%F IN ('dir/a-d/b') DO ECHO %%~fF>> %tmpfile%
     IF defined paramdir POPD
-    SET delfiled=%listfile%
+    SET delfiled=%tmpfile%
 )
 
-SET listfile=%TEMP%\CMD%RANDOM%n.tmp
+SET tmpfile=%TEMP%\CMD%RANDOM%n.tmp
 ECHO %args% | FIND "%%N" >NUL
 IF %errorlevel% equ 0 (
-    FOR /F %%N IN ("%listfile%") DO SET args=%args%
-    dir/a:-d/b %paramdir% > %listfile%
-    SET delfilen=%listfile%
+    FOR /F %%N IN ("%tmpfile%") DO SET args=%args%
+    dir/a:-d/b %paramdir% > %tmpfile%
+    SET delfilen=%tmpfile%
 )
 
-SET listfile=%TEMP%\CMD%RANDOM%s.tmp
+SET tmpfile=%TEMP%\CMD%RANDOM%s.tmp
 ECHO %args% | FIND "%%S" >NUL
 IF %errorlevel% equ 0 (
-    FOR /F %%S IN ("%listfile%") DO SET args=%args%
-    dir/a:-d/b/s %paramdir% > %listfile%
-    SET delfiles=%listfile%
+    FOR /F %%S IN ("%tmpfile%") DO SET args=%args%
+    dir/a:-d/b/s %paramdir% > %tmpfile%
+    SET delfiles=%tmpfile%
 )

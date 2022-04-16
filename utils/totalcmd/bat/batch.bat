@@ -5,7 +5,7 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-CALL :GETOPT
+CALL :GETOPT %*
 IF not defined cmd GOTO HELP
 
 CALL run_create_listfiles
