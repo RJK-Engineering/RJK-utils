@@ -10,7 +10,8 @@ GOTO BEGINGETOPT
 IF not defined cmd GOTO HELP
 IF defined pause SET ignoreerrors=1& SET ignoreexitcode=1
 
-CALL run_create_listfiles
+ECHO %args% | FIND "%%" >NUL
+IF %errorlevel% equ 0 CALL run_replace_params
 CALL run_append_listfile
 
 CALL run_execute
