@@ -1,5 +1,10 @@
 SET delfilec=&SET delfiled=&SET delfilen=&SET delfiles=
 
+SET clip=
+ECHO %args% | FINDSTR "%%~*[dpnxf]*F" >NUL
+IF %errorlevel% equ 0 CALL getclip
+IF defined clip FOR /F "tokens=*" %%F IN (""%clip%"") DO SET args=%args%
+
 SET tmpfile=%TEMP%\CMD%RANDOM%c.tmp
 ECHO %args% | FIND "%%C" >NUL
 IF %errorlevel% equ 0 (
