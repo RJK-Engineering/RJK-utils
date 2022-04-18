@@ -9,7 +9,6 @@ use RJK::File::PathUtils qw(ExtractPath);
 use RJK::Options::Pod;
 use RJK::TotalCmd::Utils;
 use RJK::Win32::Console;
-use RJK::Win32::DriveUtils;
 
 ###############################################################################
 =head1 DESCRIPTION
@@ -144,22 +143,11 @@ if (@urls) {
     Exit("No paths found");
 }
 
-my %map = split /[=\s]+/, $ENV{CHDIR_DRIVE_MAP} || "";
-my $skip;
-while (my ($a, $b) = each %map) {
-    next if $skip->{$a};
-    if ($path =~ s/^$a:\\/$b:\\/i) {
-        $skip->{$b} = 1;
-    }
-}
-
-my $drive = uc (($path =~ /^(\w:)/)[0]);
-if (! -e $drive) {
-    print "Connecting drive $drive\n";
-    RJK::Win32::DriveUtils->connectDrive($drive) or Exit("Could not connect drive $drive");
-}
-
 if (! -e $path) {
+    my %map = split /[=\s]+/, $ENV{CHDIR_DRIVE_MAP} || "";
+    while (my ($a, $b) = each %map) {
+        last if $path =~ s/^$a:\\/$b:\\/i;
+    }
     # try short name, if there is no short name available the input path is returned
     my $short = Win32::GetShortPathName($path);
     $path = -e $short ? $short :
