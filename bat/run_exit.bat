@@ -1,7 +1,7 @@
 
 IF defined error (
     ECHO %error%
-    IF defined COMMANDER_RUN_LOG ECHO %error%>> "%COMMANDER_RUN_LOG%"
+    IF defined logfile ECHO %error%>> "%logfile%"
     IF not defined ignoreerrors PAUSE
     EXIT/B 1
 )
@@ -17,7 +17,7 @@ IF defined printexitcode (
 )
 
 IF %errorlevel% gtr 0 (
-    IF defined COMMANDER_RUN_LOG ECHO %errorlevel%>> "%COMMANDER_RUN_LOG%"
+    IF defined logfile ECHO Exit code %errorlevel%>> "%logfile%"
     IF defined ignoreexitcode EXIT/B
     IF not defined printexitcode ECHO Exit code %errorlevel%
     PAUSE

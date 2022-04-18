@@ -7,11 +7,17 @@ SET help=usage
 
 GOTO BEGINGETOPT
 :ENDGETOPT
+
 IF not defined cmd GOTO HELP
 IF defined pause SET ignoreerrors=1& SET ignoreexitcode=1
 
-ECHO %args% | FIND "%%" >NUL
-IF %errorlevel% equ 0 CALL run_replace_params
+SET logfile=
+IF not defined nolog IF defined COMMANDER_RUN_LOG SET logfile="%COMMANDER_RUN_LOG%"
+
+IF not defined noparams (
+    ECHO %args% | FIND "%%" >NUL
+    IF %errorlevel% equ 0 CALL run_replace_params
+)
 CALL run_append_listfile
 
 CALL run_execute
@@ -26,7 +32,7 @@ GOTO END
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd args appendc appendd appendn appends appende appendo appendt paramdir^
     terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
-    errorredirect toclip grep output force append background wait) DO SET %%V=
+    errorredirect toclip grep output force append background wait nolog noparams) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
@@ -56,6 +62,8 @@ IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
+IF "%~1"=="/nolog" SET nolog=1&           GOTO NEXTOPT
+IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
 
 :GETARG
 IF defined cmd (
