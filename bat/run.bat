@@ -25,7 +25,7 @@ GOTO END
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd args appendc appendd appendn appends appende appendo appendt paramdir^
     terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
-    errorredirect clip grep output force append background wait) DO SET %%V=
+    errorredirect toclip grep output force append background wait) DO SET %%V=
 
 :GETOPT
 IF "%~1"=="" GOTO ENDGETOPT
@@ -48,7 +48,7 @@ IF "%~1"=="/t" SET timeout=%2&    SHIFT & GOTO NEXTOPT
 IF "%~1"=="/q" SET "quiet=>NUL"         & GOTO NEXTOPT
 IF "%~1"=="/e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
 IF "%~1"=="/r" SET "errorredirect=2>&1" & GOTO NEXTOPT
-IF "%~1"=="/c" SET "clip=|CLIP"         & GOTO NEXTOPT
+IF "%~1"=="/c" SET "toclip=|CLIP"       & GOTO NEXTOPT
 IF "%~1"=="/g" SET "grep=%~2"   & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/o" SET output=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
