@@ -5,7 +5,7 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-GOTO BEGINGETOPT
+GOTO GETOPT
 :ENDGETOPT
 IF not defined cmd GOTO HELP
 
