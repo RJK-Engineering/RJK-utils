@@ -5,12 +5,19 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-CALL :GETOPT %*
+GOTO BEGINGETOPT
+:ENDGETOPT
 IF not defined cmd GOTO HELP
 
-CALL run_create_listfiles
-SET dellistfile=
+SET logfile=
+IF not defined nolog IF defined COMMANDER_RUN_LOG SET logfile="%COMMANDER_RUN_LOG%"
 
+IF not defined noparams (
+    ECHO %args% | FIND "%%" >NUL
+    IF %errorlevel% equ 0 CALL run_replace_params
+)
+
+SET dellistfile=
 IF not defined listfile (
     CALL :CREATELISTFILE
 ) ELSE IF not defined noderef (
@@ -37,7 +44,7 @@ FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs^
     errorredirect clip grep output force append background wait) DO SET %%V=
 
 :GETNEXTOPT
-IF "%~1"=="" EXIT/B
+IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
 IF "%~1"=="/L" SET listfile=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/C" SET fromclip=1&            GOTO NEXTOPT
@@ -68,6 +75,8 @@ IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
+IF "%~1"=="/nolog" SET nolog=1&           GOTO NEXTOPT
+IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
 
 :GETARG
 IF defined cmd (
@@ -99,7 +108,7 @@ IF defined fromclip (
 ) ELSE (
     GOTO HELP
 )
-EXIT/B
+GOTO ENDGETOPT
 
 :DEREFLISTFILE
 IF not defined listfileext SET listfileext=tmp

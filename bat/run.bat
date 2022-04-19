@@ -5,7 +5,7 @@ CALL run_start %0 "%~1"
 IF defined help GOTO HELP
 SET help=usage
 
-GOTO BEGINGETOPT
+GOTO GETOPT
 :ENDGETOPT
 
 IF not defined cmd GOTO HELP
@@ -28,13 +28,13 @@ IF defined dellistfile del/q %listfile%
 CALL run_exit
 GOTO END
 
-:BEGINGETOPT
+:GETOPT
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd args appendc appendd appendn appends appende appendo appendt paramdir^
     terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect toclip grep output force append background wait nolog noparams) DO SET %%V=
 
-:GETOPT
+:GETNEXTOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
 IF "%~1"=="/C?" (IF "%~2"=="" SET appendc=1)        & GOTO NEXTOPT
@@ -75,7 +75,7 @@ IF defined cmd (
 
 :NEXTOPT
 SHIFT
-GOTO GETOPT
+GOTO GETNEXTOPT
 
 :HELP
 CALL run_help
