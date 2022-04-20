@@ -1,9 +1,15 @@
-SET delfilec=&SET delfiled=&SET delfilen=&SET delfiles=
+ECHO %args% | FINDSTR "%%~*[dpnxf]*I" >NUL
+IF %errorlevel% equ 0 CALL run_replace_param_input
 
 SET clip=
 ECHO %args% | FINDSTR "%%~*[dpnxf]*L" >NUL
 IF %errorlevel% equ 0 CALL getclip
-IF defined clip FOR /F "tokens=*" %%L IN (""%clip%"") DO SET args=%args%
+FOR /F "tokens=*" %%L IN (""%clip%"") DO SET args=%args%
+
+SET delfilec=
+SET delfiled=
+SET delfilen=
+SET delfiles=
 
 SET tmpfile=%TEMP%\CMD%RANDOM%c.tmp
 ECHO %args% | FIND "%%C" >NUL

@@ -62,8 +62,10 @@ IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
-IF "%~1"=="/nolog" SET nolog=1&           GOTO NEXTOPT
+IF "%~1"=="/nolog"    SET nolog=1&        GOTO NEXTOPT
 IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
+IF "%~1"=="/prompt"       SET "question=%~2" & SHIFT & GOTO NEXTOPT
+IF "%~1"=="/defaultvalue" SET "defval=%~2"   & SHIFT & GOTO NEXTOPT
 
 :GETARG
 IF defined cmd (
