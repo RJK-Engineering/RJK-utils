@@ -20,8 +20,8 @@ ECHO./p        Force pause before exit
 ECHO./x        Ignore exit codes (pauses when exit code ^> 0 by default)
 ECHO./i        Ignore errors (pauses on error by default)
 ECHO./t [N]    Timeout for N seconds before exit
-ECHO./q        Be quiet (supress standard output)
-ECHO./e        Hide errors (supress error output)
+ECHO./q        Be quiet (suppress standard output)
+ECHO./e        Hide errors (suppress error output)
 ECHO./r        Redirect error output to standard output
 ECHO./c        Redirect standard output to clipboard
 ECHO./g [TEXT] Grep standard output
