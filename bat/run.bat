@@ -15,11 +15,10 @@ IF defined pause SET ignoreerrors=1& SET ignoreexitcode=1
 
 IF not defined noparams (
     ECHO %args% | FIND "%%" >NUL
-    IF %errorlevel% equ 0 CALL run_replace_params
+    IF %errorlevel% equ 0 CALL run_subst_params
 )
-IF defined choices CALL run_replace_param_choice
-CALL run_append_listfile
 
+CALL run_append_listfile
 CALL run_execute
 
 CALL run_del_listfiles

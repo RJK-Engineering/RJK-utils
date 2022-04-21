@@ -13,8 +13,8 @@ SET logfile=
 IF not defined nolog IF defined COMMANDER_RUN_LOG SET logfile="%COMMANDER_RUN_LOG%"
 
 IF not defined noparams (
-    ECHO %args% | FINDSTR "%%~*[dpnx]*[LCDNS]" >NUL
-    IF %errorlevel% equ 0 CALL run_replace_params
+    ECHO %args% | FINDSTR "%%~*[dpnx]*[IOLCDNS]" >NUL
+    IF %errorlevel% equ 0 CALL run_subst_params
 )
 
 SET dellistfile=

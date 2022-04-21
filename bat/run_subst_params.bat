@@ -1,4 +1,5 @@
-IF defined question CALL run_replace_param_input
+IF defined question CALL run_subst_input
+IF defined choices CALL run_subst_choice
 
 SET clip=
 ECHO %args% | FINDSTR "%%~*[dpnxf]*L" >NUL
