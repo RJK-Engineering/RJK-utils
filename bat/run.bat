@@ -8,11 +8,10 @@ SET help=usage
 GOTO GETOPT
 :ENDGETOPT
 
+IF defined showlog type "%COMMANDER_RUN_LOG%" & EXIT/B
+IF defined clearlog del/p "%COMMANDER_RUN_LOG%" & EXIT/B
 IF not defined cmd GOTO HELP
 IF defined pause SET ignoreerrors=1& SET ignoreexitcode=1
-
-SET logfile=
-IF not defined nolog IF defined COMMANDER_RUN_LOG SET logfile="%COMMANDER_RUN_LOG%"
 
 IF not defined noparams (
     ECHO %args% | FIND "%%" >NUL
@@ -63,6 +62,8 @@ IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
 IF "%~1"=="/nolog"    SET nolog=1&        GOTO NEXTOPT
+IF "%~1"=="/showlog"  SET showlog=1&      GOTO NEXTOPT
+IF "%~1"=="/clearlog" SET clearlog=1&     GOTO NEXTOPT
 IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
 IF "%~1"=="/prompt"       SET "question=%~2" & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/defaultvalue" SET "defval=%~2"   & SHIFT & GOTO NEXTOPT
