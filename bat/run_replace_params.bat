@@ -1,5 +1,4 @@
-ECHO %args% | FINDSTR "%%~*[dpnxf]*I" >NUL
-IF %errorlevel% equ 0 CALL run_replace_param_input
+IF defined question CALL run_replace_param_input
 
 SET clip=
 ECHO %args% | FINDSTR "%%~*[dpnxf]*L" >NUL
