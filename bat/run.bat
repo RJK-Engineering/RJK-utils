@@ -17,6 +17,7 @@ IF not defined noparams (
     ECHO %args% | FIND "%%" >NUL
     IF %errorlevel% equ 0 CALL run_replace_params
 )
+IF defined choices CALL run_replace_param_choice
 CALL run_append_listfile
 
 CALL run_execute
@@ -67,6 +68,13 @@ IF "%~1"=="/clearlog" SET clearlog=1&     GOTO NEXTOPT
 IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
 IF "%~1"=="/prompt"       SET "question=%~2" & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/defaultvalue" SET "defval=%~2"   & SHIFT & GOTO NEXTOPT
+IF "%~1"=="/OM"           SET cmessage=%2&     SHIFT & GOTO NEXTOPT
+IF "%~1"=="/O" (
+    ECHO %2. %~3
+    SET choice_%2=%~3
+    SET choices=%choices%%2
+    SHIFT & SHIFT & GOTO NEXTOPT
+)
 
 :GETARG
 IF defined cmd (
