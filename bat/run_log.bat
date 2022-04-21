@@ -1,3 +1,4 @@
+IF defined nolog EXIT/B
 IF not defined COMMANDER_RUN_LOG EXIT/B
 
 REM IMPORTANT: Use a FOR loop to prevent pitfall in "ECHO %*>> file":

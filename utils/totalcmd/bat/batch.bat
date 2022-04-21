@@ -39,19 +39,19 @@ GOTO END
 :GETOPT
 REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs^
-    dirpath display noderef terminator
-    printexitcode paramdir pause ignoreerrors ignoreexitcode timeout quiet^
-    errorredirect clip grep output force append background wait) DO SET %%V=
-
+    dirpath display noderef terminator^
+    printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
+    errorredirect clip grep output force append background wait^
+    nolog showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
 :GETNEXTOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
 IF "%~1"=="/L" SET listfile=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/C" SET fromclip=1&            GOTO NEXTOPT
+IF "%~1"=="/dir" SET fromdird=1& dirpath=%2& SHIFT & GOTO NEXTOPT
 IF "%~1"=="/D" SET fromdird=1&            GOTO NEXTOPT
 IF "%~1"=="/N" SET fromdirn=1&            GOTO NEXTOPT
 IF "%~1"=="/S" SET fromdirs=1&            GOTO NEXTOPT
-IF "%~1"=="/dir" SET dirpath=%2&  SHIFT & GOTO NEXTOPT
 IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
 IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ^
@@ -60,7 +60,6 @@ IF "%~1"=="/noderef" SET noderef=1&       GOTO NEXTOPT
 IF "%~1"=="/E" SET listfileext=%2&SHIFT & GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
-IF "%~1"=="/P" SET paramdir=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT
 IF "%~1"=="/i" SET ignoreerrors=1&        GOTO NEXTOPT
 IF "%~1"=="/x" SET ignoreexitcode=1&      GOTO NEXTOPT
@@ -75,8 +74,20 @@ IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
-IF "%~1"=="/nolog" SET nolog=1&           GOTO NEXTOPT
+IF "%~1"=="/nolog"    SET nolog=1&        GOTO NEXTOPT
+IF "%~1"=="/showlog"  SET showlog=1&      GOTO NEXTOPT
+IF "%~1"=="/clearlog" SET clearlog=1&     GOTO NEXTOPT
 IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
+IF "%~1"=="/list"     SET paramdir=%2&         SHIFT & GOTO NEXTOPT
+IF "%~1"=="/prompt"       SET "question=%~2" & SHIFT & GOTO NEXTOPT
+IF "%~1"=="/defaultvalue" SET "defval=%~2"   & SHIFT & GOTO NEXTOPT
+IF "%~1"=="/OM"           SET cmessage=%2&     SHIFT & GOTO NEXTOPT
+IF "%~1"=="/O" (
+    ECHO %2. %~3
+    SET choice_%2=%~3
+    SET choices=%choices%%2
+    SHIFT & SHIFT & GOTO NEXTOPT
+)
 
 :GETARG
 IF defined cmd (
