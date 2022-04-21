@@ -1,7 +1,7 @@
 
 IF defined error (
     ECHO %error%
-    CALL run_log "%error%"
+    CALL run_log ERROR %error%
     IF not defined ignoreerrors PAUSE
     EXIT/B 1
 )
@@ -17,7 +17,7 @@ IF defined printexitcode (
 )
 
 IF %errorlevel% gtr 0 (
-    CALL run_log "Exit code %errorlevel%"
+    CALL run_log Exit code %errorlevel%
     IF defined ignoreexitcode EXIT/B
     IF not defined printexitcode ECHO Exit code %errorlevel%
     PAUSE

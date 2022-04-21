@@ -20,7 +20,7 @@ SET "out=%quiet%%out%%toclip%"
 
 ::EXECUTE
 IF defined wait ECHO run=%run%& ECHO args=%args%& ECHO "out=%out%"& PAUSE
-CALL run_log "%run%%args%"
+CALL run_log %run%%args%
 
 IF defined grep (
     %run%%args%|FIND /I "%grep%"%out%
