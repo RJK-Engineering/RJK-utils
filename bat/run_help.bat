@@ -31,6 +31,10 @@ ECHO --        OPTIONS terminator
 IF "%help%"=="extended" EXIT/B
 
 ECHO.
+ECHO EXAMPLES
+ECHO.
+TYPE %~dp0run_examples.bat
+ECHO.
 ECHO Example usage in Total Commander:
 ECHO     Command:   run.bat command.exe /p /r
 ECHO     Params:    ?/q %%N
