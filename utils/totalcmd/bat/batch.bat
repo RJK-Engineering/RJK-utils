@@ -18,7 +18,7 @@ SET dellistfile=
 IF not defined listfile (
     CALL :CREATELISTFILE
 ) ELSE IF not defined noderef (
-    CALL :DEREFLISTFILE
+    CALL :DEREFLISTFILE %listfile%
 )
 
 FOR /F "tokens=*" %%F IN (%listfile%) DO (
@@ -117,15 +117,14 @@ IF defined fromclip (
 EXIT/B
 
 :DEREFLISTFILE
-IF not defined listfileext SET listfileext=tmp
+IF not defined listfileext SET listfileext=txt
+IF /I not "%~x1"==".%listfileext%" EXIT/B
 SET line=
 FOR /F "delims=" %%F IN (%listfile%) DO (
     IF defined line EXIT/B
     CALL SET line=%%F
 )
-FOR /F "delims=" %%F IN ("%line%") DO (
-    IF /I "%%~xF"==".%listfileext%" SET listfile=%line%
-)
+SET listfile=%line%
 EXIT/B
 
 :HELP
