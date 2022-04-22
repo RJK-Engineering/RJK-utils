@@ -20,6 +20,10 @@ IF not defined listfile (
 ) ELSE IF not defined noderef (
     CALL :DEREFLISTFILE %listfile%
 )
+IF not defined listfile IF defined dirpath (
+    SET fromdird=1
+    CALL :CREATELISTFILE
+)
 
 FOR /F "tokens=*" %%F IN (%listfile%) DO (
     IF defined display ECHO %display%
@@ -43,7 +47,7 @@ IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
 IF "%~1"=="/L" SET listfile=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/C" SET fromclip=1&            GOTO NEXTOPT
-IF "%~1"=="/dir" SET fromdird=1& dirpath=%2& SHIFT & GOTO NEXTOPT
+IF "%~1"=="/dir" SET dirpath=%2&  SHIFT & GOTO NEXTOPT
 IF "%~1"=="/D" SET fromdird=1&            GOTO NEXTOPT
 IF "%~1"=="/N" SET fromdirn=1&            GOTO NEXTOPT
 IF "%~1"=="/S" SET fromdirs=1&            GOTO NEXTOPT
