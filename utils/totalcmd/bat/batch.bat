@@ -25,7 +25,7 @@ IF not defined listfile IF defined dirpath (
     CALL :CREATELISTFILE
 )
 
-FOR /F "tokens=*" %%F IN (%listfile%) DO (
+FOR /F "delims=" %%F IN (%listfile%) DO (
     IF defined display ECHO %display%
     REM replace %%F in vars
     SET append=%append%

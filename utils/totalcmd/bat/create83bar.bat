@@ -12,7 +12,7 @@ if exist %newbar% echo File already exists: %newbar%& goto END
 echo Reading %bar%
 echo Writing %newbar%
 
-for /f "tokens=*" %%A in (%bar%) do (
+for /f "delims=" %%A in (%bar%) do (
     set "l=%%A"
     set l=!l:%%L=%%l!
     set l=!l:%%F=%%f!

@@ -4,7 +4,7 @@ IF defined choices CALL run_subst_choice
 SET clip=
 ECHO %args% | FINDSTR "%%~*[dpnxf]*L" >NUL
 IF %errorlevel% equ 0 CALL getclip
-FOR /F "tokens=*" %%L IN (""%clip%"") DO SET args=%args%
+FOR /F "delims=" %%L IN (""%clip%"") DO SET args=%args%
 
 SET delfilec=
 SET delfiled=
