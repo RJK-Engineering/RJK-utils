@@ -36,15 +36,16 @@ GOTO END
 
 :GETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd extension args listfile dellistfile fromclip fromdird fromdirn fromdirs^
-    dirpath display noderef terminator^
-    printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
+FOR %%V IN (cmd extension args listfile listfileext dellistfile^
+    fromclip dirpath fromdird fromdirn fromdirs^
+    display terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait^
-    showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
+    noderef showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
 :GETNEXTOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
 IF "%~1"=="/L" SET listfile=%2&   SHIFT & GOTO NEXTOPT
+IF "%~1"=="/E" SET listfileext=%2&SHIFT & GOTO NEXTOPT
 IF "%~1"=="/C" SET fromclip=1&            GOTO NEXTOPT
 IF "%~1"=="/dir" SET dirpath=%2&  SHIFT & GOTO NEXTOPT
 IF "%~1"=="/D" SET fromdird=1&            GOTO NEXTOPT
@@ -53,7 +54,6 @@ IF "%~1"=="/S" SET fromdirs=1&            GOTO NEXTOPT
 IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
 IF "%~1"=="/k" SET printexitcode=1&SET pause=1&SET ignoreerrors=1&SET ignoreexitcode=1&GOTO NEXTOPT
-IF "%~1"=="/E" SET listfileext=%2&SHIFT & GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT
