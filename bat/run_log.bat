@@ -1,3 +1,2 @@
-IF defined nolog EXIT/B
 IF not defined COMMANDER_RUN_LOG EXIT/B
 >>"%COMMANDER_RUN_LOG%" ECHO %DATE% %TIME% %*

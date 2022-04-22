@@ -9,9 +9,6 @@ GOTO GETOPT
 :ENDGETOPT
 IF not defined cmd GOTO HELP
 
-SET logfile=
-IF not defined nolog IF defined COMMANDER_RUN_LOG SET logfile="%COMMANDER_RUN_LOG%"
-
 IF not defined noparams (
     ECHO %args% | FINDSTR "%%~*[dpnx]*[IOLCDNS]" >NUL
     IF %errorlevel% equ 0 CALL run_subst_params
@@ -32,8 +29,6 @@ FOR /F "tokens=*" %%F IN (%listfile%) DO (
     CALL run_execute %args%
     CALL run_exit
 )
-CALL run_del_listfiles
-IF defined dellistfile del/q %listfile%
 GOTO END
 
 :GETOPT
@@ -42,7 +37,7 @@ FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs^
     dirpath display noderef terminator^
     printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait^
-    nolog showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
+    showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
 :GETNEXTOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
@@ -56,7 +51,6 @@ IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
 IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ^
     ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
-IF "%~1"=="/noderef" SET noderef=1&       GOTO NEXTOPT
 IF "%~1"=="/E" SET listfileext=%2&SHIFT & GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
@@ -74,11 +68,12 @@ IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
-IF "%~1"=="/nolog"    SET nolog=1&        GOTO NEXTOPT
-IF "%~1"=="/showlog"  SET showlog=1&      GOTO NEXTOPT
-IF "%~1"=="/clearlog" SET clearlog=1&     GOTO NEXTOPT
-IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
-IF "%~1"=="/list"     SET paramdir=%2&         SHIFT & GOTO NEXTOPT
+IF "%~1"=="/noderef"      SET noderef=1&               GOTO NEXTOPT
+IF "%~1"=="/nolog"        SET COMMANDER_RUN_LOG=&      GOTO NEXTOPT
+IF "%~1"=="/showlog"      SET showlog=1&               GOTO NEXTOPT
+IF "%~1"=="/clearlog"     SET clearlog=1&              GOTO NEXTOPT
+IF "%~1"=="/noparams"     SET noparams=1&              GOTO NEXTOPT
+IF "%~1"=="/list"         SET paramdir=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/prompt"       SET "question=%~2" & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/defaultvalue" SET "defval=%~2"   & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/OM"           SET cmessage=%2&     SHIFT & GOTO NEXTOPT
@@ -137,4 +132,6 @@ EXIT/B
 CALL batch_help
 
 :END
+IF not defined noparams CALL run_del_listfiles
+IF defined dellistfile del/q %listfile%
 CALL run_end

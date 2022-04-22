@@ -20,10 +20,6 @@ IF not defined noparams (
 
 CALL run_append_listfile
 CALL run_execute
-
-IF not defined noparams CALL run_del_listfiles
-IF defined dellistfile del/q %listfile%
-
 CALL run_exit
 GOTO END
 
@@ -32,7 +28,7 @@ REM clear vars, they are inherited from master environment
 FOR %%V IN (cmd args appendc appendd appendn appends appende appendo appendt^
     terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect toclip grep output force append background wait^
-    nolog showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
+    showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
 
 :GETNEXTOPT
 IF "%~1"=="" GOTO ENDGETOPT
@@ -61,7 +57,7 @@ IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
-IF "%~1"=="/nolog"    SET nolog=1&        GOTO NEXTOPT
+IF "%~1"=="/nolog"    SET COMMANDER_RUN_LOG=& GOTO NEXTOPT
 IF "%~1"=="/showlog"  SET showlog=1&      GOTO NEXTOPT
 IF "%~1"=="/clearlog" SET clearlog=1&     GOTO NEXTOPT
 IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
@@ -92,4 +88,6 @@ GOTO GETNEXTOPT
 CALL run_help
 
 :END
+IF not defined noparams CALL run_del_listfiles
+IF defined dellistfile del/q %listfile%
 CALL run_end
