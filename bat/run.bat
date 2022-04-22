@@ -51,20 +51,20 @@ IF "%~1"=="/q" SET "quiet=>NUL"         & GOTO NEXTOPT
 IF "%~1"=="/e" SET "errorredirect=2>NUL"& GOTO NEXTOPT
 IF "%~1"=="/r" SET "errorredirect=2>&1" & GOTO NEXTOPT
 IF "%~1"=="/c" SET "toclip=|CLIP"       & GOTO NEXTOPT
-IF "%~1"=="/g" SET "grep=%~2"   & SHIFT & GOTO NEXTOPT
+IF "%~1"=="/g" SET "grep=%~2"&    SHIFT & GOTO NEXTOPT
 IF "%~1"=="/o" SET output=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/f" SET force=1&               GOTO NEXTOPT
 IF "%~1"=="/a" SET append=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/b" SET background=1&          GOTO NEXTOPT
 IF "%~1"=="/w" SET wait=1&                GOTO NEXTOPT
-IF "%~1"=="/nolog"    SET COMMANDER_RUN_LOG=& GOTO NEXTOPT
-IF "%~1"=="/showlog"  SET showlog=1&      GOTO NEXTOPT
-IF "%~1"=="/clearlog" SET clearlog=1&     GOTO NEXTOPT
-IF "%~1"=="/noparams" SET noparams=1&     GOTO NEXTOPT
-IF "%~1"=="/list"     SET paramdir=%2&         SHIFT & GOTO NEXTOPT
-IF "%~1"=="/prompt"       SET "question=%~2" & SHIFT & GOTO NEXTOPT
-IF "%~1"=="/defaultvalue" SET "defval=%~2"   & SHIFT & GOTO NEXTOPT
-IF "%~1"=="/OM"           SET cmessage=%2&     SHIFT & GOTO NEXTOPT
+IF "%~1"=="/nolog"        SET COMMANDER_RUN_LOG=&     GOTO NEXTOPT
+IF "%~1"=="/showlog"      SET showlog=1&              GOTO NEXTOPT
+IF "%~1"=="/clearlog"     SET clearlog=1&             GOTO NEXTOPT
+IF "%~1"=="/noparams"     SET noparams=1&             GOTO NEXTOPT
+IF "%~1"=="/list"         SET paramdir=%2&    SHIFT & GOTO NEXTOPT
+IF "%~1"=="/prompt"       SET "question=%~2"& SHIFT & GOTO NEXTOPT
+IF "%~1"=="/defaultvalue" SET "defval=%~2"&   SHIFT & GOTO NEXTOPT
+IF "%~1"=="/OM"           SET cmessage=%2&    SHIFT & GOTO NEXTOPT
 IF "%~1"=="/O" (
     ECHO %2. %~3
     SET choice_%2=%~3
