@@ -25,7 +25,7 @@ GOTO END
 
 :GETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd args appendc appendd appendn appends appende appendo appendt^
+FOR %%V IN (cmd args appendc appendd appendn appends dellistfile^
     terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect toclip grep output force append background wait^
     showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
@@ -88,6 +88,4 @@ GOTO GETNEXTOPT
 CALL run_help
 
 :END
-IF not defined noparams CALL run_del_listfiles
-IF defined dellistfile del/q %listfile%
 CALL run_end

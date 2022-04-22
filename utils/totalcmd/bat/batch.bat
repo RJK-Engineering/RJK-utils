@@ -14,7 +14,6 @@ IF not defined noparams (
     IF %errorlevel% equ 0 CALL run_subst_params
 )
 
-SET dellistfile=
 IF not defined listfile (
     CALL :CREATELISTFILE
 ) ELSE IF not defined noderef (
@@ -37,7 +36,7 @@ GOTO END
 
 :GETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd extension args listfile fromclip fromdird fromdirn fromdirs^
+FOR %%V IN (cmd extension args listfile dellistfile fromclip fromdird fromdirn fromdirs^
     dirpath display noderef terminator^
     printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait^
@@ -135,6 +134,4 @@ EXIT/B
 CALL batch_help
 
 :END
-IF not defined noparams CALL run_del_listfiles
-IF defined dellistfile del/q %listfile%
 CALL run_end
