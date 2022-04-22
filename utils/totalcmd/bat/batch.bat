@@ -15,13 +15,13 @@ IF not defined noparams (
 )
 
 IF not defined listfile (
-    CALL :CREATELISTFILE
+    CALL batch_create_listfile
 ) ELSE IF not defined noderef (
-    CALL :DEREFLISTFILE %listfile%
+    CALL batch_deref_listfile %listfile%
 )
 IF not defined listfile IF defined dirpath (
     SET fromdird=1
-    CALL :CREATELISTFILE
+    CALL batch_create_listfile
 )
 
 FOR /F "delims=" %%F IN (%listfile%) DO (
@@ -97,38 +97,6 @@ IF defined cmd (
 :NEXTOPT
 SHIFT
 GOTO GETNEXTOPT
-
-:CREATELISTFILE
-SET listfile=%TEMP%\CMD%RANDOM%.tmp
-SET dellistfile=1
-
-IF defined fromclip (
-    >%listfile% CALL getclip /d
-) ELSE IF defined fromdird (
-    IF defined dirpath PUSHD. & cd/d %dirpath%
-    IF exist %listfile% del/q %listfile%
-    FOR /F "delims=" %%F IN ('dir/a-d/b') DO >>%listfile% ECHO %%~fF
-    IF defined dirpath POPD
-) ELSE IF defined fromdirn (
-    >%listfile% dir/a-d/b %dirpath%
-) ELSE IF defined fromdirs (
-    >%listfile% dir/a-d/b/s %dirpath%
-) ELSE (
-    SET listfile=
-    SET dellistfile=
-)
-EXIT/B
-
-:DEREFLISTFILE
-IF not defined listfileext SET listfileext=txt
-IF /I not "%~x1"==".%listfileext%" EXIT/B
-SET line=
-FOR /F "delims=" %%F IN (%listfile%) DO (
-    IF defined line EXIT/B
-    CALL SET line=%%F
-)
-SET listfile=%line%
-EXIT/B
 
 :HELP
 CALL batch_help
