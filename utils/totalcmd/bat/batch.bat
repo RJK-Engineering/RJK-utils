@@ -49,8 +49,7 @@ IF "%~1"=="/N" SET fromdirn=1&            GOTO NEXTOPT
 IF "%~1"=="/S" SET fromdirs=1&            GOTO NEXTOPT
 IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
-IF "%~1"=="/k" SET printexitcode=1& SET pause=1& SET ^
-    ignoreerrors=1& SET ignoreexitcode=1& GOTO NEXTOPT
+IF "%~1"=="/k" SET printexitcode=1&SET pause=1&SET ignoreerrors=1&SET ignoreexitcode=1&GOTO NEXTOPT
 IF "%~1"=="/E" SET listfileext=%2&SHIFT & GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
@@ -101,20 +100,21 @@ SET listfile=%TEMP%\CMD%RANDOM%.tmp
 SET dellistfile=1
 
 IF defined fromclip (
-    CALL getclip /d > %listfile%
+    >%listfile% CALL getclip /d
 ) ELSE IF defined fromdird (
     IF defined dirpath PUSHD. & cd/d %dirpath%
     IF exist %listfile% del/q %listfile%
-    FOR /F "delims=" %%F IN ('dir/a-d/b') DO ECHO %%~fF>> %listfile%
+    FOR /F "delims=" %%F IN ('dir/a-d/b') DO >>%listfile% ECHO %%~fF
     IF defined dirpath POPD
 ) ELSE IF defined fromdirn (
-    dir/a-d/b %dirpath% > %listfile%
+    >%listfile% dir/a-d/b %dirpath%
 ) ELSE IF defined fromdirs (
-    dir/a-d/b/s %dirpath% > %listfile%
+    >%listfile% dir/a-d/b/s %dirpath%
 ) ELSE (
-    GOTO HELP
+    SET listfile=
+    SET dellistfile=
 )
-GOTO ENDGETOPT
+EXIT/B
 
 :DEREFLISTFILE
 IF not defined listfileext SET listfileext=tmp
