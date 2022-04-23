@@ -14,10 +14,14 @@ IF not defined noparams (
     IF %errorlevel% equ 0 CALL run_subst_params
 )
 
-IF not defined listfile (
+IF defined listfile (
+    IF defined subdirs (
+        CALL batch_read_subdirs
+    ) ELSE IF not defined noderef (
+        CALL batch_deref_listfile
+    )
+) ELSE (
     CALL batch_create_listfile
-) ELSE IF not defined noderef (
-    CALL batch_deref_listfile %listfile%
 )
 IF not defined listfile IF defined dirpath (
     SET fromdird=1
@@ -36,7 +40,7 @@ GOTO END
 
 :GETOPT
 REM clear vars, they are inherited from master environment
-FOR %%V IN (cmd extension args listfile listfileext dellistfile^
+FOR %%V IN (cmd extension args listfile listfileext subdirs dellistfile^
     fromclip dirpath fromdird fromdirn fromdirs^
     display terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait^
@@ -46,6 +50,7 @@ IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
 IF "%~1"=="/L" SET listfile=%2&   SHIFT & GOTO NEXTOPT
 IF "%~1"=="/E" SET listfileext=%2&SHIFT & GOTO NEXTOPT
+IF "%~1"=="/s" SET subdirs=1&             GOTO NEXTOPT
 IF "%~1"=="/C" SET fromclip=1&            GOTO NEXTOPT
 IF "%~1"=="/dir" SET dirpath=%2&  SHIFT & GOTO NEXTOPT
 IF "%~1"=="/D" SET fromdird=1&            GOTO NEXTOPT
