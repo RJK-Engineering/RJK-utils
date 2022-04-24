@@ -76,9 +76,11 @@ sub getExistingPaths {
     my $paths = shift;
     my @exist;
     foreach (@$paths) {
-        my $rpath = RJK::Filecheck->getRealPath($_);
-        if ($rpath && -e $rpath) {
-            push @exist, $rpath;
+        my $path = RJK::Filecheck->getRealPath($_);
+        if ($path && -e $path) {
+            push @exist, $path;
+        } if (-e $_) { # path may be virtual
+            push @exist, $_;
         } else {
             print "Path does not exist: $_\n";
         }
