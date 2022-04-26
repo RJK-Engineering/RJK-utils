@@ -28,15 +28,33 @@ IF not defined listfile IF defined dirpath (
     CALL batch_create_listfile
 )
 
+SET extensions=
+IF defined filetype (
+    FOR /F "tokens=1,* delims==" %%F IN (%APPDATA%\TotalCommander\user.ini) DO (
+        IF "%%F"==".%filetype%_SearchFor" SET "extensions=%%G "
+    )
+)
+
+SET match=1
 FOR /F "delims=" %%F IN (%listfile%) DO (
-    IF defined display ECHO %display%
-    REM replace %%F in vars
-    SET append=%append%
-    SET output=%output%
-    CALL run_execute %args%
-    CALL run_exit
+    IF defined extensions CALL :filter %%~xF
+    IF defined match (
+        IF defined display ECHO %display%
+        REM replace %%F in vars
+        SET append=%append%
+        SET output=%output%
+        CALL run_execute %args%
+        CALL run_exit
+    )
 )
 GOTO END
+
+:filter
+SET match=
+IF "%1"=="" exit/b
+CALL SET extstmp=%%extensions:%1 =%%
+IF not "%extstmp%"=="%extensions%" SET match=1
+exit/b
 
 :GETOPT
 REM clear vars, they are inherited from master environment
@@ -44,7 +62,7 @@ FOR %%V IN (cmd extension args listfile listfileext subdirs dellistfile^
     fromclip dirpath fromdird fromdirn fromdirs^
     display terminator printexitcode pause ignoreerrors ignoreexitcode timeout quiet^
     errorredirect clip grep output force append background wait^
-    noderef showlog clearlog noparams paramdir question defval cmessage choices) DO SET %%V=
+    noderef showlog clearlog noparams paramdir filetype question defval cmessage choices) DO SET %%V=
 :GETNEXTOPT
 IF "%~1"=="" GOTO ENDGETOPT
 IF defined terminator GOTO GETARG
@@ -81,6 +99,7 @@ IF "%~1"=="/showlog"      SET showlog=1&               GOTO NEXTOPT
 IF "%~1"=="/clearlog"     SET clearlog=1&              GOTO NEXTOPT
 IF "%~1"=="/noparams"     SET noparams=1&              GOTO NEXTOPT
 IF "%~1"=="/list"         SET paramdir=%2&     SHIFT & GOTO NEXTOPT
+IF "%~1"=="/filetype"     SET filetype=%2&     SHIFT & GOTO NEXTOPT
 IF "%~1"=="/prompt"       SET "question=%~2" & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/defaultvalue" SET "defval=%~2"   & SHIFT & GOTO NEXTOPT
 IF "%~1"=="/OM"           SET cmessage=%2&     SHIFT & GOTO NEXTOPT
