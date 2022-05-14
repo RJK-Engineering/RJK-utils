@@ -50,10 +50,14 @@ echo Set preset:
 echo     %~n0 [preset name] [keyboard rate]
 echo Delete preset:
 echo     %~n0 [preset name] ""
+echo Delete all presets:
+echo     %~n0 CLEAR
+echo Create example presets:
+echo     %~n0 CREATE
 echo.
 echo Keyboard rate range: 1-31
 echo.
-echo Stored presets:
+echo Currently available presets:
 FOR /F "tokens=1,2 delims==" %%F IN ('set KEYBOARD_CHAR_REPEAT_PRESET_') DO call :show-preset %%F %%G
 echo.
 echo Current rate: %KEYBOARD_CHAR_REPEAT_CURR_RATE%
