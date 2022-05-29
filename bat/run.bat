@@ -41,6 +41,7 @@ IF "%~1"=="/d?" (IF "%~3"=="" SET dirpath=%2& SHIFT)& GOTO NEXTOPT
 IF "%~1"=="/n?" (IF "%~3"=="" SET dirpath=%2& SHIFT)& GOTO NEXTOPT
 IF "%~1"=="/s?" (IF "%~3"=="" SET dirpath=%2& SHIFT)& GOTO NEXTOPT
 IF "%~1"=="/k" SET printexitcode=1& SET pause=1&      GOTO NEXTOPT
+IF "%~1"=="/m" SET "message=%~2"& SHIFT & GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT

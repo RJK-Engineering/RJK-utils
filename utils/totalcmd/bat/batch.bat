@@ -77,6 +77,7 @@ IF "%~1"=="/S" SET fromdirs=1&            GOTO NEXTOPT
 IF "%~1"=="/d" SET display=%%~fF&         GOTO NEXTOPT
 IF "%~1"=="/n" SET display=%%~nxF&        GOTO NEXTOPT
 IF "%~1"=="/k" SET printexitcode=1&SET pause=1&SET ignoreerrors=1&SET ignoreexitcode=1&GOTO NEXTOPT
+IF "%~1"=="/m" SET "message=%~2"& SHIFT & GOTO NEXTOPT
 IF "%~1"=="--" SET terminator=1&          GOTO NEXTOPT
 IF "%~1"=="/z" SET printexitcode=1&       GOTO NEXTOPT
 IF "%~1"=="/p" SET pause=1&               GOTO NEXTOPT

@@ -13,6 +13,7 @@ IF defined error EXIT/B
 IF defined output SET "out=>%output%"
 IF defined grep SET "out=|FIND /I "%grep%"%out%"
 
+IF defined message ECHO %message%
 IF defined wait ECHO cmd=%cmd%& ECHO args=%args%& ECHO redir="%quiet%%out%%toclip%"& PAUSE
 CALL run_log %cmd%%args%
 %cmd%%args%%errorredirect%%quiet%%out%%toclip%
