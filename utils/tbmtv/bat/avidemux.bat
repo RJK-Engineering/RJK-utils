@@ -1,5 +1,5 @@
 rem Get format from filename: filename contains "x265"
-set name=%~n1
+set "name=%~n1"
 if not "%name%"=="%name:x265=%" set format=Mkv& goto GO
 
 rem Get format from directory name: file is in dir named "mkv"
@@ -12,6 +12,7 @@ if defined format goto GO
 
 if /i "%~x1"==".flv" set format=Mp4v2& goto GO
 if /i "%~x1"==".mp4" set format=Mp4v2& goto GO
+if /i "%~x1"==".m4v" set format=Mp4v2& goto GO
 if /i "%~x1"==".avi" set format=Avi& goto GO
 
 rem Default format
