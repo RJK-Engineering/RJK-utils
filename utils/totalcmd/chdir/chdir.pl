@@ -160,10 +160,6 @@ foreach (@paths) {
     }
 }
 
-my @paths2 = @paths;
-@paths = grep { -e } @paths2;
-Exit("Not found:\n" . join("\n", @paths2)) unless @paths;
-
 if (! $opts{openAll} && @paths>1) {
     my $c = new RJK::Win32::Console();
     @paths = $c->itemFromList(\@paths);
