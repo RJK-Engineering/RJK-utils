@@ -1,4 +1,5 @@
 @echo off
+setlocal
 
 if not defined -available-options (
     echo No available options set, set -available-options before calling %0:
@@ -8,39 +9,51 @@ if not defined -available-options (
     goto END
 )
 
-if "%~1"=="set" (
-    if not "%~2"=="" shift & goto SET
-) else if "%~1"=="delete" (
-    shift & goto DELETE
-) else (
+set _cmd=%1
+shift
+if not defined _cmd (
     call :check-required %-required-options%
     if not defined -required-options-missing exit/b
+) else if "%_cmd%"=="set" (
+    if not "%~1"=="" (
+        endlocal
+        goto SET
+    )
+) else if "%_cmd%"=="delete" (
+    endlocal
+    goto DELETE
+) else (
+    echo Not a command: %_cmd%
+    goto END
 )
+endlocal
 call :set-interactive %-available-options%
 goto END
 
 :SET
-set _opt=%1
-if not defined _opt goto END
+if "%~1"=="" goto END
+set -option=%1
 call :check-if-available %-available-options%
 if not defined -is-available goto NEXT
-echo set %_opt%=%~2
-set %_opt%=%~2
-setx %_opt% %2
+echo set %1=%~2
+set %1=%~2
+setx %1 %2
 echo.
 :NEXT
 shift & shift
 goto SET
 
 :DELETE
+if "%~1"=="" goto END
 reg delete HKCU\Environment /v %1
 set %1=
-goto END
+shift
+goto DELETE
 
 :check-required
 set -required-options-missing=
 :LOOP1
-if "%1"=="" exit/b
+if "%~1"=="" exit/b
 call set value=%%%1%%
 if not defined value (
     echo Option %1 is required.
@@ -52,11 +65,11 @@ goto LOOP1
 :check-if-available
 set -is-available=
 :LOOP2
-if "%1"=="" (
-    echo Option not available: %_opt%
+if "%~1"=="" (
+    echo Option not available: %-option%
     echo Available options: %-available-options%
     exit/b
-) else if "%1"=="%_opt%" (
+) else if "%~1"=="%-option%" (
     set -is-available=1
     exit/b
 )
@@ -64,25 +77,28 @@ shift
 goto LOOP2
 
 :set-interactive
-set _opt=%1
-if not defined _opt exit/b
+if "%~1"=="" exit/b
+call :set-value %1 "%%%1%%"
 shift
-
-call set _val=%%%_opt%%%
-echo %_opt%=%_val%
-set _val=
-set/p "_val=New value? (press enter to skip) "
-if defined _val (
-    echo set %_opt%=%_val%
-    set %_opt%=%_val%
-    setx %_opt% %_val%
-)
-echo.
 goto set-interactive
 
+:set-value
+echo %1=%~2
+set %1=
+set/p "%1=New value? (press enter to skip) "
+call :_set-value %1 "%%%1%%" %2
+echo.
+exit/b
+
+:_set-value
+if "%~2"=="" (
+    set "%1=%~3"
+) else (
+    echo set %1=%~2
+    set "%1=%~2"
+    setx %1 %2
+)
+exit/b
+
 :END
-set -required-options-missing=
-set -is-available=
-set _opt=
-set _val=
 pause
