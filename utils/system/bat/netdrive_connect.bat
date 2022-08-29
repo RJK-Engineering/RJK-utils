@@ -3,17 +3,17 @@
 set -available-options=NETDRIVE_HOST NETDRIVE_MAP
 set -required-options=NETDRIVE_HOST
 
-if "%~1"=="" goto USAGE
-if "%~1"=="set" (
+if "%~1"=="" (
+    goto USAGE
+) else if "%~1"=="set" (
     call set-options %*
-    exit/b
-) else if "%~1"=="delete" if "%~2"=="option" (
+) else if "%~1 %~2"=="delete option" (
     call set-options delete %3
-    exit/b
+) else (
+    call set-options
+    setlocal
+    for %%A IN (%*) do call :connect %%A
 )
-
-setlocal
-for %%A IN (%*) do call :connect %%A
 exit/b
 
 :connect
@@ -42,7 +42,7 @@ echo %0 set
 echo.
 echo SET OPTIONS (available options: %-available-options%)
 echo.
-echo %0 set [option] [value] ([option] [value] ...)
+echo %0 set [option]=[value] ([option]=[value] ...)
 echo.
 echo DELETE OPTION
 echo.
