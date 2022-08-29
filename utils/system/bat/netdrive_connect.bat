@@ -44,4 +44,8 @@ echo SET OPTIONS (available options: %-available-options%)
 echo.
 echo %0 set [option] [value] ([option] [value] ...)
 echo.
+echo DELETE OPTION
+echo.
+echo %0 set delete option [option]
+echo.
 pause
