@@ -6,7 +6,7 @@ if not defined -available-options (
     echo set -available-options=[option] ^([option] ...^)
     echo set -required-options=[option] ^([option] ...^)
     echo call set-options ...
-    goto END
+    goto PAUSE_AND_EXIT
 )
 
 set _cmd=%1
@@ -24,14 +24,14 @@ if not defined _cmd (
     goto DELETE
 ) else (
     echo Not a command: %_cmd%
-    goto END
+    goto PAUSE_AND_EXIT
 )
 endlocal
 call :set-interactive %-available-options%
-goto END
+goto PAUSE_AND_EXIT
 
 :SET
-if "%~1"=="" goto END
+if "%~1"=="" goto PAUSE_AND_EXIT
 set -option=%1
 call :check-if-available %-available-options%
 if not defined -is-available goto NEXT
@@ -44,7 +44,7 @@ shift & shift
 goto SET
 
 :DELETE
-if "%~1"=="" goto END
+if "%~1"=="" goto PAUSE_AND_EXIT
 reg delete HKCU\Environment /v %1
 set %1=
 shift
@@ -100,5 +100,5 @@ if "%~2"=="" (
 )
 exit/b
 
-:END
+:PAUSE_AND_EXIT
 pause
