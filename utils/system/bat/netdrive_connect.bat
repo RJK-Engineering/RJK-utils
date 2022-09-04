@@ -22,8 +22,8 @@ call %~dp0drive_disconnect %driveletter%
 set volume=%driveletter%:
 
 call env-hash-value NETDRIVE_MAP %driveletter%
-if defined hash-value (
-    set dir=%hash-value%
+if defined -hash-value (
+    set dir=%-hash-value%
 ) else (
     set dir=\\%NETDRIVE_HOST%\%driveletter%$
 )
