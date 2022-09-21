@@ -1,11 +1,16 @@
 @echo off
 setlocal
 
+rem When this script is called from another script, it should not run in
+rem a local environment (no setlocal before calling this script), to allow
+rem updating of current user environment in which the main script runs.
+
 if not defined -available-options (
     echo No available options set, set -available-options before calling %0:
     echo set -available-options=[option] ^([option] ...^)
     echo set -required-options=[option] ^([option] ...^)
     echo call set-options ...
+    echo.
     goto PAUSE_AND_EXIT
 )
 
@@ -32,7 +37,7 @@ goto PAUSE_AND_EXIT
 
 :SET
 if "%~1"=="" goto PAUSE_AND_EXIT
-set -option=%1
+set -is-available=%1
 call :check-if-available %-available-options%
 if not defined -is-available goto NEXT
 echo set %1=%~2
@@ -52,7 +57,7 @@ goto DELETE
 
 :check-required
 set -required-options-missing=
-:LOOP1
+:LOOP
 if "%~1"=="" exit/b
 call set value=%%%1%%
 if not defined value (
@@ -60,21 +65,18 @@ if not defined value (
     set -required-options-missing=1
 )
 shift
-goto LOOP1
+goto LOOP
 
 :check-if-available
-set -is-available=
-:LOOP2
+if "%~1"=="%-is-available%" exit/b
 if "%~1"=="" (
-    echo Option not available: %-option%
+    echo Option not available: %-is-available%
     echo Available options: %-available-options%
-    exit/b
-) else if "%~1"=="%-option%" (
-    set -is-available=1
+    set -is-available=
     exit/b
 )
 shift
-goto LOOP2
+goto check-if-available
 
 :set-interactive
 if "%~1"=="" exit/b
