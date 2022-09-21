@@ -1,7 +1,11 @@
 @echo off
 setlocal
 
+if not "%~1"=="" goto chdir.pl
 call getclip
+
+call :totalcmd "%clip%"
+if not defined clip exit/b
 
 if /i "%clip:~0,4%"=="http" goto download
 set "var=%clip:http:=%"
@@ -9,8 +13,6 @@ if /i not "%var%"=="%clip%" goto download
 set "var=%clip:https:=%"
 if /i not "%var%"=="%clip%" goto download
 
-call :totalcmd "%clip%"
-if not defined clip exit/b
 if "%clip:~1,1%"==":" call :check-path
 if not defined clip exit/b
 goto chdir.pl
@@ -32,5 +34,5 @@ dl %clip%
 exit/b
 
 :chdir.pl
-rjk-util totalcmd\chdir\chdir.pl -c
+rjk-util totalcmd\chdir\chdir.pl -c %*
 exit/b
