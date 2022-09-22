@@ -22,8 +22,8 @@ exit/b
 set h=%TIME:~0,2%
 set m=%TIME:~3,2%
 set s=%TIME:~6,2%
-if %h:~0,1% equ 0 set h=%h:~1,1%
-if %m:~0,1% equ 0 set m=%m:~1,1%
-if %s:~0,1% equ 0 set s=%s:~1,1%
+if "%h:~0,1%"=="0" set h=%h:~1%
+if "%m:~0,1%"=="0" set m=%m:~1%
+if "%s:~0,1%"=="0" set s=%s:~1%
 set/a seconds=h*3600 + m*60 + s
 exit/b
